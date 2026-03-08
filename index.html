@@ -699,6 +699,131 @@
           </div>
         </div>
 
+        <div class="row">
+          <div style="grid-column:1/-1;">
+            <label>Style:</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">
+              <input type="hidden" id="sb-style" value="1">
+              <button type="button" class="sb-style-btn" data-prefix="sb" data-val="1"
+              style="border:2px solid var(--accent);background:#f0f4ff;"
+              title="Style 1"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <!-- ticks -->
+  <line x1="6" y1="8" x2="6"  y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="22" y1="8" x2="22" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="38" y1="8" x2="38" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="54" y1="8" x2="54" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="70" y1="8" x2="70" y2="20" stroke="currentColor" stroke-width="1"/>
+  <!-- alternating rects -->
+  <rect x="6"  y="20" width="16" height="8" fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
+  <rect x="22" y="20" width="16" height="8" fill="white"        stroke="currentColor" stroke-width="0.5"/>
+  <rect x="38" y="20" width="16" height="8" fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
+  <rect x="54" y="20" width="16" height="8" fill="white"        stroke="currentColor" stroke-width="0.5"/>
+  <!-- labels -->
+  <text x="6"  y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="38" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button><button type="button" class="sb-style-btn" data-prefix="sb" data-val="2"
+              style="border:2px solid #ddd;background:#fff;"
+              title="Style 2"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <line x1="6" y1="8" x2="6"  y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="22" y1="8" x2="22" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="38" y1="8" x2="38" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="54" y1="8" x2="54" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="70" y1="8" x2="70" y2="20" stroke="currentColor" stroke-width="1"/>
+  <!-- hatch segs -->
+  <rect x="6"  y="20" width="16" height="8" fill="white" stroke="currentColor" stroke-width="0.5"/>
+  <line x1="9"  y1="20.5" x2="9"  y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="12" y1="20.5" x2="12" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="15" y1="20.5" x2="15" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="18" y1="20.5" x2="18" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <rect x="22" y="20" width="16" height="8" fill="white" stroke="currentColor" stroke-width="0.5"/>
+  <rect x="38" y="20" width="16" height="8" fill="white" stroke="currentColor" stroke-width="0.5"/>
+  <line x1="41" y1="20.5" x2="41" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="44" y1="20.5" x2="44" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="47" y1="20.5" x2="47" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="50" y1="20.5" x2="50" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <rect x="54" y="20" width="16" height="8" fill="white" stroke="currentColor" stroke-width="0.5"/>
+  <text x="6"  y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="38" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button><button type="button" class="sb-style-btn" data-prefix="sb" data-val="3"
+              style="border:2px solid #ddd;background:#fff;"
+              title="Style 3"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <line x1="6" y1="8" x2="6"  y2="16" stroke="currentColor" stroke-width="1"/>
+  <line x1="22" y1="8" x2="22" y2="16" stroke="currentColor" stroke-width="1"/>
+  <line x1="38" y1="8" x2="38" y2="16" stroke="currentColor" stroke-width="1"/>
+  <line x1="54" y1="8" x2="54" y2="16" stroke="currentColor" stroke-width="1"/>
+  <line x1="70" y1="8" x2="70" y2="16" stroke="currentColor" stroke-width="1"/>
+  <!-- centre line -->
+  <line x1="6" y1="24" x2="70" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <!-- above-centre rects (even) -->
+  <rect x="6"  y="16" width="16" height="8" fill="currentColor"/>
+  <rect x="38" y="16" width="16" height="8" fill="currentColor"/>
+  <!-- below-centre rects (odd) -->
+  <rect x="22" y="24" width="16" height="8" fill="currentColor"/>
+  <rect x="54" y="24" width="16" height="8" fill="currentColor"/>
+  <text x="6"  y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="38" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button><button type="button" class="sb-style-btn" data-prefix="sb" data-val="4"
+              style="border:2px solid #ddd;background:#fff;"
+              title="Style 4"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <line x1="6" y1="8" x2="6"  y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="22" y1="8" x2="22" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="38" y1="8" x2="38" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="54" y1="8" x2="54" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="70" y1="8" x2="70" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <!-- baseline -->
+  <line x1="6" y1="24" x2="70" y2="24" stroke="currentColor" stroke-width="1"/>
+  <!-- dots -->
+  <circle cx="6"  cy="24" r="2" fill="currentColor"/>
+  <circle cx="22" cy="24" r="2" fill="currentColor"/>
+  <circle cx="38" cy="24" r="2" fill="currentColor"/>
+  <circle cx="54" cy="24" r="2" fill="currentColor"/>
+  <circle cx="70" cy="24" r="2" fill="currentColor"/>
+  <text x="6"  y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="38" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button><button type="button" class="sb-style-btn" data-prefix="sb" data-val="5"
+              style="border:2px solid #ddd;background:#fff;"
+              title="Style 5"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <!-- vertical ticks full height -->
+  <line x1="6"  y1="16" x2="6"  y2="24" stroke="currentColor" stroke-width="1"/>
+  <line x1="22" y1="16" x2="22" y2="24" stroke="currentColor" stroke-width="1"/>
+  <line x1="38" y1="16" x2="38" y2="24" stroke="currentColor" stroke-width="1"/>
+  <line x1="54" y1="16" x2="54" y2="24" stroke="currentColor" stroke-width="1"/>
+  <line x1="70" y1="16" x2="70" y2="24" stroke="currentColor" stroke-width="1"/>
+  <!-- baseline -->
+  <line x1="6" y1="24" x2="70" y2="24" stroke="currentColor" stroke-width="1"/>
+  <text x="6"  y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="22" y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">1</text>
+  <text x="38" y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="54" y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">3</text>
+  <text x="70" y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button>
+            </div>
+          </div>
+          <div>
+            <label>Colour:</label>
+            <input type="color" id="sb-color" value="#000000"
+              style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
+          </div>
+        </div>
         <div>
           <button class="btn btn-primary" id="sb-btn">Add scale bar</button>
           <button class="btn btn-dl" id="sb-dl" disabled>⬇ Download PDF</button>
@@ -771,6 +896,131 @@
           </div>
           <div style="font-size:0.75rem;color:#aaa;margin-top:-8px;">
             Example: X = +5 moves the bar 5% of the page width to the right. Y = −2 moves it 2% downward.
+          </div>
+        </div>
+        <div class="row">
+          <div style="grid-column:1/-1;">
+            <label>Style:</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">
+              <input type="hidden" id="sbf-style" value="1">
+              <button type="button" class="sb-style-btn" data-prefix="sbf" data-val="1"
+              style="border:2px solid var(--accent);background:#f0f4ff;"
+              title="Style 1"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <!-- ticks -->
+  <line x1="6" y1="8" x2="6"  y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="22" y1="8" x2="22" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="38" y1="8" x2="38" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="54" y1="8" x2="54" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="70" y1="8" x2="70" y2="20" stroke="currentColor" stroke-width="1"/>
+  <!-- alternating rects -->
+  <rect x="6"  y="20" width="16" height="8" fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
+  <rect x="22" y="20" width="16" height="8" fill="white"        stroke="currentColor" stroke-width="0.5"/>
+  <rect x="38" y="20" width="16" height="8" fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
+  <rect x="54" y="20" width="16" height="8" fill="white"        stroke="currentColor" stroke-width="0.5"/>
+  <!-- labels -->
+  <text x="6"  y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="38" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button><button type="button" class="sb-style-btn" data-prefix="sbf" data-val="2"
+              style="border:2px solid #ddd;background:#fff;"
+              title="Style 2"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <line x1="6" y1="8" x2="6"  y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="22" y1="8" x2="22" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="38" y1="8" x2="38" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="54" y1="8" x2="54" y2="20" stroke="currentColor" stroke-width="1"/>
+  <line x1="70" y1="8" x2="70" y2="20" stroke="currentColor" stroke-width="1"/>
+  <!-- hatch segs -->
+  <rect x="6"  y="20" width="16" height="8" fill="white" stroke="currentColor" stroke-width="0.5"/>
+  <line x1="9"  y1="20.5" x2="9"  y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="12" y1="20.5" x2="12" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="15" y1="20.5" x2="15" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="18" y1="20.5" x2="18" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <rect x="22" y="20" width="16" height="8" fill="white" stroke="currentColor" stroke-width="0.5"/>
+  <rect x="38" y="20" width="16" height="8" fill="white" stroke="currentColor" stroke-width="0.5"/>
+  <line x1="41" y1="20.5" x2="41" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="44" y1="20.5" x2="44" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="47" y1="20.5" x2="47" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <line x1="50" y1="20.5" x2="50" y2="27.5" stroke="currentColor" stroke-width="0.7"/>
+  <rect x="54" y="20" width="16" height="8" fill="white" stroke="currentColor" stroke-width="0.5"/>
+  <text x="6"  y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="38" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button><button type="button" class="sb-style-btn" data-prefix="sbf" data-val="3"
+              style="border:2px solid #ddd;background:#fff;"
+              title="Style 3"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <line x1="6" y1="8" x2="6"  y2="16" stroke="currentColor" stroke-width="1"/>
+  <line x1="22" y1="8" x2="22" y2="16" stroke="currentColor" stroke-width="1"/>
+  <line x1="38" y1="8" x2="38" y2="16" stroke="currentColor" stroke-width="1"/>
+  <line x1="54" y1="8" x2="54" y2="16" stroke="currentColor" stroke-width="1"/>
+  <line x1="70" y1="8" x2="70" y2="16" stroke="currentColor" stroke-width="1"/>
+  <!-- centre line -->
+  <line x1="6" y1="24" x2="70" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <!-- above-centre rects (even) -->
+  <rect x="6"  y="16" width="16" height="8" fill="currentColor"/>
+  <rect x="38" y="16" width="16" height="8" fill="currentColor"/>
+  <!-- below-centre rects (odd) -->
+  <rect x="22" y="24" width="16" height="8" fill="currentColor"/>
+  <rect x="54" y="24" width="16" height="8" fill="currentColor"/>
+  <text x="6"  y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="38" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button><button type="button" class="sb-style-btn" data-prefix="sbf" data-val="4"
+              style="border:2px solid #ddd;background:#fff;"
+              title="Style 4"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <line x1="6" y1="8" x2="6"  y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="22" y1="8" x2="22" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="38" y1="8" x2="38" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="54" y1="8" x2="54" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <line x1="70" y1="8" x2="70" y2="24" stroke="currentColor" stroke-width="0.8"/>
+  <!-- baseline -->
+  <line x1="6" y1="24" x2="70" y2="24" stroke="currentColor" stroke-width="1"/>
+  <!-- dots -->
+  <circle cx="6"  cy="24" r="2" fill="currentColor"/>
+  <circle cx="22" cy="24" r="2" fill="currentColor"/>
+  <circle cx="38" cy="24" r="2" fill="currentColor"/>
+  <circle cx="54" cy="24" r="2" fill="currentColor"/>
+  <circle cx="70" cy="24" r="2" fill="currentColor"/>
+  <text x="6"  y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="38" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button><button type="button" class="sb-style-btn" data-prefix="sbf" data-val="5"
+              style="border:2px solid #ddd;background:#fff;"
+              title="Style 5"
+              style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
+              <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
+  <!-- vertical ticks full height -->
+  <line x1="6"  y1="16" x2="6"  y2="24" stroke="currentColor" stroke-width="1"/>
+  <line x1="22" y1="16" x2="22" y2="24" stroke="currentColor" stroke-width="1"/>
+  <line x1="38" y1="16" x2="38" y2="24" stroke="currentColor" stroke-width="1"/>
+  <line x1="54" y1="16" x2="54" y2="24" stroke="currentColor" stroke-width="1"/>
+  <line x1="70" y1="16" x2="70" y2="24" stroke="currentColor" stroke-width="1"/>
+  <!-- baseline -->
+  <line x1="6" y1="24" x2="70" y2="24" stroke="currentColor" stroke-width="1"/>
+  <text x="6"  y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">0</text>
+  <text x="22" y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">1</text>
+  <text x="38" y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">2</text>
+  <text x="54" y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">3</text>
+  <text x="70" y="14" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
+</svg>
+            </button>
+            </div>
+          </div>
+          <div>
+            <label>Colour:</label>
+            <input type="color" id="sbf-color" value="#000000"
+              style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
           </div>
         </div>
         <div>
@@ -1700,8 +1950,6 @@ function formatLabel(val) {
 }
 
 // ── Core drawing function ──────────────────────────────────────────────────
-// unitMmLength : mm per display unit (1000 for metres, 304.8 for feet)
-// niceCandidates : array of "nice" values in display units
 async function applyScaleBar(ids, unitMmLength, niceCandidates) {
   const scaleValue  = parseFloat(document.getElementById(ids.scale).value)   || 100;
   const offsetXPct  = parseFloat(document.getElementById(ids.ox).value)      || 0;
@@ -1709,6 +1957,14 @@ async function applyScaleBar(ids, unitMmLength, niceCandidates) {
   const pageSizeSel = document.getElementById(ids.pagesize).value;
   const pos         = document.getElementById(ids.pos).value;
   const applyTo     = document.getElementById(ids.pages).value;
+  const styleNum    = parseInt(document.getElementById(ids.style).value) || 1;
+  // Parse hex color → {r,g,b} 0-1
+  const hex = document.getElementById(ids.color).value;
+  const inkR = parseInt(hex.slice(1,3),16)/255;
+  const inkG = parseInt(hex.slice(3,5),16)/255;
+  const inkB = parseInt(hex.slice(5,7),16)/255;
+  const inkC = PDFLib.rgb(inkR, inkG, inkB);
+  const whiteC = PDFLib.rgb(1,1,1);
 
   status(ids.status, 'Processing…', 'run');
   try {
@@ -1718,24 +1974,15 @@ async function applyScaleBar(ids, unitMmLength, niceCandidates) {
 
     allPages.forEach(page => {
       const { width: rawW, height: rawH } = page.getSize();
-
-      // ── Read page rotation ─────────────────────────────────────────
       let rot = 0;
       try {
         const rn = page.node.get(PDFLib.PDFName.of('Rotate'));
         if (rn) rot = ((rn.value() % 360) + 360) % 360;
       } catch(_) {}
-
       const swapped = rot === 90 || rot === 270;
       const visW = swapped ? rawH : rawW;
       const visH = swapped ? rawW : rawH;
 
-      // ── Visual → raw PDF coordinate transform ─────────────────────
-      // Derived by inverting the viewer's rotation (viewer rotates rot° CW):
-      //   rot=0:   px=vx,        py=vy
-      //   rot=90:  px=rawW-vy,   py=vx
-      //   rot=180: px=rawW-vx,   py=rawH-vy
-      //   rot=270: px=vy,        py=rawH-vx
       function toPdf(vx, vy) {
         switch (rot) {
           case 0:   return { x: vx,         y: vy         };
@@ -1744,11 +1991,8 @@ async function applyScaleBar(ids, unitMmLength, niceCandidates) {
           default:  return { x: vy,         y: rawH - vx  };
         }
       }
-
-      // Text pre-rotated rot° CCW so viewer's rot° CW returns it to 0° (readable).
       const textRot = PDFLib.degrees(rot);
 
-      // ── Visual page width for bar sizing ──────────────────────────
       let pageWidthMm;
       if (pageSizeSel === 'auto') {
         pageWidthMm = detectISOSize(visW, visH).widthMm;
@@ -1757,7 +2001,6 @@ async function applyScaleBar(ids, unitMmLength, niceCandidates) {
         pageWidthMm = (visW > visH) ? Math.max(s.w, s.h) : Math.min(s.w, s.h);
       }
 
-      // ── Bar geometry (all in visual-space pts) ─────────────────────
       const targetUnits = (pageWidthMm * 0.20 * scaleValue) / unitMmLength;
       const totalUnits  = niceValue(targetUnits, niceCandidates);
       const barLenMm    = (totalUnits * unitMmLength) / scaleValue;
@@ -1766,69 +2009,140 @@ async function applyScaleBar(ids, unitMmLength, niceCandidates) {
       const segW        = barLenPt / segments;
       const barH        = 3.5 * PT_PER_MM;
       const lblSize     = 3.0 * PT_PER_MM;
-      const tickH       = 2.5 * PT_PER_MM;   // tick drops down from label baseline to bar top
+      const tickH       = 2.5 * PT_PER_MM;
       const margin      = 14  * PT_PER_MM;
-      // Layout (bottom→top in visual space): bar bottom → bar → bar top → tick → label baseline
       const groupH      = barH + tickH + lblSize;
 
-      // ── Anchor in visual space ─────────────────────────────────────
-      // vAY = bottom of the entire group (= bottom of bar)
       let vAX, vAY;
       if      (pos === 'bl') { vAX = margin;               vAY = margin; }
       else if (pos === 'bc') { vAX = (visW-barLenPt)/2;   vAY = margin; }
       else if (pos === 'br') { vAX = visW-barLenPt-margin; vAY = margin; }
       else if (pos === 'tl') { vAX = margin;               vAY = visH-margin-groupH; }
-      else    /* tr */       { vAX = visW-barLenPt-margin; vAY = visH-margin-groupH; }
+      else                   { vAX = visW-barLenPt-margin; vAY = visH-margin-groupH; }
 
       vAX += (offsetXPct / 100) * visW;
       vAY += (offsetYPct / 100) * visH;
 
-      // Visual Y levels (bottom→top)
-      const vBarBottomY = vAY;                        // bottom of alternating rects
-      const vBarTopY    = vAY + barH;                 // top of rects = bottom of ticks
-      const vLblY       = vAY + barH + tickH;         // label baseline (above ticks)
+      const vBarBottomY = vAY;
+      const vBarTopY    = vAY + barH;
+      const vLblY       = vAY + barH + tickH;
 
-      // ── Draw alternating rectangles ────────────────────────────────
-      for (let i = 0; i < segments; i++) {
-        const vx0=vAX+i*segW, vy0=vBarBottomY, vx1=vAX+(i+1)*segW, vy1=vBarTopY;
-        const cs = [toPdf(vx0,vy0), toPdf(vx1,vy0), toPdf(vx0,vy1), toPdf(vx1,vy1)];
+      // ── Helper: draw a filled rectangle in visual space ──────────────
+      function drawSegRect(vx0, vy0, vx1, vy1, fillColor, borderColor) {
+        const cs = [toPdf(vx0,vy0),toPdf(vx1,vy0),toPdf(vx0,vy1),toPdf(vx1,vy1)];
         const minX=Math.min(...cs.map(c=>c.x)), minY=Math.min(...cs.map(c=>c.y));
         page.drawRectangle({
-          x: minX, y: minY,
-          width:  Math.max(...cs.map(c=>c.x)) - minX,
-          height: Math.max(...cs.map(c=>c.y)) - minY,
-          color: (i%2===0) ? PDFLib.rgb(0,0,0) : PDFLib.rgb(1,1,1),
-          borderColor: PDFLib.rgb(0,0,0), borderWidth: 0.5,
+          x:minX, y:minY,
+          width: Math.max(...cs.map(c=>c.x))-minX,
+          height:Math.max(...cs.map(c=>c.y))-minY,
+          color: fillColor, borderColor: borderColor, borderWidth: 0.5,
         });
       }
 
-      // ── Ticks (descend from label baseline to bar top) and labels ──
+      // ── Draw bar body by style ────────────────────────────────────────
+      if (styleNum === 1) {
+        // Classic: alternating filled/empty rectangles
+        for (let i = 0; i < segments; i++) {
+          drawSegRect(
+            vAX+i*segW, vBarBottomY, vAX+(i+1)*segW, vBarTopY,
+            i%2===0 ? inkC : whiteC, inkC
+          );
+        }
+
+      } else if (styleNum === 2) {
+        // Hatch: odd segments get dense vertical hatch lines; even segments empty
+        for (let i = 0; i < segments; i++) {
+          const x0=vAX+i*segW, x1=vAX+(i+1)*segW;
+          // Border rect for all segments
+          drawSegRect(x0, vBarBottomY, x1, vBarTopY, whiteC, inkC);
+          if (i % 2 === 0) {
+            // Draw vertical hatch lines spaced 1.2pt apart
+            const spacing = 1.2;
+            const w = x1 - x0;
+            const nLines = Math.floor(w / spacing);
+            for (let j = 1; j <= nLines; j++) {
+              const vx = x0 + j * (w / (nLines+1));
+              page.drawLine({
+                start: toPdf(vx, vBarBottomY+0.3),
+                end:   toPdf(vx, vBarTopY-0.3),
+                thickness: 0.4, color: inkC,
+              });
+            }
+          }
+        }
+
+      } else if (styleNum === 3) {
+        // Staggered: odd segs above centre, even segs below centre
+        const midY  = vAY + barH / 2;
+        const halfH = barH / 2;
+        // Draw a thin centre line across full bar
+        page.drawLine({
+          start: toPdf(vAX, midY), end: toPdf(vAX+barLenPt, midY),
+          thickness: 0.5, color: inkC,
+        });
+        for (let i = 0; i < segments; i++) {
+          const x0=vAX+i*segW, x1=vAX+(i+1)*segW;
+          if (i % 2 === 0) {
+            // above centre: from midY to vBarTopY
+            drawSegRect(x0, midY, x1, vBarTopY, inkC, inkC);
+          } else {
+            // below centre: from vBarBottomY to midY
+            drawSegRect(x0, vBarBottomY, x1, midY, inkC, inkC);
+          }
+        }
+
+      } else if (styleNum === 4) {
+        // Style 4: single thin baseline with dots at tick positions
+        page.drawLine({
+          start: toPdf(vAX, vBarBottomY + barH*0.5),
+          end:   toPdf(vAX+barLenPt, vBarBottomY + barH*0.5),
+          thickness: 0.6, color: inkC,
+        });
+        const dotR = barH * 0.22;
+        const lineY = vBarBottomY + barH*0.5;
+        for (let i = 0; i <= segments; i++) {
+          const dvx = vAX + i * segW;
+          const dp  = toPdf(dvx, lineY);
+          page.drawEllipse({
+            x: dp.x, y: dp.y,
+            xScale: dotR, yScale: dotR,
+            color: inkC, borderColor: inkC, borderWidth: 0,
+          });
+        }
+      } else {
+        // Style 5: thin baseline only, vertical ticks at every number position
+        page.drawLine({
+          start: toPdf(vAX, vBarBottomY + barH*0.5),
+          end:   toPdf(vAX+barLenPt, vBarBottomY + barH*0.5),
+          thickness: 0.6, color: inkC,
+        });
+        // Vertical ticks descend from bar mid down (no separate tick above — labels handle that)
+      }
+
+      // ── Ticks and labels ──────────────────────────────────────────────
       const unitsPerSeg = totalUnits / segments;
+      const useTickH = (styleNum === 4 || styleNum === 5) ? tickH * 0.6 : tickH;
+      const tickTopY = (styleNum === 4 || styleNum === 5) ? vBarBottomY + barH*0.5 : vBarTopY;
       for (let i = 0; i <= segments; i++) {
         const vTX = vAX + i * segW;
-        // Tick: from label baseline down to bar top
         page.drawLine({
           start: toPdf(vTX, vLblY),
-          end:   toPdf(vTX, vBarTopY),
-          thickness: 0.6, color: PDFLib.rgb(0,0,0),
+          end:   toPdf(vTX, tickTopY),
+          thickness: 0.5, color: inkC,
         });
-        // Centered numeric label above tick
         const str = formatLabel(unitsPerSeg * i);
         const lw  = font.widthOfTextAtSize(str, lblSize);
         const lp  = toPdf(vTX - lw/2, vLblY + 1);
         page.drawText(str, { x:lp.x, y:lp.y, size:lblSize, font,
-          color:PDFLib.rgb(0,0,0), rotate:textRot });
+          color:inkC, rotate:textRot });
       }
-      // Unit suffix — same baseline, just after last tick, with small gap
-      const unitLw = font.widthOfTextAtSize(ids.unit, lblSize);
       const up = toPdf(vAX + barLenPt + 2.5 * PT_PER_MM, vLblY + 1);
       page.drawText(ids.unit, { x:up.x, y:up.y, size:lblSize, font,
-        color:PDFLib.rgb(0,0,0), rotate:textRot });
+        color:inkC, rotate:textRot });
     });
 
     const outBytes = await pdfDoc.save({ useObjectStreams: true });
 
-    // Status
     const p0 = pdfDoc.getPages()[0];
     const { width:w0, height:h0 } = p0.getSize();
     let rot0=0;
@@ -1840,7 +2154,8 @@ async function applyScaleBar(ids, unitMmLength, niceCandidates) {
       : (()=>{ const s=ISO_SIZES_MM[pageSizeSel]; return (vis0W>vis0H)?Math.max(s.w,s.h):Math.min(s.w,s.h); })();
     const tot0 = niceValue((pgMm0*0.20*scaleValue)/unitMmLength, niceCandidates);
     const rotMsg = rot0 ? ` · ${rot0}° compensated` : '';
-    status(ids.status, `Done — 1:${scaleValue}, ${tot0}${ids.unit} bar, ${allPages.length} page(s)${rotMsg}.`, 'ok');
+    const styleLabel = ['','Classic','Hatch','Staggered','Dots','Ticks'][styleNum];
+    status(ids.status, `Done — 1:${scaleValue}, ${tot0}${ids.unit}, ${styleLabel} style, ${allPages.length} page(s)${rotMsg}.`, 'ok');
     document.getElementById(ids.dl).disabled    = false;
     document.getElementById(ids.apply).disabled = false;
     return outBytes;
@@ -1857,7 +2172,8 @@ document.getElementById('sb-btn').addEventListener('click', async () => {
   if (!currentBuffer) return;
   sbBytes = await applyScaleBar(
     { scale:'sb-scale', pagesize:'sb-pagesize', pos:'sb-pos', pages:'sb-pages',
-      ox:'sb-ox', oy:'sb-oy', status:'sb-status', dl:'sb-dl', apply:'sb-apply', unit:'m' },
+      ox:'sb-ox', oy:'sb-oy', style:'sb-style', color:'sb-color',
+      status:'sb-status', dl:'sb-dl', apply:'sb-apply', unit:'m' },
     1000, NICE_METERS
   );
 });
@@ -1876,7 +2192,8 @@ document.getElementById('sbf-btn').addEventListener('click', async () => {
   if (!currentBuffer) return;
   sbfBytes = await applyScaleBar(
     { scale:'sbf-scale', pagesize:'sbf-pagesize', pos:'sbf-pos', pages:'sbf-pages',
-      ox:'sbf-ox', oy:'sbf-oy', status:'sbf-status', dl:'sbf-dl', apply:'sbf-apply', unit:'ft' },
+      ox:'sbf-ox', oy:'sbf-oy', style:'sbf-style', color:'sbf-color',
+      status:'sbf-status', dl:'sbf-dl', apply:'sbf-apply', unit:'ft' },
     MM_PER_FOOT, NICE_FEET
   );
 });
@@ -2419,15 +2736,18 @@ applyPolyBtn.addEventListener('click', async () => {
     }
 
     if (mode === 'layer') {
-      // Draw white polygon directly on page content stream using SVG path
+      // Use raw PDF operators — coordinates are in PDF space (Y up), direct toPdf() output.
       const pts = patchVertices.map(v => toPdf(v.vx, v.vy));
-      // Build SVG path string: M x0 y0 L x1 y1 ... Z
-      const pathStr = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ') + ' Z';
-      page.drawSvgPath(pathStr, {
-        color: PDFLib.rgb(1, 1, 1),
-        borderColor: PDFLib.rgb(1, 1, 1),
-        borderWidth: 0.5,
-      });
+      page.pushOperators(
+        PDFLib.pushGraphicsState(),
+        PDFLib.setFillingRgbColor(1, 1, 1),
+        PDFLib.setStrokingRgbColor(1, 1, 1),
+        PDFLib.moveTo(pts[0].x, pts[0].y),
+        ...pts.slice(1).map(p => PDFLib.lineTo(p.x, p.y)),
+        PDFLib.closePath(),
+        PDFLib.fill(),
+        PDFLib.popGraphicsState()
+      );
       patchBytes = await doc.save({ useObjectStreams: true });
 
     } else {
@@ -2644,10 +2964,10 @@ document.getElementById('patch-apply').addEventListener('click',
         const sigBlank = szSig * LH * 2.4;
         const rSig = szSect + gap + sigBlank + szSig*1.15 + pad*0.8 + szSig + rPad*1.0;
 
-        // North + project no. row — square-ish
-        const rNorth = BW * 0.44;
+        // North + project no. row — compact
+        const rNorth = BW * 0.28;
 
-        const BH = rProj + rSite + rCont + rPlan + rSD + rSig + rNorth;
+        const BH = rProj + rSite + rCont + rPlan + rSD + rNorth + rSig;
 
         // Anchor: bottom-right
         const bx = visW - mg - BW;
@@ -2657,10 +2977,10 @@ document.getElementById('patch-apply').addEventListener('click',
         const iX0 = bx + gap;
         const iX1 = bx + BW - gap;
 
-        // Y bottoms (bottom-up)
-        const yNorth = by;
-        const ySig   = yNorth + rNorth;
-        const ySD    = ySig   + rSig;
+        // Y bottoms (bottom-up): signatures last = bottommost row
+        const ySig   = by;
+        const yNorth = ySig   + rSig;
+        const ySD    = yNorth + rNorth;
         const yPlan  = ySD    + rSD;
         const yCont  = yPlan  + rPlan;
         const ySite  = yCont  + rCont;
@@ -2720,7 +3040,7 @@ document.getElementById('patch-apply').addEventListener('click',
         dText('DESIGNER', colSigX+pad*0.6, ySig+rSig-szSect-gap-pad*0.3, szSect, false, BW*0.5-pad);
 
         // Names: shrink to fit, near bottom inner border
-        const nameBaseY = ySig + gap + rPad*0.5;
+        const nameBaseY = ySig + gap + rPad*1.6;
         const halfW = colSigX - iX0;
         const szCl  = shrinkFit(F.client,   fontR, szSig, halfW - pad*1.2);
         const szDe  = shrinkFit(F.designer, fontR, szSig, iX1-colSigX - pad*1.2);
@@ -2740,6 +3060,7 @@ document.getElementById('patch-apply').addEventListener('click',
 
         // ── NORTH ARROW | PROJECT NO. ────────────────────────────────
         dDiv(ySig);
+        dDiv(yNorth);
         const colNX = bx + BW*0.50;
         dLine(colNX, yNorth, colNX, yNorth+rNorth, 0.3);
 
@@ -2754,49 +3075,50 @@ document.getElementById('patch-apply').addEventListener('click',
           dText(F.projno, colNX+(pnW2-tw)/2, yNorth+rNorth*0.38, szPN, false, pnW2);
         }
 
-        // North arrow (left cell)
+        // North arrow — small isosceles triangle (~30% of old size)
         const nCellW = colNX - iX0;
-        const nCellH = rNorth - szSect - gap - pad*0.5;
+        const nCellH = rNorth - szSect - gap - pad*0.4;
         const cx     = iX0 + nCellW*0.5;
-        const cy     = yNorth + gap + nCellH*0.44;
-        const R      = Math.min(nCellW, nCellH) * 0.27;
-        const szN    = R * 0.88;
+        const cy     = yNorth + gap + nCellH*0.46;
+        // Triangle size: height H, half-base B (isosceles)
+        const triH   = Math.min(nCellW, nCellH) * 0.20;
+        const triB   = triH * 0.46;
+        const szN    = triH * 0.52;
 
-        // Rotation math (θ from north=up, CW positive)
+        // Rotation (θ = northDeg CW from up)
         const theta  = F.northDeg * Math.PI / 180;
-        const ndx    = Math.sin(theta);   // north x-component (visual, y-up)
-        const ndy    = Math.cos(theta);   // north y-component
-        const pdx    = Math.cos(theta);   // perp x (90° CW from north)
-        const pdy    = -Math.sin(theta);  // perp y
+        const ndx    = Math.sin(theta);    // points "north" in visual space
+        const ndy    = Math.cos(theta);
+        const pdx    = Math.cos(theta);    // perpendicular (right side)
+        const pdy    = -Math.sin(theta);
 
-        // Circle
-        const cPdf = toPdf(cx, cy);
-        page.drawEllipse({x:cPdf.x, y:cPdf.y, xScale:R*0.88, yScale:R*0.88,
-          color:PDFLib.rgb(1,1,1), borderColor:INK2, borderWidth:0.4});
+        // Triangle vertices in visual space
+        const tip  = { vx: cx + ndx*triH*0.62, vy: cy + ndy*triH*0.62 };
+        const bL   = { vx: cx - ndx*triH*0.38 + pdx*triB, vy: cy - ndy*triH*0.38 + pdy*triB };
+        const bR   = { vx: cx - ndx*triH*0.38 - pdx*triB, vy: cy - ndy*triH*0.38 - pdy*triB };
 
-        // Arrow shaft
-        const tipFrac  = 0.76;  // tip at 76% of R from center
-        const tailFrac = 0.52;  // tail at 52% back
-        dLine(cx-ndx*R*tailFrac, cy-ndy*R*tailFrac,
-              cx+ndx*R*tipFrac,  cy+ndy*R*tipFrac, 0.5);
-
-        // Filled arrowhead
-        const aHead = R*0.36, aWide = R*0.18;
-        const tipPt = {vx: cx+ndx*R*tipFrac, vy: cy+ndy*R*tipFrac};
-        const hBase = {vx: tipPt.vx-ndx*aHead, vy: tipPt.vy-ndy*aHead};
-        const hL    = {vx: hBase.vx+pdx*aWide, vy: hBase.vy+pdy*aWide};
-        const hR    = {vx: hBase.vx-pdx*aWide, vy: hBase.vy-pdy*aWide};
-        const ap    = [tipPt,hL,hR].map(p=>toPdf(p.vx,p.vy));
-        page.drawSvgPath(
-          `M ${ap[0].x.toFixed(2)} ${ap[0].y.toFixed(2)} L ${ap[1].x.toFixed(2)} ${ap[1].y.toFixed(2)} L ${ap[2].x.toFixed(2)} ${ap[2].y.toFixed(2)} Z`,
-          {color:INK, borderColor:INK, borderWidth:0.2}
+        // Draw triangle with raw PDF operators — PDF coords (Y up), no flip needed
+        const pTip = toPdf(tip.vx, tip.vy);
+        const pBL  = toPdf(bL.vx,  bL.vy);
+        const pBR  = toPdf(bR.vx,  bR.vy);
+        page.pushOperators(
+          PDFLib.pushGraphicsState(),
+          PDFLib.setFillingRgbColor(0.22, 0.22, 0.22),
+          PDFLib.setStrokingRgbColor(0.22, 0.22, 0.22),
+          PDFLib.moveTo(pTip.x, pTip.y),
+          PDFLib.lineTo(pBL.x,  pBL.y),
+          PDFLib.lineTo(pBR.x,  pBR.y),
+          PDFLib.closePath(),
+          PDFLib.fill(),
+          PDFLib.popGraphicsState()
         );
 
-        // "N" at arrow tip (centered)
-        const nTextX = cx + ndx*(R*tipFrac + szN*0.6);
-        const nTextY = cy + ndy*(R*tipFrac + szN*0.6) - szN*0.25;
-        const nTW    = fontB.widthOfTextAtSize('N', szN);
-        dText('N', nTextX-nTW/2, nTextY, szN, true, null);
+        // "N" just above triangle tip
+        const szN2 = szN;
+        const nTW  = fontB.widthOfTextAtSize('N', szN2);
+        const nTX  = cx + ndx*(triH*0.62 + szN2*0.65) - nTW/2;
+        const nTY  = cy + ndy*(triH*0.62 + szN2*0.65) - szN2*0.22;
+        dText('N', nTX, nTY, szN2, true, null);
       });
 
       vnBytes = await doc.save({ useObjectStreams: true });
@@ -2815,6 +3137,22 @@ document.getElementById('patch-apply').addEventListener('click',
   document.getElementById('vn-apply').addEventListener('click',
     function() { if (vnBytes) applyAsActive(vnBytes, 'Title block', 'vn-status', 'vn-apply'); });
 }
+
+
+// ── Scale bar style pickers ────────────────────────────────────────────────
+document.querySelectorAll('.sb-style-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const prefix = btn.dataset.prefix;
+    const val    = btn.dataset.val;
+    document.getElementById(prefix + '-style').value = val;
+    document.querySelectorAll(`.sb-style-btn[data-prefix="${prefix}"]`).forEach(b => {
+      b.style.border = '2px solid #ddd';
+      b.style.background = '#fff';
+    });
+    btn.style.border = '2px solid var(--accent)';
+    btn.style.background = '#f0f4ff';
+  });
+});
 
 </script>
 </body>
