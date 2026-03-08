@@ -1,0 +1,2735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Tools — For Architects & Professionals</title>
+<style>
+  :root {
+    --bg: #f8f8f6;
+    --white: #ffffff;
+    --ink: #1a1a1a;
+    --mid: #555;
+    --light: #e8e8e4;
+    --ok: #2d6a2d;
+    --err: #8b1a1a;
+    --run: #5a5a00;
+    --radius: 4px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--bg); color: var(--ink);
+    min-height: 100vh; font-size: 14px;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background: var(--ink); color: var(--white);
+    padding: 12px 28px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
+  #file-indicator { font-size: 0.78rem; color: #aaa; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #file-indicator span { color: #fff; }
+  #btn-change-file {
+    background: none; border: 1px solid #555; color: #ccc;
+    padding: 4px 10px; cursor: pointer; font-family: inherit;
+    font-size: 0.75rem; border-radius: var(--radius);
+  }
+  #btn-change-file:hover { border-color: #fff; color: #fff; }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── HOME ── */
+  #view-home { max-width: 860px; margin: 0 auto; padding: 40px 20px; }
+
+  .home-header { margin-bottom: 32px; }
+  .home-header h2 { font-size: 1.35rem; font-weight: normal; letter-spacing: 0.04em; margin-bottom: 8px; }
+  .home-header p { font-size: 0.85rem; color: var(--mid); line-height: 1.6; max-width: 600px; }
+  .home-header .privacy-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 12px; padding: 5px 12px;
+    border: 1px solid #ccc; border-radius: 20px;
+    font-size: 0.75rem; color: var(--mid);
+  }
+
+  #drop-zone {
+    border: 2px dashed #bbb; background: var(--white);
+    border-radius: var(--radius); padding: 48px 24px;
+    text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 32px; position: relative; overflow: hidden;
+  }
+  #drop-zone.dragover { border-color: var(--ink); background: #f0f0ee; }
+  #drop-zone h3 { font-size: 1rem; font-weight: normal; margin-bottom: 6px; }
+  #drop-zone p { color: var(--mid); font-size: 0.83rem; }
+  #file-input-hidden { display: none; }
+
+  /* Check animation */
+  #drop-check {
+    display: none; position: absolute; inset: 0;
+    background: var(--white); align-items: center; justify-content: center;
+    flex-direction: column; gap: 10px;
+  }
+  #drop-check.show { display: flex; animation: fadeCheck 1.6s ease forwards; }
+  @keyframes fadeCheck { 0%{opacity:0} 20%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+  #drop-check .check-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--ok); display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; color: var(--ok); animation: scaleIn 0.3s ease;
+  }
+  @keyframes scaleIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+  #drop-check p { font-size: 0.85rem; color: var(--ok); }
+
+  /* ── TOOLS CAROUSEL ── */
+  .tools-carousel-wrap { position: relative; margin-bottom: 4px; }
+  .tools-carousel-wrap .scroll-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: var(--white); border: 1px solid #ccc; border-radius: 50%;
+    width: 30px; height: 30px; cursor: pointer; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2; transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .tools-carousel-wrap .scroll-btn:hover { border-color: var(--ink); box-shadow: 1px 1px 0 var(--ink); }
+  .tools-carousel-wrap .scroll-btn.left  { left: -15px; }
+  .tools-carousel-wrap .scroll-btn.right { right: -15px; }
+  .tools-grid {
+    display: flex; gap: 12px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    scroll-behavior: smooth; padding-bottom: 6px;
+    /* hide scrollbar visually but keep functional */
+    scrollbar-width: none;
+  }
+  .tools-grid::-webkit-scrollbar { display: none; }
+  .tool-card {
+    background: var(--white); border: 1px solid var(--light);
+    border-radius: var(--radius); padding: 16px; cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    /* exactly 6 cards visible in 820px container: (820 - 5*12) / 6 = 126.7px */
+    min-width: 127px; max-width: 127px;
+    scroll-snap-align: start; flex-shrink: 0;
+  }
+  .tool-card:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .tool-card .icon { font-size: 1.4rem; margin-bottom: 8px; }
+  .tool-card h3 { font-size: 0.82rem; margin-bottom: 4px; line-height: 1.3; }
+  .tool-card p { font-size: 0.72rem; color: var(--mid); line-height: 1.35; }
+
+  /* ── TOOL VIEW ── */
+  #view-tool { max-width: 860px; margin: 0 auto; padding: 32px 20px; }
+  #back-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: inherit; font-size: 0.85rem; color: var(--mid);
+    padding: 0; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 6px;
+  }
+  #back-btn:hover { color: var(--ink); }
+
+  .tool-panel { display: none; }
+  .tool-panel.active { display: block; }
+
+  .panel-box {
+    background: var(--white); border: 1px solid var(--light);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 18px;
+  }
+  .panel-box h2 { font-size: 1rem; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid var(--light); }
+
+  /* Working file banner */
+  #working-banner {
+    display: none; background: #f0f7f0; border: 1px solid #a8d4a8;
+    border-radius: var(--radius); padding: 8px 14px; margin-bottom: 16px;
+    font-size: 0.8rem; color: var(--ok);
+  }
+  #working-banner.show { display: flex; align-items: center; gap: 8px; }
+
+  label { display: block; margin-bottom: 5px; font-size: 0.85rem; }
+  input[type="text"], input[type="number"], select {
+    display: block; width: 100%; padding: 7px 10px; margin-bottom: 14px;
+    border: 1px solid #ccc; border-radius: var(--radius);
+    font-family: inherit; font-size: 0.85rem; background: var(--white);
+  }
+  input[type="file"] { display: block; margin-bottom: 14px; font-family: inherit; font-size: 0.85rem; }
+  input[type="range"] { width: 100%; margin-bottom: 4px; cursor: pointer; }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 150px; }
+
+  .btn {
+    display: inline-block; padding: 8px 18px;
+    border: 1px solid var(--ink); background: var(--white);
+    font-family: inherit; font-size: 0.85rem; cursor: pointer;
+    border-radius: var(--radius); margin-right: 8px; margin-bottom: 6px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn:hover { background: var(--ink); color: var(--white); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--ink); color: var(--white); }
+  .btn-primary:hover { background: #444; }
+  .btn-dl { border-color: var(--ok); color: var(--ok); }
+  .btn-dl:hover { background: var(--ok); color: var(--white); }
+  .btn-apply { border-color: #0055aa; color: #0055aa; font-size: 0.8rem; padding: 6px 14px; }
+  .btn-apply:hover { background: #0055aa; color: var(--white); }
+
+  .status { margin-top: 10px; font-size: 0.82rem; min-height: 18px; padding: 4px 0; }
+  .ok  { color: var(--ok); }
+  .err { color: var(--err); }
+  .run { color: var(--run); }
+
+  /* ── GS COMPRESS ── */
+  .preset-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  .preset-btn {
+    flex: 1; min-width: 100px; padding: 10px 8px; border: 1px solid #ccc;
+    background: var(--white); cursor: pointer; font-family: inherit;
+    border-radius: var(--radius); text-align: center; transition: all 0.15s;
+  }
+  .preset-btn:hover { border-color: var(--ink); }
+  .preset-btn.active { border-color: var(--ink); background: var(--ink); color: var(--white); }
+  .preset-btn .preset-name { font-size: 0.85rem; font-weight: bold; display: block; }
+  .preset-btn .preset-desc { font-size: 0.72rem; color: inherit; opacity: 0.7; display: block; margin-top: 3px; }
+  .gs-custom-opts { background: var(--bg); border: 1px solid var(--light); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; }
+  .gs-load-note { font-size: 0.78rem; color: var(--mid); padding: 8px 0; }
+  .progress-bar-wrap { background: var(--light); border-radius: 2px; height: 6px; margin: 8px 0; overflow: hidden; display: none; }
+  .progress-bar-wrap.show { display: block; }
+  .progress-bar { height: 100%; background: var(--ink); width: 0%; transition: width 0.3s; }
+
+  /* ── CONVERT PREVIEW ── */
+  #convert-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  #convert-preview canvas { border: 1px solid var(--light); }
+
+  /* ── PAGE REORDER ── */
+  #reorder-grid {
+    display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px;
+    padding: 14px; background: var(--bg); border: 1px solid var(--light);
+    border-radius: var(--radius); min-height: 100px;
+  }
+  .page-thumb {
+    position: relative; cursor: grab; user-select: none;
+    border: 2px solid var(--light); border-radius: var(--radius);
+    background: var(--white); padding: 6px; text-align: center;
+    transition: border-color 0.15s;
+  }
+  .page-thumb:hover { border-color: var(--ink); }
+  .page-thumb.dragging { opacity: 0.4; cursor: grabbing; }
+  .page-thumb.drag-over { border-color: #0066cc; border-style: dashed; }
+  .page-thumb canvas { display: block; pointer-events: none; }
+  .page-thumb .thumb-label { font-size: 0.72rem; color: var(--mid); margin-top: 4px; }
+  .page-thumb .delete-cb { position: absolute; top: 4px; right: 4px; cursor: pointer; accent-color: var(--err); }
+
+  /* ── OTHER TOOLS STRIP ── */
+  #other-tools-section {
+    background: var(--white); border: 1px solid var(--light);
+    border-radius: var(--radius); padding: 18px 24px;
+  }
+  #other-tools-section h3 { font-size: 0.85rem; color: var(--mid); margin-bottom: 12px; letter-spacing: 0.05em; }
+  .other-tools-strip { display: flex; flex-wrap: wrap; gap: 8px; }
+  .other-btn {
+    padding: 6px 14px; border: 1px solid #ccc; background: var(--white);
+    font-family: inherit; font-size: 0.8rem; cursor: pointer; border-radius: var(--radius);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .other-btn:hover { border-color: var(--ink); background: var(--bg); }
+
+  /* ── PATCH TOOL ── */
+  #patch-fullscreen {
+    display: none; position: fixed; inset: 0; z-index: 500;
+    background: #111; flex-direction: column;
+  }
+  #patch-fullscreen.open { display: flex; }
+  #patch-topbar {
+    background: #1a1a1a; color: #fff; padding: 10px 16px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    border-bottom: 1px solid #333; flex-shrink: 0;
+  }
+  #patch-topbar span { font-size: 0.8rem; color: #aaa; }
+  #patch-topbar .patch-sep { color: #444; }
+  #patch-canvas-wrap {
+    flex: 1; overflow: auto; display: flex;
+    align-items: flex-start; justify-content: center; padding: 16px;
+  }
+  #patch-canvas-container { position: relative; display: inline-block; cursor: crosshair; }
+  #patch-canvas-bg  { display: block; }
+  #patch-canvas-draw {
+    position: absolute; top: 0; left: 0;
+    cursor: crosshair;
+  }
+  .patch-vertex-dot {
+    position: absolute; width: 10px; height: 10px;
+    border-radius: 50%; background: #e03; border: 2px solid #fff;
+    transform: translate(-50%, -50%); pointer-events: none;
+  }
+  .patch-vertex-dot.first { width: 18px; height: 18px; background: #0af; }
+  #patch-info-bar {
+    background: #1a1a1a; color: #aaa; font-size: 0.78rem;
+    padding: 6px 16px; border-top: 1px solid #333; flex-shrink: 0;
+  }
+  .carbon-wrap {
+    margin: 28px 0 0; border: 1px solid #e0e0dc; border-radius: var(--radius);
+    padding: 12px 16px; display: flex; align-items: center; gap: 14px;
+    min-height: 60px; background: var(--white);
+  }
+  .carbon-wrap .carbon-slot { flex: 1; min-height: 40px; }
+  .carbon-wrap .carbon-label { font-size: 0.68rem; color: #ccc; white-space: nowrap; align-self: flex-end; }
+
+  /* ── SPLIT GRID ── */
+  #split-grid { display: flex; flex-wrap: wrap; gap: 0; margin-top: 14px; align-items: flex-start; }
+  .split-page-wrap { display: flex; align-items: center; }
+  .split-thumb {
+    border: 2px solid var(--light); border-radius: var(--radius);
+    background: var(--white); padding: 5px; text-align: center;
+  }
+  .split-thumb canvas { display: block; }
+  .split-thumb .thumb-label { font-size: 0.72rem; color: var(--mid); margin-top: 3px; }
+  .split-gap {
+    width: 24px; display: flex; flex-direction: column;
+    align-items: center; cursor: pointer; padding: 4px 0; position: relative;
+  }
+  .split-gap .split-line {
+    width: 3px; background: var(--light); flex: 1; min-height: 50px;
+    border-radius: 2px; transition: background 0.15s;
+  }
+  .split-gap.marked .split-line { background: var(--err); }
+  .split-gap .split-icon {
+    font-size: 0.75rem; opacity: 0; transition: opacity 0.15s;
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: var(--white); padding: 0 2px; color: var(--err); pointer-events: none;
+  }
+  .split-gap:hover .split-line { background: #aaa; }
+  .split-gap:hover .split-icon,
+  .split-gap.marked .split-icon { opacity: 1; }
+
+  /* ── CUSTOM FILE INPUT ── */
+  .file-input-wrap { position: relative; margin-bottom: 14px; }
+  .file-input-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; margin: 0; }
+  .file-input-label {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; border: 1px solid #ccc; border-radius: var(--radius);
+    font-family: inherit; font-size: 0.85rem; color: var(--mid);
+    background: var(--white); cursor: pointer; transition: border-color 0.15s;
+  }
+  .file-input-wrap:hover .file-input-label { border-color: var(--ink); color: var(--ink); }
+  .file-input-label .file-name { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <h1>▣ PDF TOOLS</h1>
+  <div id="file-indicator">No file loaded</div>
+  <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+</div>
+
+<!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
+<div id="view-home" class="view active">
+  <div style="max-width:860px; margin:0 auto; padding:40px 20px;">
+
+    <div class="home-header">
+      <h2>PDF Tools Portal — 100% free</h2>
+      <p>For architects and professionals who need to work with documents efficiently and confidentially.
+         Compress drawings, resize pages to ISO formats, add watermarks using your own logo and more.</p>
+      <div class="privacy-badge">
+        Your files never leave your browser — 100% local processing
+      </div>
+    </div>
+
+    <div id="drop-zone" onclick="document.getElementById('file-input-hidden').click()">
+      <div id="drop-zone-content">
+        <div style="font-size:2.2rem; margin-bottom:10px;">⬆</div>
+        <h3>Upload a PDF file</h3>
+        <p>Click here or drag and drop a file</p>
+      </div>
+      <div id="drop-check">
+        <div class="check-circle">✓</div>
+        <p id="drop-check-name">File loaded</p>
+      </div>
+    </div>
+    <input type="file" id="file-input-hidden" accept="application/pdf">
+
+    <p style="font-size:0.8rem; color:var(--mid); margin-bottom:12px;">Or choose a tool directly:</p>
+    <div class="tools-carousel-wrap">
+      <button class="scroll-btn left" onclick="scrollGrid(-1)">‹</button>
+      <div class="tools-grid" id="home-tools-grid"></div>
+      <button class="scroll-btn right" onclick="scrollGrid(1)">›</button>
+    </div>
+
+    <!-- Carbon Ads — replace comment with Carbon script tag once approved -->
+    <div class="carbon-wrap">
+      <div class="carbon-slot" id="carbon-slot">
+        <!-- <script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?serve=XXXX&placement=yourdomain" id="_carbonads_js"></script> -->
+      </div>
+      <span class="carbon-label">advertisement</span>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
+<div id="view-tool" class="view">
+  <div style="max-width:860px; margin:0 auto; padding:32px 20px;">
+    <button id="back-btn" onclick="goHome()">← Home</button>
+
+    <div id="working-banner">
+      <span>✓</span>
+      <span id="working-banner-text">Working on modified file</span>
+    </div>
+
+    <!-- ── 1. COMPRESS (Ghostscript-WASM) ── -->
+    <div class="tool-panel" id="panel-compress">
+      <div class="panel-box">
+        <h2>Compress PDF</h2>
+        <p style="font-size:0.82rem; color:var(--mid); margin-bottom:16px;">
+          Uses Ghostscript compiled to WebAssembly for real compression — significantly more effective than metadata-only approaches.
+          The engine (~30 MB) loads once on first use and is cached for the session.
+        </p>
+
+        <label>Compression preset:</label>
+        <div class="preset-grid">
+          <div class="preset-btn" data-preset="screen">
+            <span class="preset-name">Screen</span>
+            <span class="preset-desc">72 DPI · smallest file<br>digital viewing only</span>
+          </div>
+          <div class="preset-btn active" data-preset="ebook">
+            <span class="preset-name">eBook</span>
+            <span class="preset-desc">150 DPI · good balance<br>email & web sharing</span>
+          </div>
+          <div class="preset-btn" data-preset="printer">
+            <span class="preset-name">Printer</span>
+            <span class="preset-desc">300 DPI · high quality<br>office printing</span>
+          </div>
+          <div class="preset-btn" data-preset="prepress">
+            <span class="preset-name">Prepress</span>
+            <span class="preset-desc">300 DPI · color-safe<br>professional print</span>
+          </div>
+          <div class="preset-btn" data-preset="custom">
+            <span class="preset-name">Custom</span>
+            <span class="preset-desc">manual DPI<br>& quality control</span>
+          </div>
+        </div>
+
+        <div class="gs-custom-opts" id="gs-custom-opts" style="display:none">
+          <div class="row">
+            <div>
+              <label>Image DPI (color & grayscale):</label>
+              <input type="number" id="gs-dpi" value="150" min="36" max="600">
+            </div>
+            <div>
+              <label>JPEG quality (1–100):</label>
+              <input type="number" id="gs-quality" value="75" min="1" max="100">
+            </div>
+          </div>
+        </div>
+
+        <div class="gs-load-note" id="gs-load-note">
+          The Ghostscript engine will be downloaded the first time you compress a file (~30 MB).
+        </div>
+        <div class="progress-bar-wrap" id="gs-progress-wrap">
+          <div class="progress-bar" id="gs-progress-bar"></div>
+        </div>
+
+        <div style="margin-top:8px;">
+          <button class="btn btn-primary" id="c-btn">Compress</button>
+          <button class="btn btn-dl" id="c-dl" disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="c-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="c-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 2. CONVERT TO IMAGE ── -->
+    <div class="tool-panel" id="panel-convert">
+      <div class="panel-box">
+        <h2>Convert pages to images</h2>
+        <div class="row">
+          <div>
+            <label>Format:</label>
+            <select id="cv-format">
+              <option value="image/png">PNG</option>
+              <option value="image/jpeg">JPG</option>
+            </select>
+          </div>
+          <div>
+            <label>Resolution:</label>
+            <select id="cv-scale">
+              <option value="1">Low (~72 DPI)</option>
+              <option value="2" selected>Medium (~150 DPI)</option>
+              <option value="3">High (~220 DPI)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="cv-btn">Render pages</button>
+          <button class="btn btn-dl" id="cv-dl" disabled>⬇ Download ZIP</button>
+        </div>
+        <div class="status" id="cv-status"></div>
+        <div id="convert-preview"></div>
+      </div>
+    </div>
+
+    <!-- ── 3. WATERMARK TEXT ── -->
+    <div class="tool-panel" id="panel-wm-text">
+      <div class="panel-box">
+        <h2>Text watermark</h2>
+        <label>Watermark text:</label>
+        <input type="text" id="wt-text" placeholder="e.g. CONFIDENTIAL — Arch. Studio Johnson">
+        <div class="row">
+          <div>
+            <label>Font size (pt):</label>
+            <input type="number" id="wt-size" value="48" min="10" max="150">
+          </div>
+          <div>
+            <label>Opacity (0.05–1):</label>
+            <input type="number" id="wt-opacity" value="0.15" min="0.05" max="1" step="0.05">
+          </div>
+          <div>
+            <label>Color (hex):</label>
+            <input type="text" id="wt-color" value="#000000">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Position:</label>
+            <select id="wt-pos">
+              <option value="center">Center (diagonal)</option>
+              <option value="br">Bottom right</option>
+              <option value="tl">Top left</option>
+            </select>
+          </div>
+          <div>
+            <label>Apply to:</label>
+            <select id="wt-pages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="wt-btn">Apply</button>
+          <button class="btn btn-dl" id="wt-dl" disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="wt-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="wt-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 4. WATERMARK LOGO ── -->
+    <div class="tool-panel" id="panel-wm-logo">
+      <div class="panel-box">
+        <h2>Logo watermark</h2>
+        <p style="font-size:0.82rem; color:var(--mid); margin-bottom:14px;">
+          The logo is automatically converted to grayscale before embedding. Select an image of your logo.
+        </p>
+        <label>Image file (PNG, JPG):</label>
+        <div class="file-input-wrap">
+          <input type="file" id="wl-img" accept="image/*"
+            onchange="document.getElementById('wl-file-name').textContent = this.files[0]?.name || ''">
+          <div class="file-input-label">
+            <span>📁 Choose image…</span>
+            <span class="file-name" id="wl-file-name"></span>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Opacity (0.05–1):</label>
+            <input type="number" id="wl-opacity" value="0.18" min="0.05" max="1" step="0.05">
+          </div>
+          <div>
+            <label>Scale (% of page width):</label>
+            <input type="number" id="wl-scale" value="40" min="5" max="100">
+          </div>
+          <div>
+            <label>Rotation (degrees):</label>
+            <input type="number" id="wl-rotation" value="0" min="-180" max="180" step="5">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Position:</label>
+            <select id="wl-pos">
+              <option value="center">Center</option>
+              <option value="br">Bottom right</option>
+              <option value="tl">Top left</option>
+              <option value="tr">Top right</option>
+              <option value="bl">Bottom left</option>
+            </select>
+          </div>
+          <div>
+            <label>Apply to:</label>
+            <select id="wl-pages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="wl-btn">Apply logo</button>
+          <button class="btn btn-dl" id="wl-dl" disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="wl-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="wl-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 5. RESIZE TO STANDARD FORMAT ── -->
+    <div class="tool-panel" id="panel-crop">
+      <div class="panel-box">
+        <h2>Resize to standard format</h2>
+        <p style="font-size:0.82rem; color:var(--mid); margin-bottom:14px;">
+          Rescales each page to the selected ISO or standard format, fitting the content within the new dimensions.
+        </p>
+        <div class="row">
+          <div>
+            <label>Target format:</label>
+            <select id="crop-format">
+              <option value="A4">A4 — 210×297 mm</option>
+              <option value="A3">A3 — 297×420 mm</option>
+              <option value="A2">A2 — 420×594 mm</option>
+              <option value="A1">A1 — 594×841 mm</option>
+              <option value="A0">A0 — 841×1189 mm</option>
+              <option value="LETTER">Letter — 216×279 mm</option>
+              <option value="LEGAL">Legal — 216×356 mm</option>
+            </select>
+          </div>
+          <div>
+            <label>Orientation:</label>
+            <select id="crop-orient">
+              <option value="auto">Auto (match each page)</option>
+              <option value="portrait">Portrait</option>
+              <option value="landscape">Landscape</option>
+            </select>
+          </div>
+          <div>
+            <label>Fit mode:</label>
+            <select id="crop-mode">
+              <option value="fit">Fit — scale without cropping</option>
+              <option value="stretch">Stretch — force exact dimensions</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="crop-btn">Resize pages</button>
+          <button class="btn btn-dl" id="crop-dl" disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="crop-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="crop-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 6. REORDER & REMOVE ── -->
+    <div class="tool-panel" id="panel-reorder">
+      <div class="panel-box">
+        <h2>Reorder & remove pages</h2>
+        <p style="font-size:0.82rem; color:var(--mid); margin-bottom:10px;">
+          Drag thumbnails to reorder. Check the box on any page to mark it for removal.
+        </p>
+        <div>
+          <button class="btn" id="ro-render-btn">Load thumbnails</button>
+          <button class="btn btn-primary" id="ro-btn" disabled>Apply changes</button>
+          <button class="btn btn-dl" id="ro-dl" disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="ro-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="ro-status"></div>
+        <div id="reorder-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── 7. GRAPHIC SCALE BAR ── -->
+    <div class="tool-panel" id="panel-scalebar">
+      <div class="panel-box">
+        <h2>Graphic scale bar</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Adds an architectural scale bar to every page. Page rotation is automatically detected
+          and compensated so the bar always appears in the correct visual position.
+        </p>
+        <div class="row">
+          <div>
+            <label>Page size (or auto-detect):</label>
+            <select id="sb-pagesize">
+              <option value="auto">Auto-detect from PDF</option>
+              <option value="A4">A4 — 210×297 mm</option>
+              <option value="A3">A3 — 297×420 mm</option>
+              <option value="A2">A2 — 420×594 mm</option>
+              <option value="A1">A1 — 594×841 mm</option>
+              <option value="A0">A0 — 841×1189 mm</option>
+            </select>
+          </div>
+          <div>
+            <label>Drawing scale (1 : X):</label>
+            <input type="number" id="sb-scale" value="100" min="1" max="100000"
+              placeholder="e.g. 100 for 1:100">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Base position:</label>
+            <select id="sb-pos">
+              <option value="bl">Bottom left</option>
+              <option value="bc">Bottom center</option>
+              <option value="br">Bottom right</option>
+              <option value="tl">Top left</option>
+              <option value="tr">Top right</option>
+            </select>
+          </div>
+          <div>
+            <label>Apply to:</label>
+            <select id="sb-pages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fine-tune offset -->
+        <div style="background:var(--bg);border:1px solid var(--light);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:0.82rem;margin-bottom:10px;color:var(--mid);">
+            Fine-tune offset — as % of visual page width/height (negative moves left/down):
+          </div>
+          <div class="row">
+            <div>
+              <label>Horizontal offset X (%):</label>
+              <input type="number" id="sb-ox" value="0" min="-50" max="50" step="0.5">
+            </div>
+            <div>
+              <label>Vertical offset Y (%):</label>
+              <input type="number" id="sb-oy" value="0" min="-50" max="50" step="0.5">
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:#aaa;margin-top:-8px;">
+            Example: X = +5 moves the bar 5% of the page width to the right. Y = −2 moves it 2% downward.
+          </div>
+        </div>
+
+        <div>
+          <button class="btn btn-primary" id="sb-btn">Add scale bar</button>
+          <button class="btn btn-dl" id="sb-dl" disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="sb-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="sb-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 7b. SCALE BAR (FEET) ── -->
+    <div class="tool-panel" id="panel-scalebar-ft">
+      <div class="panel-box">
+        <h2>Graphic scale bar (feet)</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Adds an imperial scale bar in feet. Page rotation is automatically detected
+          and compensated so the bar always appears in the correct visual position.
+        </p>
+        <div class="row">
+          <div>
+            <label>Page size (or auto-detect):</label>
+            <select id="sbf-pagesize">
+              <option value="auto">Auto-detect from PDF</option>
+              <option value="A4">A4 — 210×297 mm</option>
+              <option value="A3">A3 — 297×420 mm</option>
+              <option value="A2">A2 — 420×594 mm</option>
+              <option value="A1">A1 — 594×841 mm</option>
+              <option value="A0">A0 — 841×1189 mm</option>
+              <option value="LETTER">Letter — 216×279 mm</option>
+              <option value="ANSI_D">ANSI D — 559×864 mm</option>
+            </select>
+          </div>
+          <div>
+            <label>Drawing scale (1 : X):</label>
+            <input type="number" id="sbf-scale" value="96" min="1" max="100000"
+              placeholder="e.g. 96 for 1″=8′">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Base position:</label>
+            <select id="sbf-pos">
+              <option value="bl">Bottom left</option>
+              <option value="bc">Bottom center</option>
+              <option value="br">Bottom right</option>
+              <option value="tl">Top left</option>
+              <option value="tr">Top right</option>
+            </select>
+          </div>
+          <div>
+            <label>Apply to:</label>
+            <select id="sbf-pages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--light);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">
+          <div style="font-size:0.82rem;margin-bottom:10px;color:var(--mid);">
+            Fine-tune offset — as % of visual page width/height (negative moves left/down):
+          </div>
+          <div class="row">
+            <div>
+              <label>Horizontal offset X (%):</label>
+              <input type="number" id="sbf-ox" value="0" min="-50" max="50" step="0.5">
+            </div>
+            <div>
+              <label>Vertical offset Y (%):</label>
+              <input type="number" id="sbf-oy" value="0" min="-50" max="50" step="0.5">
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:#aaa;margin-top:-8px;">
+            Example: X = +5 moves the bar 5% of the page width to the right. Y = −2 moves it 2% downward.
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="sbf-btn">Add scale bar (ft)</button>
+          <button class="btn btn-dl" id="sbf-dl" disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="sbf-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="sbf-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 8. SPLIT PDF ── -->
+    <div class="tool-panel" id="panel-split">
+      <div class="panel-box">
+        <h2>Split PDF</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:10px;">
+          Load thumbnails, then click the gap between any two pages to mark a split point.
+          Each section will be exported as a separate PDF.
+        </p>
+        <div>
+          <button class="btn" id="sp-render-btn">Load thumbnails</button>
+          <button class="btn btn-primary" id="sp-btn" disabled>Split &amp; download all</button>
+        </div>
+        <div class="status" id="sp-status"></div>
+        <div id="split-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── 9. MERGE PDFs ── -->
+    <div class="tool-panel" id="panel-merge">
+      <div class="panel-box">
+        <h2>Merge PDFs</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Upload multiple PDF files. Drag the preview cards to reorder them, then merge into one document.
+        </p>
+        <div class="file-input-wrap" style="margin-bottom:14px;">
+          <input type="file" id="mg-input" accept="application/pdf" multiple
+            onchange="onMergeFilesSelected(this.files)">
+          <div class="file-input-label">📁 Choose PDF files (multiple allowed)…
+            <span class="file-name" id="mg-file-name"></span>
+          </div>
+        </div>
+        <div id="merge-grid" style="display:flex;flex-wrap:wrap;gap:12px;min-height:60px;
+          padding:12px;background:var(--bg);border:1px solid var(--light);
+          border-radius:var(--radius);margin-bottom:14px;"></div>
+        <div>
+          <button class="btn btn-primary" id="mg-btn" disabled>Merge into one PDF</button>
+          <button class="btn btn-dl" id="mg-dl" disabled>⬇ Download merged PDF</button>
+        </div>
+        <div class="status" id="mg-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 10. IMAGE TO PDF ── -->
+    <div class="tool-panel" id="panel-img2pdf">
+      <div class="panel-box">
+        <h2>Image to PDF</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Convert one or more images into a PDF — one page per image, sized to fit.
+        </p>
+        <div class="file-input-wrap">
+          <input type="file" id="i2p-input" accept="image/png,image/jpeg,image/webp" multiple
+            onchange="onImgFilesSelected(this.files)">
+          <div class="file-input-label">📁 Choose images (JPG, PNG, WebP)…
+            <span class="file-name" id="i2p-file-name"></span>
+          </div>
+        </div>
+        <div id="i2p-preview" style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;"></div>
+        <div class="row">
+          <div>
+            <label>Page size:</label>
+            <select id="i2p-size">
+              <option value="fit">Fit to image</option>
+              <option value="A4">A4 portrait</option>
+              <option value="A3">A3 portrait</option>
+              <option value="LETTER">Letter</option>
+            </select>
+          </div>
+          <div>
+            <label>Image fit:</label>
+            <select id="i2p-fit">
+              <option value="fit">Fit (keep aspect ratio)</option>
+              <option value="fill">Fill (stretch to page)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-primary" id="i2p-btn" disabled>Create PDF</button>
+          <button class="btn btn-dl" id="i2p-dl" disabled>⬇ Download PDF</button>
+        </div>
+        <div class="status" id="i2p-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 11. PATCH / REDACT ── -->
+    <div class="tool-panel" id="panel-patch">
+      <div class="panel-box">
+        <h2>Patch / Redact</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Draw a white polygon over any area of a page to cover unwanted content.
+        </p>
+
+        <!-- Mode explanation -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+          <label style="flex:1;min-width:200px;cursor:pointer;display:flex;gap:8px;align-items:flex-start;
+            padding:12px;border:1px solid #ccc;border-radius:var(--radius);background:var(--white);">
+            <input type="radio" name="patch-mode" id="patch-mode-layer" value="layer" checked style="margin-top:2px;flex-shrink:0;">
+            <div>
+              <div style="font-size:0.85rem;font-weight:bold;margin-bottom:3px;">White layer (non-destructive)</div>
+              <div style="font-size:0.75rem;color:var(--mid);line-height:1.4;">
+                A white shape is drawn on top of the page. The original content still exists in the PDF
+                file below the patch — it is not visible on screen or in print, but it can be recovered
+                by someone who edits the file. Use this for layout adjustments.
+              </div>
+            </div>
+          </label>
+          <label style="flex:1;min-width:200px;cursor:pointer;display:flex;gap:8px;align-items:flex-start;
+            padding:12px;border:1px solid #ccc;border-radius:var(--radius);background:var(--white);">
+            <input type="radio" name="patch-mode" id="patch-mode-flat" value="flatten" style="margin-top:2px;flex-shrink:0;">
+            <div>
+              <div style="font-size:0.85rem;font-weight:bold;margin-bottom:3px;">Flatten page (permanent redaction)</div>
+              <div style="font-size:0.75rem;color:var(--mid);line-height:1.4;">
+                The entire page is rasterized to an image and reconstructed — original vector content
+                below the patch is permanently destroyed and unrecoverable. Use this for sensitive
+                documents. Note: the page becomes an image, which increases file size.
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Page to patch:</label>
+            <select id="patch-page-sel"></select>
+          </div>
+          <div>
+            <label>Render resolution (flatten only):</label>
+            <select id="patch-dpi">
+              <option value="150">150 DPI — smaller file</option>
+              <option value="200" selected>200 DPI — balanced</option>
+              <option value="300">300 DPI — print quality</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <button class="btn btn-primary" id="patch-open-btn">Open page editor</button>
+          <button class="btn btn-dl"   id="patch-dl"    disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="patch-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="patch-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 12. TITLE BLOCK (VIÑETA) ── -->
+    <div class="tool-panel" id="panel-vineta">
+      <div class="panel-box">
+        <h2>Title block (viñeta)</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:16px;">
+          Adds an architectural title block to the bottom-right corner. Width adapts to page format, height adjusts automatically to content. Empty fields are left blank.
+        </p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:0;">
+          <div>
+            <label>Project name:</label>
+            <input type="text" id="vn-project" placeholder="e.g. Mountain View Residence">
+          </div>
+          <div>
+            <label>Address:</label>
+            <input type="text" id="vn-address" placeholder="e.g. 742 Evergreen Terrace, Springfield">
+          </div>
+          <div style="grid-column:1/-1;">
+            <label>Drawing content <span style="color:var(--mid);font-weight:normal;">(one item per line — all text auto-uppercased)</span>:</label>
+            <textarea id="vn-content" rows="3" placeholder="e.g. Ground Floor Plan&#10;Stair Detail&#10;Section A-A"
+              style="width:100%;font-family:inherit;font-size:0.85rem;padding:6px 8px;border:1px solid #ccc;border-radius:var(--radius);resize:vertical;"></textarea>
+          </div>
+          <div>
+            <label>Type:</label>
+            <input type="text" id="vn-type" placeholder="e.g. ARCH / ELEC / STRUCT">
+          </div>
+          <div>
+            <label>Plan number:</label>
+            <input type="text" id="vn-number" placeholder="e.g. 01">
+          </div>
+          <div>
+            <label>Scale:</label>
+            <input type="text" id="vn-scale" placeholder="e.g. 1:100">
+          </div>
+          <div>
+            <label>Date:</label>
+            <input type="text" id="vn-date" placeholder="e.g. March 2026">
+          </div>
+          <div><!-- spacer --></div>
+          <div>
+            <label>Client name (mandante):</label>
+            <input type="text" id="vn-client" placeholder="e.g. John Smith">
+          </div>
+          <div>
+            <label>Designer name (proyectista):</label>
+            <input type="text" id="vn-designer" placeholder="e.g. Jane Doe, Architect">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:14px;">
+          <div>
+            <label>Apply to:</label>
+            <select id="vn-pages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+          <div>
+            <label>Page size override:</label>
+            <select id="vn-pagesize">
+              <option value="auto">Auto-detect</option>
+              <option value="A4">A4</option>
+              <option value="A3">A3</option>
+              <option value="A2">A2</option>
+              <option value="A1">A1</option>
+              <option value="A0">A0</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" id="vn-btn">Add title block</button>
+          <button class="btn btn-dl"    id="vn-dl"    disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="vn-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="vn-status"></div>
+      </div>
+    </div>
+
+    <!-- ── OTHER TOOLS STRIP ── -->
+    <div id="other-tools-section">
+      <h3>OTHER TOOLS — same file</h3>
+      <div class="other-tools-strip" id="other-tools-strip"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PATCH FULLSCREEN EDITOR ── -->
+<div id="patch-fullscreen">
+  <div id="patch-topbar">
+    <strong style="color:#fff;font-size:0.85rem;">Patch editor</strong>
+    <span class="patch-sep">|</span>
+    <span id="patch-tb-info">Click to place vertices. Click the blue dot (or near the first point) to close the polygon.</span>
+    <span class="patch-sep" style="margin-left:auto;">|</span>
+    <button class="btn" id="patch-undo-btn"  style="font-size:0.78rem;padding:4px 10px;border-color:#555;color:#ccc;">↩ Undo last</button>
+    <button class="btn" id="patch-clear-btn" style="font-size:0.78rem;padding:4px 10px;border-color:#555;color:#ccc;">✕ Clear</button>
+    <button class="btn btn-primary" id="patch-apply-poly" disabled style="font-size:0.78rem;padding:4px 12px;">✓ Apply patch</button>
+    <button class="btn" id="patch-close-btn" style="font-size:0.78rem;padding:4px 10px;border-color:#555;color:#ccc;">Close</button>
+  </div>
+  <div id="patch-canvas-wrap">
+    <div id="patch-canvas-container">
+      <canvas id="patch-canvas-bg"></canvas>
+      <canvas id="patch-canvas-draw"></canvas>
+    </div>
+  </div>
+  <div id="patch-info-bar" id="patch-info-bar">
+    Vertices: <span id="patch-vtx-count">0</span> &nbsp;|&nbsp;
+    Snap radius: 20px — click near the blue first-point dot to close the polygon.
+  </div>
+</div>
+
+<!-- SCRIPTS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+// ─── PDF.js lazy load ─────────────────────────────────────────────────────
+const pdfjsScript = document.createElement('script');
+pdfjsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+document.head.appendChild(pdfjsScript);
+pdfjsScript.onload = () => {
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+};
+
+// ─── TOOL DEFINITIONS ────────────────────────────────────────────────────
+const TOOLS = [
+  { id:'compress',    icon:'🗜', name:'Compress PDF',           desc:'Ghostscript-powered compression with full control over DPI and quality.' },
+  { id:'vineta',      icon:'📋', name:'Title block',          desc:'Generate an architectural title block (viñeta) with project name, plan number, scale, signatures and more.' },
+  { id:'patch',       icon:'⬜', name:'Patch / Redact',         desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
+  { id:'scalebar',    icon:'📏', name:'Scale bar (m)',          desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
+  { id:'scalebar-ft', icon:'📐', name:'Scale bar (ft)',         desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
+  { id:'wm-logo',     icon:'🔖', name:'Logo watermark',        desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
+  { id:'wm-text',     icon:'✒', name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
+  { id:'crop',        icon:'📋', name:'Resize to format',      desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
+  { id:'reorder',     icon:'⇅', name:'Reorder & remove pages', desc:'Drag pages to rearrange them and remove any you don\'t need.' },
+  { id:'split',       icon:'✂', name:'Split PDF',              desc:'Select break points between pages and export each section as a separate PDF.' },
+  { id:'merge',       icon:'⊕', name:'Merge PDFs',            desc:'Upload multiple PDFs, rearrange them and combine into one.', noFile: true },
+  { id:'convert',     icon:'🖼', name:'Convert to images',     desc:'Export each page as PNG or JPG at the resolution you need.' },
+  { id:'img2pdf',     icon:'🗒', name:'Image to PDF',          desc:'Convert one or more images (JPG, PNG) into a PDF document.', noFile: true },
+];
+
+// ─── STATE ───────────────────────────────────────────────────────────────
+let currentBuffer = null;
+let currentFileName = '';
+let activeToolId = null;
+let modificationHistory = [];
+let gsInstance = null; // Ghostscript WASM singleton
+
+// ─── HOME GRID ───────────────────────────────────────────────────────────
+const homeGrid = document.getElementById('home-tools-grid');
+TOOLS.forEach(t => {
+  const card = document.createElement('div');
+  card.className = 'tool-card';
+  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  card.onclick = () => {
+    if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
+    else { openTool(t.id); }
+  };
+  homeGrid.appendChild(card);
+});
+let pendingTool = null;
+
+function scrollGrid(dir) {
+  const grid = document.getElementById('home-tools-grid');
+  // Scroll by 3 card widths (127px + 12px gap = 139px × 3)
+  grid.scrollBy({ left: dir * 139 * 3, behavior: 'smooth' });
+}
+
+// ─── FILE LOADING ─────────────────────────────────────────────────────────
+function readFile(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result); r.onerror = rej;
+    r.readAsArrayBuffer(file);
+  });
+}
+
+async function loadPDF(file) {
+  currentBuffer = await readFile(file);
+  currentFileName = file.name;
+  modificationHistory = [];
+  updateTopBar();
+  showDropCheck(file.name);
+}
+
+function updateTopBar() {
+  const label = modificationHistory.length > 0
+    ? `${currentFileName} [modified ×${modificationHistory.length}]`
+    : currentFileName;
+  document.getElementById('file-indicator').innerHTML = `File: <span>${label}</span>`;
+  document.getElementById('btn-change-file').style.display = 'inline-block';
+}
+
+function showDropCheck(name) {
+  const el = document.getElementById('drop-check');
+  document.getElementById('drop-check-name').textContent = name;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1700);
+}
+
+document.getElementById('file-input-hidden').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  await loadPDF(file);
+  if (pendingTool) { openTool(pendingTool); pendingTool = null; }
+  e.target.value = '';
+});
+
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', async e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') await loadPDF(file);
+});
+
+// ─── NAVIGATION ──────────────────────────────────────────────────────────
+function openTool(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-tool').classList.add('active');
+  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${id}`).classList.add('active');
+  activeToolId = id;
+  buildOtherTools(id);
+  updateWorkingBanner();
+  window.scrollTo(0, 0);
+  // Populate patch page selector immediately when that panel opens
+  if (id === 'patch' && currentBuffer) {
+    PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true })
+      .then(doc => {
+        const sel = document.getElementById('patch-page-sel');
+        sel.innerHTML = '';
+        doc.getPages().forEach((_, i) => {
+          const opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = `Page ${i + 1}`;
+          sel.appendChild(opt);
+        });
+      }).catch(() => {});
+  }
+}
+
+function goHome() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-home').classList.add('active');
+}
+
+function resetToHome() {
+  currentBuffer = null; currentFileName = ''; modificationHistory = [];
+  document.getElementById('file-indicator').textContent = 'No file loaded';
+  document.getElementById('btn-change-file').style.display = 'none';
+  document.getElementById('working-banner').classList.remove('show');
+  goHome();
+}
+
+function buildOtherTools(currentId) {
+  const strip = document.getElementById('other-tools-strip');
+  strip.innerHTML = '';
+  TOOLS.filter(t => t.id !== currentId).forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'other-btn';
+    btn.textContent = `${t.icon} ${t.name}`;
+    btn.onclick = () => openTool(t.id);
+    strip.appendChild(btn);
+  });
+}
+
+function updateWorkingBanner() {
+  const banner = document.getElementById('working-banner');
+  if (modificationHistory.length > 0) {
+    document.getElementById('working-banner-text').textContent =
+      `Working on modified file — operations applied: ${modificationHistory.slice(-3).join(' → ')}`;
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────
+function status(id, msg, cls = '') {
+  const el = document.getElementById(id); el.textContent = msg; el.className = 'status ' + cls;
+}
+function download(bytes, name) {
+  const blob = new Blob([bytes], { type: 'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = name; a.click();
+  URL.revokeObjectURL(url);
+}
+function hexToRgb(hex) {
+  return { r: parseInt(hex.slice(1,3),16)/255, g: parseInt(hex.slice(3,5),16)/255, b: parseInt(hex.slice(5,7),16)/255 };
+}
+function nameSuffix(suffix) { return currentFileName.replace(/\.pdf$/i,'') + suffix + '.pdf'; }
+
+function applyAsActive(bytes, label, statusId, applyBtnId) {
+  currentBuffer = bytes.slice(0);
+  modificationHistory.push(label);
+  updateTopBar();
+  updateWorkingBanner();
+  status(statusId, '✓ Set as working file. Subsequent tools will use this version.', 'ok');
+  document.getElementById(applyBtnId).disabled = true;
+}
+
+const PAGE_SIZES = {
+  A4:[595.28,841.89], A3:[841.89,1190.55], A2:[1190.55,1683.78],
+  A1:[1683.78,2383.94], A0:[2383.94,3370.39], LETTER:[612,792], LEGAL:[612,1008]
+};
+
+// ─── 1. COMPRESS — GHOSTSCRIPT WASM ──────────────────────────────────────
+let selectedPreset = 'ebook';
+
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedPreset = btn.dataset.preset;
+    document.getElementById('gs-custom-opts').style.display =
+      selectedPreset === 'custom' ? 'block' : 'none';
+  });
+});
+
+// Correct package: @jspawn/ghostscript-wasm@0.0.2 (ESM, needs locateFile for .wasm resolution)
+const GS_CDN = 'https://cdn.jsdelivr.net/npm/@jspawn/ghostscript-wasm@0.0.2';
+
+async function loadGhostscript() {
+  if (gsInstance) return gsInstance;
+
+  const progressWrap = document.getElementById('gs-progress-wrap');
+  const progressBar  = document.getElementById('gs-progress-bar');
+  progressWrap.classList.add('show');
+  progressBar.style.width = '0%';
+
+  let fakeProgress = 0;
+  const tick = setInterval(() => {
+    fakeProgress = Math.min(fakeProgress + Math.random() * 2.5, 82);
+    progressBar.style.width = fakeProgress + '%';
+  }, 400);
+
+  try {
+    // Dynamic ESM import — the only reliable way to load this package in-browser
+    const { default: initGhostscript } = await import(`${GS_CDN}/gs.mjs`);
+
+    clearInterval(tick);
+    progressBar.style.width = '88%';
+
+    // locateFile tells Emscripten where the .wasm binary lives
+    const gs = await initGhostscript({
+      locateFile: file => `${GS_CDN}/${file}`,
+      print:    () => {},
+      printErr: () => {}
+    });
+
+    if (!gs || !gs.FS || !gs.callMain) throw new Error('Ghostscript module loaded but API is missing.');
+
+    progressBar.style.width = '100%';
+    setTimeout(() => progressWrap.classList.remove('show'), 500);
+    gsInstance = gs;
+    return gs;
+
+  } catch(err) {
+    clearInterval(tick);
+    progressWrap.classList.remove('show');
+    throw new Error('Could not load Ghostscript engine. (' + err.message + ')');
+  }
+}
+
+let compressedBytes = null;
+document.getElementById('c-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  document.getElementById('c-btn').disabled = true;
+  document.getElementById('c-dl').disabled = true;
+  document.getElementById('c-apply').disabled = true;
+  status('c-status', 'Loading Ghostscript engine…', 'run');
+  try {
+    const gs = await loadGhostscript();
+    status('c-status', 'Compressing…', 'run');
+
+    const inputData = new Uint8Array(currentBuffer);
+    // Write input file to GS virtual filesystem
+    gs.FS.writeFile('input.pdf', inputData);
+
+    const args = [
+      '-dBATCH', '-dNOPAUSE', '-dSAFER', '-dQUIET',
+      '-sDEVICE=pdfwrite',
+      '-dCompatibilityLevel=1.5',
+      '-dAutoRotatePages=/None',   // preserve original page orientation
+    ];
+
+    if (selectedPreset === 'custom') {
+      const dpi = parseInt(document.getElementById('gs-dpi').value) || 150;
+      const q   = parseInt(document.getElementById('gs-quality').value) || 75;
+      args.push(
+        `-dColorImageResolution=${dpi}`,
+        `-dGrayImageResolution=${dpi}`,
+        '-dMonoImageResolution=300',
+        '-dColorImageDownsampleType=/Bicubic',
+        '-dGrayImageDownsampleType=/Bicubic',
+        '-dAutoFilterColorImages=false',
+        '-dColorImageFilter=/DCTEncode',
+        `-dJPEGQ=${q}`
+      );
+    } else {
+      args.push(`-dPDFSETTINGS=/${selectedPreset}`);
+    }
+
+    args.push('-sOutputFile=output.pdf', 'input.pdf');
+    gs.callMain(args);
+
+    const outputData = gs.FS.readFile('output.pdf');
+    compressedBytes = outputData.buffer;
+
+    // Clean up GS virtual FS
+    try { gs.FS.unlink('input.pdf'); gs.FS.unlink('output.pdf'); } catch(_) {}
+
+    const origKB  = (currentBuffer.byteLength / 1024).toFixed(1);
+    const compKB  = (compressedBytes.byteLength / 1024).toFixed(1);
+    const pct     = (((currentBuffer.byteLength - compressedBytes.byteLength) / currentBuffer.byteLength) * 100).toFixed(1);
+    const presetLabel = selectedPreset === 'custom' ? `custom ${document.getElementById('gs-dpi').value} DPI` : selectedPreset;
+    status('c-status', `Original: ${origKB} KB → Compressed: ${compKB} KB (−${pct}%) [${presetLabel}]`, 'ok');
+    document.getElementById('c-dl').disabled = false;
+    document.getElementById('c-apply').disabled = false;
+  } catch(e) {
+    // If GS failed to load, fall back to pdf-lib metadata-strip compression
+    if (e.message.includes('Could not load')) {
+      status('c-status', 'Ghostscript unavailable — applying pdf-lib fallback compression…', 'run');
+      try {
+        const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+        pdfDoc.setTitle(''); pdfDoc.setAuthor(''); pdfDoc.setSubject('');
+        pdfDoc.setKeywords([]); pdfDoc.setProducer(''); pdfDoc.setCreator('');
+        pdfDoc.getPages().forEach(p => { try { p.node.delete(PDFLib.PDFName.of('Annots')); } catch(_){} });
+        try { pdfDoc.catalog.delete(PDFLib.PDFName.of('Metadata')); } catch(_){}
+        compressedBytes = await pdfDoc.save({ useObjectStreams: true, addDefaultPage: false });
+        const origKB = (currentBuffer.byteLength/1024).toFixed(1);
+        const compKB = (compressedBytes.byteLength/1024).toFixed(1);
+        const pct    = (((currentBuffer.byteLength - compressedBytes.byteLength)/currentBuffer.byteLength)*100).toFixed(1);
+        status('c-status', `Fallback compression: ${origKB} KB → ${compKB} KB (−${pct}%). For stronger compression, check your connection and retry.`, 'ok');
+        document.getElementById('c-dl').disabled = false;
+        document.getElementById('c-apply').disabled = false;
+      } catch(e2) { status('c-status', 'Error: ' + e2.message, 'err'); }
+    } else {
+      status('c-status', 'Error: ' + e.message, 'err');
+    }
+  } finally {
+    document.getElementById('c-btn').disabled = false;
+  }
+});
+document.getElementById('c-dl').addEventListener('click', () => { if (compressedBytes) download(compressedBytes, nameSuffix('_compressed')); });
+document.getElementById('c-apply').addEventListener('click', () => { if (compressedBytes) applyAsActive(compressedBytes, 'Compress', 'c-status', 'c-apply'); });
+
+// ─── 2. CONVERT TO IMAGES ─────────────────────────────────────────────────
+let renderedCanvases = [];
+document.getElementById('cv-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  if (!window.pdfjsLib) { status('cv-status', 'PDF.js still loading, try again in a moment.', 'err'); return; }
+  status('cv-status', 'Loading PDF…', 'run');
+  renderedCanvases = [];
+  document.getElementById('convert-preview').innerHTML = '';
+  document.getElementById('cv-dl').disabled = true;
+  try {
+    const pdfDoc = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
+    const scale = parseFloat(document.getElementById('cv-scale').value);
+    for (let i = 1; i <= pdfDoc.numPages; i++) {
+      status('cv-status', `Rendering page ${i} of ${pdfDoc.numPages}…`, 'run');
+      const page = await pdfDoc.getPage(i);
+      const vp = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      renderedCanvases.push(canvas);
+      const ts = Math.min(1, 140 / canvas.width);
+      const thumb = document.createElement('canvas');
+      thumb.width = Math.round(canvas.width * ts); thumb.height = Math.round(canvas.height * ts);
+      thumb.getContext('2d').drawImage(canvas, 0, 0, thumb.width, thumb.height);
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:0.72rem;color:#888;text-align:center;';
+      lbl.textContent = `p. ${i}`;
+      const wrap = document.createElement('div');
+      wrap.appendChild(thumb); wrap.appendChild(lbl);
+      document.getElementById('convert-preview').appendChild(wrap);
+    }
+    status('cv-status', `${pdfDoc.numPages} page(s) ready.`, 'ok');
+    document.getElementById('cv-dl').disabled = false;
+  } catch(e) { status('cv-status', 'Error: ' + e.message, 'err'); }
+});
+document.getElementById('cv-dl').addEventListener('click', async () => {
+  if (!renderedCanvases.length) return;
+  const fmt = document.getElementById('cv-format').value;
+  const ext = fmt === 'image/jpeg' ? 'jpg' : 'png';
+  status('cv-status', 'Building ZIP…', 'run');
+  document.getElementById('cv-dl').disabled = true;
+  const zip = new JSZip();
+  renderedCanvases.forEach((c, i) => {
+    const b64 = c.toDataURL(fmt, 0.92).split(',')[1];
+    zip.file(`page_${String(i+1).padStart(3,'0')}.${ext}`, b64, { base64: true });
+  });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${currentFileName.replace(/\.pdf$/i,'')}_images.zip`; a.click();
+  URL.revokeObjectURL(url);
+  status('cv-status', 'ZIP downloaded.', 'ok');
+  document.getElementById('cv-dl').disabled = false;
+});
+
+// ─── 3. TEXT WATERMARK ────────────────────────────────────────────────────
+let wtBytes = null;
+document.getElementById('wt-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  const txt = document.getElementById('wt-text').value.trim();
+  if (!txt) { status('wt-status', 'Please enter watermark text.', 'err'); return; }
+  status('wt-status', 'Applying…', 'run');
+  try {
+    const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+    const sz = parseInt(document.getElementById('wt-size').value) || 48;
+    const op = parseFloat(document.getElementById('wt-opacity').value) || 0.15;
+    const { r, g, b } = hexToRgb(document.getElementById('wt-color').value || '#000000');
+    const pos = document.getElementById('wt-pos').value;
+    const pages = document.getElementById('wt-pages').value === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+    const tw = font.widthOfTextAtSize(txt, sz);
+    pages.forEach(page => {
+      const { width, height } = page.getSize();
+      let x, y, rotate;
+      if (pos === 'center')    { x = (width - tw) / 2; y = height / 2; rotate = PDFLib.degrees(35); }
+      else if (pos === 'br')   { x = width - tw - 24;  y = 24;         rotate = PDFLib.degrees(0); }
+      else                     { x = 20;               y = height - sz - 20; rotate = PDFLib.degrees(0); }
+      page.drawText(txt, { x, y, size: sz, font, color: PDFLib.rgb(r,g,b), opacity: op, rotate });
+    });
+    wtBytes = await pdfDoc.save({ useObjectStreams: true });
+    status('wt-status', `Applied to ${pages.length} page(s).`, 'ok');
+    document.getElementById('wt-dl').disabled = false;
+    document.getElementById('wt-apply').disabled = false;
+  } catch(e) { status('wt-status', 'Error: ' + e.message, 'err'); }
+});
+document.getElementById('wt-dl').addEventListener('click', () => { if (wtBytes) download(wtBytes, nameSuffix('_watermark')); });
+document.getElementById('wt-apply').addEventListener('click', () => { if (wtBytes) applyAsActive(wtBytes, 'Text WM', 'wt-status', 'wt-apply'); });
+
+// ─── 4. LOGO WATERMARK ────────────────────────────────────────────────────
+function imageToGrayscalePNG(imgEl) {
+  return new Promise(res => {
+    const canvas = document.createElement('canvas');
+    canvas.width = imgEl.naturalWidth; canvas.height = imgEl.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(imgEl, 0, 0);
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < data.data.length; i += 4) {
+      const lum = data.data[i] * 0.299 + data.data[i+1] * 0.587 + data.data[i+2] * 0.114;
+      data.data[i] = data.data[i+1] = data.data[i+2] = lum;
+    }
+    ctx.putImageData(data, 0, 0);
+    canvas.toBlob(blob => {
+      const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsArrayBuffer(blob);
+    }, 'image/png');
+  });
+}
+
+let wlBytes = null;
+document.getElementById('wl-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  const imgFile = document.getElementById('wl-img').files[0];
+  if (!imgFile) { status('wl-status', 'Please upload a logo image.', 'err'); return; }
+  status('wl-status', 'Processing image…', 'run');
+  try {
+    const imgUrl = URL.createObjectURL(imgFile);
+    const imgEl = new Image();
+    await new Promise((res, rej) => { imgEl.onload = res; imgEl.onerror = rej; imgEl.src = imgUrl; });
+    const grayBuf = await imageToGrayscalePNG(imgEl);
+    URL.revokeObjectURL(imgUrl);
+
+    const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+    const embeddedImg = await pdfDoc.embedPng(grayBuf);
+    const opacity  = parseFloat(document.getElementById('wl-opacity').value) || 0.18;
+    const scalePct = parseFloat(document.getElementById('wl-scale').value) || 40;
+    const rotDeg   = parseFloat(document.getElementById('wl-rotation').value) || 0;
+    const pos      = document.getElementById('wl-pos').value;
+    const pages    = document.getElementById('wl-pages').value === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+
+    // Precompute rotation math for center-pivot
+    const rad = rotDeg * Math.PI / 180;
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+
+    pages.forEach(page => {
+      const { width, height } = page.getSize();
+      const imgW = width * (scalePct / 100);
+      const imgH = (embeddedImg.height / embeddedImg.width) * imgW;
+      const margin = 24;
+
+      // Desired center of the logo on the page (unrotated position)
+      let cx, cy;
+      if (pos === 'center')    { cx = width / 2;               cy = height / 2; }
+      else if (pos === 'br')   { cx = width - imgW/2 - margin; cy = imgH/2 + margin; }
+      else if (pos === 'tl')   { cx = imgW/2 + margin;         cy = height - imgH/2 - margin; }
+      else if (pos === 'tr')   { cx = width - imgW/2 - margin; cy = height - imgH/2 - margin; }
+      else                     { cx = imgW/2 + margin;         cy = imgH/2 + margin; }
+
+      // pdf-lib rotates around bottom-left corner.
+      // To rotate around center (cx,cy), adjust the bottom-left anchor point.
+      const adjX = cx - (imgW/2) * cos + (imgH/2) * sin;
+      const adjY = cy - (imgW/2) * sin - (imgH/2) * cos;
+
+      page.drawImage(embeddedImg, {
+        x: adjX, y: adjY,
+        width: imgW, height: imgH,
+        opacity,
+        rotate: PDFLib.degrees(rotDeg)
+      });
+    });
+
+    wlBytes = await pdfDoc.save({ useObjectStreams: true });
+    status('wl-status', `Logo applied — grayscale, ${scalePct}% width, ${rotDeg}° rotation.`, 'ok');
+    document.getElementById('wl-dl').disabled = false;
+    document.getElementById('wl-apply').disabled = false;
+  } catch(e) { status('wl-status', 'Error: ' + e.message, 'err'); }
+});
+document.getElementById('wl-dl').addEventListener('click', () => { if (wlBytes) download(wlBytes, nameSuffix('_logo_wm')); });
+document.getElementById('wl-apply').addEventListener('click', () => { if (wlBytes) applyAsActive(wlBytes, 'Logo WM', 'wl-status', 'wl-apply'); });
+
+// ─── 5. RESIZE TO FORMAT ──────────────────────────────────────────────────
+let cropBytes = null;
+document.getElementById('crop-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  status('crop-status', 'Processing…', 'run');
+  try {
+    const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+    const fmtKey = document.getElementById('crop-format').value;
+    const [fW, fH] = PAGE_SIZES[fmtKey];
+    const orient = document.getElementById('crop-orient').value;
+    const mode   = document.getElementById('crop-mode').value;
+    pdfDoc.getPages().forEach(page => {
+      const { width, height } = page.getSize();
+      let tW, tH;
+      if (orient === 'portrait')         { tW = fW; tH = fH; }
+      else if (orient === 'landscape')   { tW = fH; tH = fW; }
+      else { if (width > height) { tW = fH; tH = fW; } else { tW = fW; tH = fH; } }
+      let sx, sy;
+      if (mode === 'fit') { const s = Math.min(tW/width, tH/height); sx = s; sy = s; }
+      else                { sx = tW/width; sy = tH/height; }
+      page.scaleContent(sx, sy);
+      page.translateContent((tW - width*sx)/2, (tH - height*sy)/2);
+      page.setSize(tW, tH);
+    });
+    cropBytes = await pdfDoc.save({ useObjectStreams: true });
+    status('crop-status', `All pages resized to ${fmtKey}.`, 'ok');
+    document.getElementById('crop-dl').disabled = false;
+    document.getElementById('crop-apply').disabled = false;
+  } catch(e) { status('crop-status', 'Error: ' + e.message, 'err'); }
+});
+document.getElementById('crop-dl').addEventListener('click', () => { if (cropBytes) download(cropBytes, nameSuffix(`_${document.getElementById('crop-format').value}`)); });
+document.getElementById('crop-apply').addEventListener('click', () => { if (cropBytes) applyAsActive(cropBytes, `Resize ${document.getElementById('crop-format').value}`, 'crop-status', 'crop-apply'); });
+
+// ─── 6. REORDER & REMOVE ──────────────────────────────────────────────────
+let reorderBytes = null;
+
+document.getElementById('ro-render-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  if (!window.pdfjsLib) { status('ro-status', 'PDF.js still loading.', 'err'); return; }
+  status('ro-status', 'Loading thumbnails…', 'run');
+  const grid = document.getElementById('reorder-grid');
+  grid.innerHTML = '';
+  ['ro-btn','ro-dl','ro-apply'].forEach(id => document.getElementById(id).disabled = true);
+  try {
+    const pdfDoc = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
+    for (let i = 1; i <= pdfDoc.numPages; i++) {
+      const page = await pdfDoc.getPage(i);
+      const vp = page.getViewport({ scale: 0.28 });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+      const thumb = document.createElement('div');
+      thumb.className = 'page-thumb'; thumb.dataset.index = i - 1; thumb.draggable = true;
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.className = 'delete-cb'; cb.title = 'Remove this page';
+      cb.addEventListener('change', () => {
+        thumb.style.opacity = cb.checked ? '0.3' : '1';
+        thumb.style.borderColor = cb.checked ? 'var(--err)' : '';
+      });
+      const lbl = document.createElement('div');
+      lbl.className = 'thumb-label'; lbl.textContent = `p. ${i}`;
+      thumb.appendChild(canvas); thumb.appendChild(cb); thumb.appendChild(lbl);
+      grid.appendChild(thumb);
+    }
+    initDragDrop(grid);
+    status('ro-status', `${pdfDoc.numPages} pages loaded. Drag to reorder, check to remove.`, 'ok');
+    document.getElementById('ro-btn').disabled = false;
+  } catch(e) { status('ro-status', 'Error: ' + e.message, 'err'); }
+});
+
+function initDragDrop(grid) {
+  let dragged = null;
+  grid.addEventListener('dragstart', e => {
+    dragged = e.target.closest('.page-thumb');
+    if (dragged) setTimeout(() => dragged.classList.add('dragging'), 0);
+  });
+  grid.addEventListener('dragend', () => {
+    document.querySelectorAll('.page-thumb').forEach(t => t.classList.remove('dragging','drag-over'));
+    dragged = null;
+  });
+  grid.addEventListener('dragover', e => {
+    e.preventDefault();
+    const t = e.target.closest('.page-thumb');
+    document.querySelectorAll('.page-thumb').forEach(x => x.classList.remove('drag-over'));
+    if (t && t !== dragged) t.classList.add('drag-over');
+  });
+  grid.addEventListener('drop', e => {
+    e.preventDefault();
+    const target = e.target.closest('.page-thumb');
+    if (!target || !dragged || target === dragged) return;
+    const all = [...grid.querySelectorAll('.page-thumb')];
+    const fi = all.indexOf(dragged), ti = all.indexOf(target);
+    if (fi < ti) grid.insertBefore(dragged, target.nextSibling);
+    else grid.insertBefore(dragged, target);
+    document.querySelectorAll('.page-thumb').forEach(t => t.classList.remove('drag-over'));
+  });
+}
+
+document.getElementById('ro-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  status('ro-status', 'Rebuilding PDF…', 'run');
+  try {
+    const src = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+    const out = await PDFLib.PDFDocument.create();
+    const thumbs = [...document.getElementById('reorder-grid').querySelectorAll('.page-thumb')];
+    const selected = thumbs.filter(t => !t.querySelector('.delete-cb').checked);
+    if (selected.length === 0) { status('ro-status', 'You must keep at least one page.', 'err'); return; }
+    const indices = selected.map(t => parseInt(t.dataset.index));
+    const copied  = await out.copyPages(src, indices);
+    copied.forEach(p => out.addPage(p));
+    reorderBytes = await out.save({ useObjectStreams: true });
+    const removed = thumbs.length - selected.length;
+    status('ro-status', `PDF rebuilt: ${selected.length} page(s)${removed > 0 ? `, ${removed} removed` : ''}.`, 'ok');
+    document.getElementById('ro-dl').disabled = false;
+    document.getElementById('ro-apply').disabled = false;
+  } catch(e) { status('ro-status', 'Error: ' + e.message, 'err'); }
+});
+// ─── 7. GRAPHIC SCALE BAR (shared helpers) ───────────────────────────────
+const PT_PER_MM = 72 / 25.4;
+const MM_PER_FOOT = 304.8;
+
+const ISO_SIZES_MM = {
+  A4:     { w:210,  h:297  },
+  A3:     { w:297,  h:420  },
+  A2:     { w:420,  h:594  },
+  A1:     { w:594,  h:841  },
+  A0:     { w:841,  h:1189 },
+  LETTER: { w:216,  h:279  },
+  ANSI_D: { w:559,  h:864  },
+};
+
+function detectISOSize(visWpt, visHpt) {
+  const wMm = visWpt / PT_PER_MM, hMm = visHpt / PT_PER_MM;
+  for (const [key, s] of Object.entries(ISO_SIZES_MM)) {
+    if (Math.abs(wMm-s.w)<10 && Math.abs(hMm-s.h)<10) return { key, widthMm: s.w };
+    if (Math.abs(wMm-s.h)<10 && Math.abs(hMm-s.w)<10) return { key, widthMm: s.h };
+  }
+  return { key:'custom', widthMm: wMm };
+}
+
+function niceValue(target, candidates) {
+  return candidates.reduce((best,v) =>
+    Math.abs(v-target) < Math.abs(best-target) ? v : best, candidates[0]);
+}
+
+function formatLabel(val) {
+  return val % 1 === 0 ? String(Math.round(val)) : val.toFixed(1);
+}
+
+// ── Core drawing function ──────────────────────────────────────────────────
+// unitMmLength : mm per display unit (1000 for metres, 304.8 for feet)
+// niceCandidates : array of "nice" values in display units
+async function applyScaleBar(ids, unitMmLength, niceCandidates) {
+  const scaleValue  = parseFloat(document.getElementById(ids.scale).value)   || 100;
+  const offsetXPct  = parseFloat(document.getElementById(ids.ox).value)      || 0;
+  const offsetYPct  = parseFloat(document.getElementById(ids.oy).value)      || 0;
+  const pageSizeSel = document.getElementById(ids.pagesize).value;
+  const pos         = document.getElementById(ids.pos).value;
+  const applyTo     = document.getElementById(ids.pages).value;
+
+  status(ids.status, 'Processing…', 'run');
+  try {
+    const pdfDoc   = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+    const font     = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const allPages = applyTo === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+
+    allPages.forEach(page => {
+      const { width: rawW, height: rawH } = page.getSize();
+
+      // ── Read page rotation ─────────────────────────────────────────
+      let rot = 0;
+      try {
+        const rn = page.node.get(PDFLib.PDFName.of('Rotate'));
+        if (rn) rot = ((rn.value() % 360) + 360) % 360;
+      } catch(_) {}
+
+      const swapped = rot === 90 || rot === 270;
+      const visW = swapped ? rawH : rawW;
+      const visH = swapped ? rawW : rawH;
+
+      // ── Visual → raw PDF coordinate transform ─────────────────────
+      // Derived by inverting the viewer's rotation (viewer rotates rot° CW):
+      //   rot=0:   px=vx,        py=vy
+      //   rot=90:  px=rawW-vy,   py=vx
+      //   rot=180: px=rawW-vx,   py=rawH-vy
+      //   rot=270: px=vy,        py=rawH-vx
+      function toPdf(vx, vy) {
+        switch (rot) {
+          case 0:   return { x: vx,         y: vy         };
+          case 90:  return { x: rawW - vy,  y: vx         };
+          case 180: return { x: rawW - vx,  y: rawH - vy  };
+          default:  return { x: vy,         y: rawH - vx  };
+        }
+      }
+
+      // Text pre-rotated rot° CCW so viewer's rot° CW returns it to 0° (readable).
+      const textRot = PDFLib.degrees(rot);
+
+      // ── Visual page width for bar sizing ──────────────────────────
+      let pageWidthMm;
+      if (pageSizeSel === 'auto') {
+        pageWidthMm = detectISOSize(visW, visH).widthMm;
+      } else {
+        const s = ISO_SIZES_MM[pageSizeSel];
+        pageWidthMm = (visW > visH) ? Math.max(s.w, s.h) : Math.min(s.w, s.h);
+      }
+
+      // ── Bar geometry (all in visual-space pts) ─────────────────────
+      const targetUnits = (pageWidthMm * 0.20 * scaleValue) / unitMmLength;
+      const totalUnits  = niceValue(targetUnits, niceCandidates);
+      const barLenMm    = (totalUnits * unitMmLength) / scaleValue;
+      const barLenPt    = barLenMm * PT_PER_MM;
+      const segments    = 5;
+      const segW        = barLenPt / segments;
+      const barH        = 3.5 * PT_PER_MM;
+      const lblSize     = 3.0 * PT_PER_MM;
+      const tickH       = 2.5 * PT_PER_MM;   // tick drops down from label baseline to bar top
+      const margin      = 14  * PT_PER_MM;
+      // Layout (bottom→top in visual space): bar bottom → bar → bar top → tick → label baseline
+      const groupH      = barH + tickH + lblSize;
+
+      // ── Anchor in visual space ─────────────────────────────────────
+      // vAY = bottom of the entire group (= bottom of bar)
+      let vAX, vAY;
+      if      (pos === 'bl') { vAX = margin;               vAY = margin; }
+      else if (pos === 'bc') { vAX = (visW-barLenPt)/2;   vAY = margin; }
+      else if (pos === 'br') { vAX = visW-barLenPt-margin; vAY = margin; }
+      else if (pos === 'tl') { vAX = margin;               vAY = visH-margin-groupH; }
+      else    /* tr */       { vAX = visW-barLenPt-margin; vAY = visH-margin-groupH; }
+
+      vAX += (offsetXPct / 100) * visW;
+      vAY += (offsetYPct / 100) * visH;
+
+      // Visual Y levels (bottom→top)
+      const vBarBottomY = vAY;                        // bottom of alternating rects
+      const vBarTopY    = vAY + barH;                 // top of rects = bottom of ticks
+      const vLblY       = vAY + barH + tickH;         // label baseline (above ticks)
+
+      // ── Draw alternating rectangles ────────────────────────────────
+      for (let i = 0; i < segments; i++) {
+        const vx0=vAX+i*segW, vy0=vBarBottomY, vx1=vAX+(i+1)*segW, vy1=vBarTopY;
+        const cs = [toPdf(vx0,vy0), toPdf(vx1,vy0), toPdf(vx0,vy1), toPdf(vx1,vy1)];
+        const minX=Math.min(...cs.map(c=>c.x)), minY=Math.min(...cs.map(c=>c.y));
+        page.drawRectangle({
+          x: minX, y: minY,
+          width:  Math.max(...cs.map(c=>c.x)) - minX,
+          height: Math.max(...cs.map(c=>c.y)) - minY,
+          color: (i%2===0) ? PDFLib.rgb(0,0,0) : PDFLib.rgb(1,1,1),
+          borderColor: PDFLib.rgb(0,0,0), borderWidth: 0.5,
+        });
+      }
+
+      // ── Ticks (descend from label baseline to bar top) and labels ──
+      const unitsPerSeg = totalUnits / segments;
+      for (let i = 0; i <= segments; i++) {
+        const vTX = vAX + i * segW;
+        // Tick: from label baseline down to bar top
+        page.drawLine({
+          start: toPdf(vTX, vLblY),
+          end:   toPdf(vTX, vBarTopY),
+          thickness: 0.6, color: PDFLib.rgb(0,0,0),
+        });
+        // Centered numeric label above tick
+        const str = formatLabel(unitsPerSeg * i);
+        const lw  = font.widthOfTextAtSize(str, lblSize);
+        const lp  = toPdf(vTX - lw/2, vLblY + 1);
+        page.drawText(str, { x:lp.x, y:lp.y, size:lblSize, font,
+          color:PDFLib.rgb(0,0,0), rotate:textRot });
+      }
+      // Unit suffix — same baseline, just after last tick, with small gap
+      const unitLw = font.widthOfTextAtSize(ids.unit, lblSize);
+      const up = toPdf(vAX + barLenPt + 2.5 * PT_PER_MM, vLblY + 1);
+      page.drawText(ids.unit, { x:up.x, y:up.y, size:lblSize, font,
+        color:PDFLib.rgb(0,0,0), rotate:textRot });
+    });
+
+    const outBytes = await pdfDoc.save({ useObjectStreams: true });
+
+    // Status
+    const p0 = pdfDoc.getPages()[0];
+    const { width:w0, height:h0 } = p0.getSize();
+    let rot0=0;
+    try { const rn=p0.node.get(PDFLib.PDFName.of('Rotate')); if(rn) rot0=((rn.value()%360)+360)%360; } catch(_){}
+    const sw0=rot0===90||rot0===270;
+    const vis0W=sw0?h0:w0, vis0H=sw0?w0:h0;
+    const pgMm0 = pageSizeSel==='auto'
+      ? detectISOSize(vis0W,vis0H).widthMm
+      : (()=>{ const s=ISO_SIZES_MM[pageSizeSel]; return (vis0W>vis0H)?Math.max(s.w,s.h):Math.min(s.w,s.h); })();
+    const tot0 = niceValue((pgMm0*0.20*scaleValue)/unitMmLength, niceCandidates);
+    const rotMsg = rot0 ? ` · ${rot0}° compensated` : '';
+    status(ids.status, `Done — 1:${scaleValue}, ${tot0}${ids.unit} bar, ${allPages.length} page(s)${rotMsg}.`, 'ok');
+    document.getElementById(ids.dl).disabled    = false;
+    document.getElementById(ids.apply).disabled = false;
+    return outBytes;
+  } catch(e) {
+    status(ids.status, 'Error: ' + e.message, 'err');
+    return null;
+  }
+}
+
+// ── 7a. Scale bar — metres ─────────────────────────────────────────────────
+const NICE_METERS = [0.1,0.25,0.5,1,2,5,10,20,25,50,100,200,500,1000];
+let sbBytes = null;
+document.getElementById('sb-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  sbBytes = await applyScaleBar(
+    { scale:'sb-scale', pagesize:'sb-pagesize', pos:'sb-pos', pages:'sb-pages',
+      ox:'sb-ox', oy:'sb-oy', status:'sb-status', dl:'sb-dl', apply:'sb-apply', unit:'m' },
+    1000, NICE_METERS
+  );
+});
+document.getElementById('sb-dl').addEventListener('click',
+  () => { if (sbBytes) download(sbBytes, nameSuffix('_scalebar')); });
+document.getElementById('sb-apply').addEventListener('click',
+  () => { if (sbBytes) applyAsActive(sbBytes, 'Scale bar (m)', 'sb-status', 'sb-apply'); });
+
+// ── 7b. Scale bar — feet ───────────────────────────────────────────────────
+// All values in feet. Covers 3/4"=1'0" (scale≈16) through 1"=40'0" (scale≈480).
+// Each "nice" total = 5 segments × nice_ft, so per-segment labels are clean integers.
+// Candidates chosen to match the reference: 5, 15, 30, 60, 150 FT totals.
+const NICE_FEET = [5, 10, 15, 20, 25, 30, 40, 50, 60, 75, 100, 150, 200, 300, 500, 1000];
+let sbfBytes = null;
+document.getElementById('sbf-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  sbfBytes = await applyScaleBar(
+    { scale:'sbf-scale', pagesize:'sbf-pagesize', pos:'sbf-pos', pages:'sbf-pages',
+      ox:'sbf-ox', oy:'sbf-oy', status:'sbf-status', dl:'sbf-dl', apply:'sbf-apply', unit:'ft' },
+    MM_PER_FOOT, NICE_FEET
+  );
+});
+document.getElementById('sbf-dl').addEventListener('click',
+  () => { if (sbfBytes) download(sbfBytes, nameSuffix('_scalebar_ft')); });
+document.getElementById('sbf-apply').addEventListener('click',
+  () => { if (sbfBytes) applyAsActive(sbfBytes, 'Scale bar (ft)', 'sbf-status', 'sbf-apply'); });
+
+// ─── 8. SPLIT PDF ─────────────────────────────────────────────────────────
+let splitPageCount = 0;
+let splitMarks = new Set(); // indices AFTER which to split (0-based)
+
+document.getElementById('sp-render-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  if (!window.pdfjsLib) { status('sp-status', 'PDF.js still loading.', 'err'); return; }
+  status('sp-status', 'Loading thumbnails…', 'run');
+  const grid = document.getElementById('split-grid');
+  grid.innerHTML = '';
+  splitMarks.clear();
+  document.getElementById('sp-btn').disabled = true;
+  try {
+    const pdfDoc = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
+    splitPageCount = pdfDoc.numPages;
+
+    for (let i = 1; i <= pdfDoc.numPages; i++) {
+      const page = await pdfDoc.getPage(i);
+      const vp = page.getViewport({ scale: 0.25 });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+
+      // Page wrap
+      const wrap = document.createElement('div');
+      wrap.className = 'split-page-wrap';
+
+      const thumb = document.createElement('div');
+      thumb.className = 'split-thumb';
+      const lbl = document.createElement('div');
+      lbl.className = 'thumb-label'; lbl.textContent = `p. ${i}`;
+      thumb.appendChild(canvas); thumb.appendChild(lbl);
+      wrap.appendChild(thumb);
+
+      // Gap after each page except the last
+      if (i < pdfDoc.numPages) {
+        const gap = document.createElement('div');
+        gap.className = 'split-gap';
+        gap.dataset.after = i - 1; // 0-based
+        const line = document.createElement('div'); line.className = 'split-line';
+        const icon = document.createElement('div'); icon.className = 'split-icon'; icon.textContent = '✂';
+        gap.appendChild(line); gap.appendChild(icon);
+        gap.addEventListener('click', () => {
+          const idx = parseInt(gap.dataset.after);
+          if (splitMarks.has(idx)) { splitMarks.delete(idx); gap.classList.remove('marked'); }
+          else                     { splitMarks.add(idx);    gap.classList.add('marked'); }
+          updateSplitStatus();
+        });
+        wrap.appendChild(gap);
+      }
+      grid.appendChild(wrap);
+    }
+    status('sp-status', `${pdfDoc.numPages} pages. Click the gap between pages to mark a split point.`, 'ok');
+    document.getElementById('sp-btn').disabled = false;
+  } catch(e) { status('sp-status', 'Error: ' + e.message, 'err'); }
+});
+
+function updateSplitStatus() {
+  const n = splitMarks.size;
+  if (n === 0) {
+    status('sp-status', 'No split points marked — the entire PDF would be one file.', 'run');
+  } else {
+    status('sp-status', `${n} split point(s) marked → will produce ${n + 1} PDF file(s).`, 'ok');
+  }
+}
+
+document.getElementById('sp-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  if (splitMarks.size === 0) { status('sp-status', 'Mark at least one split point first.', 'err'); return; }
+  status('sp-status', 'Splitting…', 'run');
+  document.getElementById('sp-btn').disabled = true;
+  try {
+    const srcDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+    // Build segment boundaries (0-based page indices)
+    const cuts = [...splitMarks].sort((a,b) => a-b);
+    const segments = [];
+    let start = 0;
+    for (const cut of cuts) {
+      segments.push({ start, end: cut }); // inclusive
+      start = cut + 1;
+    }
+    segments.push({ start, end: splitPageCount - 1 });
+
+    const zip = new JSZip();
+    const baseName = currentFileName.replace(/\.pdf$/i, '');
+    for (let s = 0; s < segments.length; s++) {
+      const { start, end } = segments[s];
+      const newDoc = await PDFLib.PDFDocument.create();
+      const indices = Array.from({ length: end - start + 1 }, (_, k) => start + k);
+      const copied = await newDoc.copyPages(srcDoc, indices);
+      copied.forEach(p => newDoc.addPage(p));
+      const bytes = await newDoc.save({ useObjectStreams: true });
+      zip.file(`${baseName}_part${s+1}_pp${start+1}-${end+1}.pdf`, bytes);
+    }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `${baseName}_split.zip`; a.click();
+    URL.revokeObjectURL(url);
+    status('sp-status', `Done — ${segments.length} PDF files downloaded as ZIP.`, 'ok');
+  } catch(e) { status('sp-status', 'Error: ' + e.message, 'err'); }
+  finally { document.getElementById('sp-btn').disabled = false; }
+});
+
+// ─── 9. MERGE PDFs ────────────────────────────────────────────────────────
+let mergeFiles = []; // array of { name, buffer, thumbCanvas }
+let mergedBytes = null;
+
+async function onMergeFilesSelected(fileList) {
+  const label = document.getElementById('mg-file-name');
+  label.textContent = `${fileList.length} file(s) selected`;
+  status('mg-status', 'Loading previews…', 'run');
+  document.getElementById('mg-btn').disabled = true;
+  document.getElementById('mg-dl').disabled = true;
+
+  mergeFiles = [];
+  const grid = document.getElementById('merge-grid');
+  grid.innerHTML = '';
+
+  for (const file of fileList) {
+    const buf = await readFile(file);
+    mergeFiles.push({ name: file.name, buffer: buf });
+
+    // Render first page as thumbnail
+    try {
+      const pdfDoc = await pdfjsLib.getDocument({ data: buf.slice(0) }).promise;
+      const page = await pdfDoc.getPage(1);
+      const vp = page.getViewport({ scale: 0.22 });
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width; canvas.height = vp.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+
+      const card = document.createElement('div');
+      card.className = 'page-thumb'; card.draggable = true;
+      card.dataset.idx = mergeFiles.length - 1;
+      const lbl = document.createElement('div');
+      lbl.className = 'thumb-label';
+      lbl.textContent = file.name.length > 16 ? file.name.slice(0,14) + '…' : file.name;
+      card.appendChild(canvas); card.appendChild(lbl);
+      grid.appendChild(card);
+    } catch(_) {}
+  }
+
+  initMergeDragDrop(grid);
+  status('mg-status', `${mergeFiles.length} PDF(s) loaded. Drag to reorder.`, 'ok');
+  document.getElementById('mg-btn').disabled = false;
+}
+
+function initMergeDragDrop(grid) {
+  let dragged = null;
+  grid.addEventListener('dragstart', e => {
+    dragged = e.target.closest('.page-thumb');
+    if (dragged) setTimeout(() => dragged.classList.add('dragging'), 0);
+  });
+  grid.addEventListener('dragend', () => {
+    grid.querySelectorAll('.page-thumb').forEach(t => t.classList.remove('dragging','drag-over'));
+    dragged = null;
+  });
+  grid.addEventListener('dragover', e => {
+    e.preventDefault();
+    const t = e.target.closest('.page-thumb');
+    grid.querySelectorAll('.page-thumb').forEach(x => x.classList.remove('drag-over'));
+    if (t && t !== dragged) t.classList.add('drag-over');
+  });
+  grid.addEventListener('drop', e => {
+    e.preventDefault();
+    const target = e.target.closest('.page-thumb');
+    if (!target || !dragged || target === dragged) return;
+    const all = [...grid.querySelectorAll('.page-thumb')];
+    const fi = all.indexOf(dragged), ti = all.indexOf(target);
+    if (fi < ti) grid.insertBefore(dragged, target.nextSibling);
+    else grid.insertBefore(dragged, target);
+    grid.querySelectorAll('.page-thumb').forEach(t => t.classList.remove('drag-over'));
+  });
+}
+
+document.getElementById('mg-btn').addEventListener('click', async () => {
+  if (!mergeFiles.length) return;
+  status('mg-status', 'Merging…', 'run');
+  document.getElementById('mg-btn').disabled = true;
+  try {
+    // Read order from DOM
+    const cards = [...document.getElementById('merge-grid').querySelectorAll('.page-thumb')];
+    const orderedIdx = cards.map(c => parseInt(c.dataset.idx));
+
+    const outDoc = await PDFLib.PDFDocument.create();
+    for (const idx of orderedIdx) {
+      const srcDoc = await PDFLib.PDFDocument.load(mergeFiles[idx].buffer.slice(0), { ignoreEncryption: true });
+      const pageIndices = srcDoc.getPageIndices();
+      const copied = await outDoc.copyPages(srcDoc, pageIndices);
+      copied.forEach(p => outDoc.addPage(p));
+    }
+    mergedBytes = await outDoc.save({ useObjectStreams: true });
+    const total = outDoc.getPageCount();
+    status('mg-status', `Merged: ${orderedIdx.length} files → ${total} pages.`, 'ok');
+    document.getElementById('mg-dl').disabled = false;
+  } catch(e) { status('mg-status', 'Error: ' + e.message, 'err'); }
+  finally { document.getElementById('mg-btn').disabled = false; }
+});
+
+document.getElementById('mg-dl').addEventListener('click', () => {
+  if (mergedBytes) download(mergedBytes, 'merged.pdf');
+});
+
+// ─── 10. IMAGE TO PDF ──────────────────────────────────────────────────────
+let imgFiles = [];
+let img2pdfBytes = null;
+
+async function onImgFilesSelected(fileList) {
+  imgFiles = [...fileList];
+  document.getElementById('i2p-file-name').textContent =
+    imgFiles.length === 1 ? imgFiles[0].name : `${imgFiles.length} files`;
+  const preview = document.getElementById('i2p-preview');
+  preview.innerHTML = '';
+  for (const f of imgFiles) {
+    const url = URL.createObjectURL(f);
+    const img = document.createElement('img');
+    img.src = url; img.style.cssText = 'height:80px;border:1px solid var(--light);border-radius:3px;';
+    img.onload = () => URL.revokeObjectURL(url);
+    preview.appendChild(img);
+  }
+  document.getElementById('i2p-btn').disabled = imgFiles.length === 0;
+  status('i2p-status', `${imgFiles.length} image(s) ready.`, 'ok');
+}
+
+document.getElementById('i2p-btn').addEventListener('click', async () => {
+  if (!imgFiles.length) return;
+  status('i2p-status', 'Creating PDF…', 'run');
+  document.getElementById('i2p-btn').disabled = true;
+  try {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    const sizeSel = document.getElementById('i2p-size').value;
+    const fitMode = document.getElementById('i2p-fit').value;
+
+    for (const file of imgFiles) {
+      const arrayBuf = await readFile(file);
+      const isJpeg = file.type === 'image/jpeg';
+
+      let embImg;
+      try {
+        embImg = isJpeg
+          ? await pdfDoc.embedJpg(arrayBuf)
+          : await pdfDoc.embedPng(arrayBuf);
+      } catch(_) {
+        // fallback: draw onto canvas and re-export as PNG
+        const url = URL.createObjectURL(file);
+        const imgEl = new Image();
+        await new Promise((res,rej) => { imgEl.onload=res; imgEl.onerror=rej; imgEl.src=url; });
+        const cv = document.createElement('canvas');
+        cv.width = imgEl.naturalWidth; cv.height = imgEl.naturalHeight;
+        cv.getContext('2d').drawImage(imgEl, 0, 0);
+        const pngBuf = await new Promise(res => {
+          cv.toBlob(blob => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.readAsArrayBuffer(blob); }, 'image/png');
+        });
+        embImg = await pdfDoc.embedPng(pngBuf);
+        URL.revokeObjectURL(url);
+      }
+
+      const imgW = embImg.width, imgH = embImg.height;
+
+      let pageW, pageH;
+      if (sizeSel === 'fit') {
+        pageW = imgW; pageH = imgH;
+      } else {
+        [pageW, pageH] = PAGE_SIZES[sizeSel];
+      }
+
+      const page = pdfDoc.addPage([pageW, pageH]);
+
+      let drawW, drawH, drawX, drawY;
+      if (fitMode === 'fill') {
+        drawW = pageW; drawH = pageH; drawX = 0; drawY = 0;
+      } else {
+        const scale = Math.min(pageW / imgW, pageH / imgH);
+        drawW = imgW * scale; drawH = imgH * scale;
+        drawX = (pageW - drawW) / 2; drawY = (pageH - drawH) / 2;
+      }
+
+      page.drawImage(embImg, { x: drawX, y: drawY, width: drawW, height: drawH });
+    }
+
+    img2pdfBytes = await pdfDoc.save({ useObjectStreams: true });
+    status('i2p-status', `PDF created — ${imgFiles.length} page(s).`, 'ok');
+    document.getElementById('i2p-dl').disabled = false;
+  } catch(e) { status('i2p-status', 'Error: ' + e.message, 'err'); }
+  finally { document.getElementById('i2p-btn').disabled = false; }
+});
+
+document.getElementById('i2p-dl').addEventListener('click', () => {
+  if (img2pdfBytes) download(img2pdfBytes, 'images.pdf');
+});
+
+// ─── 11. PATCH / REDACT ───────────────────────────────────────────────────
+// ─── 11. PATCH / REDACT ─────────────────────────────────────────────────────
+
+const SNAP_RADIUS = 22;  // px — generous snap for first vertex close
+let patchVertices  = []; // array of {vx,vy} in visual PDF pts
+let patchBytes     = null;
+let patchPageIdx   = 0;  // 0-based
+let patchScale     = 1;  // canvas px per PDF visual pt
+let patchVisW      = 0;
+let patchVisH      = 0;
+let patchRot       = 0;
+let patchRawW      = 0;
+let patchRawH      = 0;
+let polygonClosed  = false;
+
+const fs       = document.getElementById('patch-fullscreen');
+const bgCanvas = document.getElementById('patch-canvas-bg');
+const drawCanvas = document.getElementById('patch-canvas-draw');
+const bgCtx    = bgCanvas.getContext('2d');
+const drCtx    = drawCanvas.getContext('2d');
+const vtxCount = document.getElementById('patch-vtx-count');
+const tbInfo   = document.getElementById('patch-tb-info');
+const applyPolyBtn = document.getElementById('patch-apply-poly');
+
+// Populate page selector when panel opens
+function populatePatchPageSel() {
+  if (!currentBuffer) return;
+  PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption:true })
+    .then(doc => {
+      const sel = document.getElementById('patch-page-sel');
+      sel.innerHTML = '';
+      doc.getPages().forEach((_, i) => {
+        const opt = document.createElement('option');
+        opt.value = i; opt.textContent = `Page ${i+1}`;
+        sel.appendChild(opt);
+      });
+    }).catch(()=>{});
+}
+
+document.getElementById('patch-open-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  if (!window.pdfjsLib) { status('patch-status','PDF.js still loading…','err'); return; }
+
+  patchPageIdx = parseInt(document.getElementById('patch-page-sel').value) || 0;
+
+  // Get rotation from pdf-lib
+  const doc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption:true });
+  const page = doc.getPages()[patchPageIdx];
+  const { width: rW, height: rH } = page.getSize();
+  patchRawW = rW; patchRawH = rH;
+  patchRot = 0;
+  try {
+    const rn = page.node.get(PDFLib.PDFName.of('Rotate'));
+    if (rn) patchRot = ((rn.value()%360)+360)%360;
+  } catch(_){}
+  const sw = patchRot===90||patchRot===270;
+  patchVisW = sw ? rH : rW;
+  patchVisH = sw ? rW : rH;
+
+  // Render page with PDF.js
+  const pdfJs  = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
+  const pjPage = await pdfJs.getPage(patchPageIdx + 1);
+
+  // Fit to 90% of viewport
+  const maxW = window.innerWidth  * 0.90;
+  const maxH = (window.innerHeight - 100) * 0.90;
+  const vp0  = pjPage.getViewport({ scale: 1 });
+  patchScale  = Math.min(maxW / vp0.width, maxH / vp0.height);
+  const vp   = pjPage.getViewport({ scale: patchScale });
+
+  bgCanvas.width  = drawCanvas.width  = vp.width;
+  bgCanvas.height = drawCanvas.height = vp.height;
+
+  await pjPage.render({ canvasContext: bgCtx, viewport: vp }).promise;
+
+  // Reset state
+  patchVertices = []; polygonClosed = false;
+  applyPolyBtn.disabled = true;
+  redrawPolygon();
+
+  fs.classList.add('open');
+});
+
+// ── Canvas interaction ─────────────────────────────────────────────────────
+function canvasPoint(e) {
+  const rect = drawCanvas.getBoundingClientRect();
+  const scaleX = drawCanvas.width  / rect.width;
+  const scaleY = drawCanvas.height / rect.height;
+  let cx, cy;
+  if (e.touches) {
+    cx = (e.touches[0].clientX - rect.left) * scaleX;
+    cy = (e.touches[0].clientY - rect.top)  * scaleY;
+  } else {
+    cx = (e.clientX - rect.left) * scaleX;
+    cy = (e.clientY - rect.top)  * scaleY;
+  }
+  // Convert canvas px → visual PDF pts
+  const vx = cx / patchScale;
+  const vy = patchVisH - (cy / patchScale); // PDF y is bottom-up
+  return { cx, cy, vx, vy };
+}
+
+function dist(ax,ay,bx,by){ return Math.sqrt((ax-bx)**2+(ay-by)**2); }
+
+drawCanvas.addEventListener('click', e => {
+  if (polygonClosed) return;
+  const { cx, cy, vx, vy } = canvasPoint(e);
+
+  // Snap-to-close: if near first vertex AND we have ≥3 points
+  if (patchVertices.length >= 3) {
+    const first = patchVertices[0];
+    const fcx = first.vx * patchScale;
+    const fcy = (patchVisH - first.vy) * patchScale;
+    if (dist(cx,cy,fcx,fcy) < SNAP_RADIUS) {
+      polygonClosed = true;
+      applyPolyBtn.disabled = false;
+      tbInfo.textContent = 'Polygon closed. Click "Apply patch" to embed it, or undo/clear to redo.';
+      redrawPolygon();
+      return;
+    }
+  }
+
+  patchVertices.push({ vx, vy });
+  vtxCount.textContent = patchVertices.length;
+  tbInfo.textContent = patchVertices.length < 3
+    ? `${patchVertices.length} vertex placed — need at least 3 to close.`
+    : `${patchVertices.length} vertices — click the blue dot or near first point to close.`;
+  redrawPolygon();
+});
+
+// Show live line from last vertex to cursor
+drawCanvas.addEventListener('mousemove', e => {
+  if (polygonClosed || patchVertices.length === 0) return;
+  redrawPolygon();
+  const { cx, cy } = canvasPoint(e);
+  drCtx.save();
+  drCtx.setLineDash([4,4]);
+  drCtx.strokeStyle = 'rgba(255,60,0,0.7)';
+  drCtx.lineWidth = 1.5;
+  drCtx.beginPath();
+  const last = patchVertices[patchVertices.length-1];
+  drCtx.moveTo(last.vx * patchScale, (patchVisH - last.vy) * patchScale);
+  drCtx.lineTo(cx, cy);
+  drCtx.stroke();
+  drCtx.restore();
+});
+
+function redrawPolygon() {
+  drCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+  if (patchVertices.length === 0) return;
+
+  // Fill preview if closed
+  if (polygonClosed) {
+    drCtx.save();
+    drCtx.fillStyle = 'rgba(255,255,255,0.75)';
+    drCtx.strokeStyle = '#e03';
+    drCtx.lineWidth = 1.5;
+    drCtx.beginPath();
+    patchVertices.forEach((v,i) => {
+      const cx = v.vx * patchScale;
+      const cy = (patchVisH - v.vy) * patchScale;
+      i===0 ? drCtx.moveTo(cx,cy) : drCtx.lineTo(cx,cy);
+    });
+    drCtx.closePath();
+    drCtx.fill();
+    drCtx.stroke();
+    drCtx.restore();
+  } else {
+    // Open polygon lines
+    drCtx.save();
+    drCtx.strokeStyle = 'rgba(255,60,0,0.85)';
+    drCtx.lineWidth = 1.5;
+    drCtx.setLineDash([]);
+    drCtx.beginPath();
+    patchVertices.forEach((v,i) => {
+      const cx = v.vx * patchScale;
+      const cy = (patchVisH - v.vy) * patchScale;
+      i===0 ? drCtx.moveTo(cx,cy) : drCtx.lineTo(cx,cy);
+    });
+    drCtx.stroke();
+    drCtx.restore();
+  }
+
+  // Draw vertex dots
+  patchVertices.forEach((v,i) => {
+    const cx = v.vx * patchScale;
+    const cy = (patchVisH - v.vy) * patchScale;
+    drCtx.save();
+    drCtx.beginPath();
+    const r = i===0 ? 8 : 5;
+    drCtx.arc(cx, cy, r, 0, Math.PI*2);
+    drCtx.fillStyle = i===0 ? '#0af' : '#e03';
+    drCtx.fill();
+    drCtx.strokeStyle = '#fff';
+    drCtx.lineWidth = 1.5;
+    drCtx.stroke();
+    drCtx.restore();
+  });
+}
+
+document.getElementById('patch-undo-btn').addEventListener('click', () => {
+  if (polygonClosed) { polygonClosed=false; applyPolyBtn.disabled=true; }
+  else patchVertices.pop();
+  vtxCount.textContent = patchVertices.length;
+  tbInfo.textContent = 'Last vertex removed.';
+  redrawPolygon();
+});
+
+document.getElementById('patch-clear-btn').addEventListener('click', () => {
+  patchVertices=[]; polygonClosed=false; applyPolyBtn.disabled=true;
+  vtxCount.textContent=0;
+  tbInfo.textContent='Canvas cleared. Click to start a new polygon.';
+  redrawPolygon();
+});
+
+document.getElementById('patch-close-btn').addEventListener('click', () => {
+  fs.classList.remove('open');
+});
+
+// ── Apply patch ────────────────────────────────────────────────────────────
+applyPolyBtn.addEventListener('click', async () => {
+  if (!polygonClosed || patchVertices.length < 3) return;
+  const mode = document.querySelector('input[name="patch-mode"]:checked').value;
+  applyPolyBtn.disabled = true;
+  fs.classList.remove('open');
+  status('patch-status', mode==='flatten' ? 'Flattening page…' : 'Applying white patch…', 'run');
+
+  try {
+    const doc  = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption:true });
+    const page = doc.getPages()[patchPageIdx];
+
+    // toPdf: visual coords → raw PDF coords (same formula as scale bar)
+    function toPdf(vx, vy) {
+      switch (patchRot) {
+        case 0:   return { x: vx,              y: vy              };
+        case 90:  return { x: patchRawW - vy,  y: vx              };
+        case 180: return { x: patchRawW - vx,  y: patchRawH - vy  };
+        default:  return { x: vy,              y: patchRawH - vx  };
+      }
+    }
+
+    if (mode === 'layer') {
+      // Draw white polygon directly on page content stream using SVG path
+      const pts = patchVertices.map(v => toPdf(v.vx, v.vy));
+      // Build SVG path string: M x0 y0 L x1 y1 ... Z
+      const pathStr = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ') + ' Z';
+      page.drawSvgPath(pathStr, {
+        color: PDFLib.rgb(1, 1, 1),
+        borderColor: PDFLib.rgb(1, 1, 1),
+        borderWidth: 0.5,
+      });
+      patchBytes = await doc.save({ useObjectStreams: true });
+
+    } else {
+      // Flatten: rasterize page to canvas, reconstruct as image page
+      const dpi = parseInt(document.getElementById('patch-dpi').value) || 200;
+      const scale = dpi / 72;
+
+      // Draw white polygon on a temporary canvas OVER the page render
+      const pdfJs  = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
+      const pjPage = await pdfJs.getPage(patchPageIdx + 1);
+      const vp     = pjPage.getViewport({ scale });
+      const flatCanvas = document.createElement('canvas');
+      flatCanvas.width = vp.width; flatCanvas.height = vp.height;
+      const fCtx = flatCanvas.getContext('2d');
+
+      await pjPage.render({ canvasContext: fCtx, viewport: vp }).promise;
+
+      // Draw the white polygon on the rasterized canvas
+      fCtx.save();
+      fCtx.fillStyle = '#ffffff';
+      fCtx.beginPath();
+      patchVertices.forEach((v,i) => {
+        // canvas coord: x = vx*scale, y = (visH - vy)*scale
+        const cx = v.vx * scale;
+        const cy = (patchVisH - v.vy) * scale;
+        i===0 ? fCtx.moveTo(cx,cy) : fCtx.lineTo(cx,cy);
+      });
+      fCtx.closePath();
+      fCtx.fill();
+      fCtx.restore();
+
+      // Export canvas to PNG, embed in new PDF page
+      const pngBlob  = await new Promise(res => flatCanvas.toBlob(res, 'image/png'));
+      const pngBuf   = await pngBlob.arrayBuffer();
+      const embImg   = await doc.embedPng(pngBuf);
+
+      // Replace page: set its MediaBox to match the image, clear content, draw image
+      const { width: rawW, height: rawH } = page.getSize();
+      const sw = patchRot===90||patchRot===270;
+      const newW = sw ? rawH : rawW;
+      const newH = sw ? rawW : rawH;
+      page.setSize(newW, newH);
+      // Remove rotation since page is now an image in the correct orientation
+      try { page.node.delete(PDFLib.PDFName.of('Rotate')); } catch(_){}
+      page.drawImage(embImg, { x:0, y:0, width:newW, height:newH });
+
+      patchBytes = await doc.save({ useObjectStreams: true });
+    }
+
+    const modeLabel = mode==='flatten' ? 'Flattened (permanent)' : 'White layer applied';
+    status('patch-status', `${modeLabel} — page ${patchPageIdx+1} patched.`, 'ok');
+    document.getElementById('patch-dl').disabled    = false;
+    document.getElementById('patch-apply').disabled = false;
+  } catch(e) {
+    status('patch-status', 'Error: ' + e.message, 'err');
+  } finally {
+    applyPolyBtn.disabled = false;
+  }
+});
+
+document.getElementById('patch-dl').addEventListener('click',
+  () => { if (patchBytes) download(patchBytes, nameSuffix('_patched')); });
+document.getElementById('patch-apply').addEventListener('click',
+  () => { if (patchBytes) applyAsActive(patchBytes, 'Patch', 'patch-status', 'patch-apply'); });
+
+
+
+// ─── 12. TITLE BLOCK (VIÑETA) ────────────────────────────────────────────
+{
+  // Block width per ISO format (mm). Height is dynamic (auto from content).
+  const VN_WIDTHS = { A4:36, A3:50, A2:59, A1:68, A0:77 };
+  const VN_MARGIN_MM = 8;   // slightly larger margin from corner
+  let vnBytes = null;
+
+  // Dark gray (not black) for all ink
+  const INK  = PDFLib.rgb(0.22, 0.22, 0.22);   // text & lines
+  const INK2 = PDFLib.rgb(0.30, 0.30, 0.30);   // lighter for dividers
+
+  document.getElementById('vn-btn').addEventListener('click', async () => {
+    if (!currentBuffer) return;
+    status('vn-status', 'Generating title block\u2026', 'run');
+    document.getElementById('vn-btn').disabled = true;
+    try {
+      const doc   = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption:true });
+      const fontR = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
+      const fontB = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+      const applyTo     = document.getElementById('vn-pages').value;
+      const pageSizeSel = document.getElementById('vn-pagesize').value;
+      const pages       = applyTo === 'all' ? doc.getPages() : [doc.getPages()[0]];
+
+      function uc(s){ return s ? s.trim().toUpperCase() : ''; }
+
+      const F = {
+        project:  uc(document.getElementById('vn-project').value),
+        address:  uc(document.getElementById('vn-address').value),
+        contents: document.getElementById('vn-content').value
+                    .split('\n').map(l => uc(l)).filter(Boolean),
+        type:     uc(document.getElementById('vn-type').value),
+        number:   uc(document.getElementById('vn-number').value),
+        scale:    uc(document.getElementById('vn-scale').value),
+        date:     uc(document.getElementById('vn-date').value),
+        client:   uc(document.getElementById('vn-client').value),
+        designer: uc(document.getElementById('vn-designer').value),
+      };
+      const planId = [F.type, F.number].filter(Boolean).join('-');
+
+      pages.forEach(page => {
+        const { width: rawW, height: rawH } = page.getSize();
+        let rot = 0;
+        try {
+          const rn = page.node.get(PDFLib.PDFName.of('Rotate'));
+          if (rn) rot = ((rn.value() % 360) + 360) % 360;
+        } catch(_){}
+        const sw   = rot === 90 || rot === 270;
+        const visW = sw ? rawH : rawW;
+        const visH = sw ? rawW : rawH;
+
+        function toPdf(vx, vy) {
+          switch (rot) {
+            case 0:   return { x: vx,         y: vy         };
+            case 90:  return { x: rawW - vy,  y: vx         };
+            case 180: return { x: rawW - vx,  y: rawH - vy  };
+            default:  return { x: vy,         y: rawH - vx  };
+          }
+        }
+        const textRot = PDFLib.degrees(rot);
+
+        function dRect(vx, vy, vw, vh, bw, fill) {
+          const cs = [toPdf(vx,vy), toPdf(vx+vw,vy), toPdf(vx,vy+vh), toPdf(vx+vw,vy+vh)];
+          const minX = Math.min(...cs.map(c=>c.x)), minY = Math.min(...cs.map(c=>c.y));
+          page.drawRectangle({
+            x:minX, y:minY,
+            width:  Math.max(...cs.map(c=>c.x))-minX,
+            height: Math.max(...cs.map(c=>c.y))-minY,
+            color:       fill !== undefined ? fill : PDFLib.rgb(1,1,1),
+            borderColor: INK2, borderWidth: bw || 0.35,
+          });
+        }
+
+        function dLine(vx0,vy0,vx1,vy1, w) {
+          page.drawLine({ start:toPdf(vx0,vy0), end:toPdf(vx1,vy1),
+            thickness: w||0.35, color: INK2 });
+        }
+
+        function dText(str, vx, vy, size, bold, maxW) {
+          if (!str) return;
+          const f = bold ? fontB : fontR;
+          const p = toPdf(vx, vy);
+          const opts = { x:p.x, y:p.y, size:size, font:f, color:INK, rotate:textRot };
+          if (maxW) opts.maxWidth = maxW;
+          page.drawText(str, opts);
+        }
+
+        // Detect ISO format
+        let isoKey = pageSizeSel !== 'auto' ? pageSizeSel : detectISOSize(visW, visH).key;
+        if (!VN_WIDTHS[isoKey]) isoKey = 'A4';
+
+        const BW  = VN_WIDTHS[isoKey] * PT_PER_MM;
+        const mg  = VN_MARGIN_MM * PT_PER_MM;
+        const pad = 1.8 * PT_PER_MM;
+        const iW  = BW - pad * 2;  // inner width
+
+        // ── Font sizes ───────────────────────────────────────────────
+        const szSect  = Math.max(2.0, BW * 0.033);   // section labels — very small
+        const szVal   = Math.max(3.0, BW * 0.048);   // regular values
+        const szBold  = Math.max(3.0, BW * 0.050);   // bold values
+        const szSig   = Math.max(2.5, BW * 0.038);   // signature names
+
+        // ── Dynamic row heights ──────────────────────────────────────
+        const rowPad  = pad * 0.9;     // vertical padding inside each row
+        // Fixed rows (label + value stacked, each with top/bottom padding)
+        const rProj   = szSect + szBold + rowPad * 2.2;
+        const rAddr   = szSect + szVal  + rowPad * 2.2;
+        const rSD     = szSect + szBold + rowPad * 2.0;  // scale+date
+        const rSig    = szSect + szSig  + rowPad * 3.8;  // extra space for sig line
+
+        // Plan ID row — scales with BW
+        let szId = Math.max(6, BW * 0.15);
+        while (szId > 5 && fontB.widthOfTextAtSize(planId || 'A-00', szId) > iW) szId -= 0.5;
+        const rPlan = planId ? (szId + rowPad * 2.5) : 0;
+
+        // Content row — grows with number of lines
+        const szCont  = Math.max(2.8, BW * 0.046);
+        const lineGap = szCont * 0.42;
+        const lineH   = szCont + lineGap;
+        const nLines  = Math.max(1, F.contents.length);
+        const rCont   = szSect + rowPad * 1.8 + nLines * lineH + rowPad * 0.8;
+
+        const BH = rProj + rAddr + rCont + rPlan + rSD + rSig;
+
+        // ── Anchor: bottom-right corner ──────────────────────────────
+        const bx = visW - mg - BW;
+        const by = mg;
+
+        // Y bottoms (bottom-up)
+        const ySig  = by;
+        const ySD   = ySig  + rSig;
+        const yPlan = ySD   + rSD;
+        const yCont = yPlan + rPlan;
+        const yAddr = yCont + rCont;
+        const yProj = yAddr + rAddr;
+
+        // ── Double border ────────────────────────────────────────────
+        const gap = 1.2 * PT_PER_MM;
+        dRect(bx,     by,     BW,        BH,        0.6);   // outer
+        dRect(bx+gap, by+gap, BW-gap*2, BH-gap*2,  0.35);  // inner
+
+        // Inner border edges — divider lines reach only these bounds
+        const iX0 = bx + gap;          // inner left
+        const iX1 = bx + BW - gap;     // inner right
+        const iW2 = iX1 - iX0;         // inner width (same as iW + 2*pad - 2*gap, approx iW)
+
+        // ── Text helpers ─────────────────────────────────────────────
+        // Centered text within a cell [cellX .. cellX+cellW]
+        function dTextC(str, cellX, cellW, vy, size, bold) {
+          if (!str) return;
+          const f = bold ? fontB : fontR;
+          const tw = f.widthOfTextAtSize(str, size);
+          const vx = cellX + (cellW - tw) / 2;
+          dText(str, vx, vy, size, bold, cellW);
+        }
+
+        // Section label — always left-aligned, near top of row
+        function dLabel(label, ry, rh) {
+          dText(label, iX0 + pad*0.6, ry + rh - szSect - gap - pad*0.3, szSect, false, iW2);
+        }
+
+        // Horizontal divider between sections (inner width only)
+        function dDiv(vy) { dLine(iX0, vy, iX1, vy, 0.3); }
+
+        // ── PROYECTO ────────────────────────────────────────────────
+        dLabel('PROJECT', yProj, rProj);
+        // Value centered, with gap below top border for topmost row
+        const projValY = yProj + pad*0.8;
+        dTextC(F.project, iX0, iW2, projValY, szBold, true);
+
+        // ── DIRECCIÓN ───────────────────────────────────────────────
+        dDiv(yProj);
+        dLabel('ADDRESS', yAddr, rAddr);
+        dTextC(F.address, iX0, iW2, yAddr + pad*0.8, szVal, false);
+
+        // ── CONTENIDO ───────────────────────────────────────────────
+        dDiv(yAddr);
+        dLabel('DRAWING CONTENT', yCont, rCont);
+        if (F.contents.length > 0) {
+          const startY = yCont + rCont - szSect - gap - pad*1.0 - szCont;
+          F.contents.forEach((ln, i) => {
+            dTextC(ln, iX0, iW2, startY - i*lineH, szCont, false);
+          });
+        }
+
+        // ── PLAN ID ─────────────────────────────────────────────────
+        if (planId) {
+          dDiv(yCont);
+          // Vertically centered using cap height (~72% of font size)
+          const idY = yPlan + (rPlan - szId * 0.72) / 2;
+          dTextC(planId, iX0, iW2, idY, szId, true);
+        }
+
+        // ── ESCALA | FECHA ──────────────────────────────────────────
+        dDiv(yPlan);
+        const colSD = BW * 0.50;
+        const colSDx = bx + colSD; // vertical divider x
+        dLine(colSDx, ySD, colSDx, ySD+rSD, 0.3);  // vertical divider
+        // Left cell: scale
+        dText('SCALE', iX0+pad*0.6,   ySD + rSD - szSect - gap - pad*0.3, szSect, false, colSD-gap-pad);
+        dTextC(F.scale, iX0, colSDx-iX0, ySD + pad*0.8, szBold, true);
+        // Right cell: date
+        dText('DATE',  colSDx+pad*0.6, ySD + rSD - szSect - gap - pad*0.3, szSect, false, colSD-pad);
+        dTextC(F.date, colSDx, iX1-colSDx, ySD + pad*0.8, szVal, false);
+
+        // ── FIRMAS ──────────────────────────────────────────────────
+        dDiv(ySD);
+        const colSig = BW * 0.50;
+        const colSigX = bx + colSig;
+        dLine(colSigX, ySig, colSigX, ySig+rSig, 0.3);
+
+        // Names sit just above bottom inner border
+        const nameY  = ySig + gap + pad*0.6;
+        // Sig line sits just above names with a clear gap
+        const sigY   = nameY + szSig + pad*1.4;
+        dLine(iX0+pad,       sigY, colSigX-pad,  sigY, 0.3);
+        dLine(colSigX+pad,   sigY, iX1-pad,      sigY, 0.3);
+
+        // Labels near top of sig row
+        dText('CLIENT',   iX0+pad*0.6,   ySig + rSig - szSect - gap - pad*0.3, szSect, false, colSig-gap-pad);
+        dText('DESIGNER', colSigX+pad*0.6,ySig + rSig - szSect - gap - pad*0.3, szSect, false, colSig-pad);
+        // Names centered in each column
+        dTextC(F.client,   iX0,    colSigX-iX0,    nameY, szSig, false);
+        dTextC(F.designer, colSigX, iX1-colSigX,   nameY, szSig, false);
+      });
+
+      vnBytes = await doc.save({ useObjectStreams: true });
+      status('vn-status', 'Title block added to ' + pages.length + ' page(s).', 'ok');
+      document.getElementById('vn-dl').disabled    = false;
+      document.getElementById('vn-apply').disabled = false;
+    } catch(e) {
+      status('vn-status', 'Error: ' + e.message, 'err');
+    } finally {
+      document.getElementById('vn-btn').disabled = false;
+    }
+  });
+
+  document.getElementById('vn-dl').addEventListener('click',
+    function() { if (vnBytes) download(vnBytes, nameSuffix('_vineta')); });
+  document.getElementById('vn-apply').addEventListener('click',
+    function() { if (vnBytes) applyAsActive(vnBytes, 'Title block', 'vn-status', 'vn-apply'); });
+}
+
+</script>
+</body>
+</html>
