@@ -939,11 +939,11 @@
             <input type="text" id="vn-project" placeholder="e.g. Mountain View Residence">
           </div>
           <div>
-            <label>Address:</label>
+            <label>Site:</label>
             <input type="text" id="vn-address" placeholder="e.g. 742 Evergreen Terrace, Springfield">
           </div>
           <div style="grid-column:1/-1;">
-            <label>Drawing content <span style="color:var(--mid);font-weight:normal;">(one item per line — all text auto-uppercased)</span>:</label>
+            <label>Drawing content <span style="color:var(--mid);font-weight:normal;">(one item per line — auto-uppercased)</span>:</label>
             <textarea id="vn-content" rows="3" placeholder="e.g. Ground Floor Plan&#10;Stair Detail&#10;Section A-A"
               style="width:100%;font-family:inherit;font-size:0.85rem;padding:6px 8px;border:1px solid #ccc;border-radius:var(--radius);resize:vertical;"></textarea>
           </div>
@@ -963,14 +963,22 @@
             <label>Date:</label>
             <input type="text" id="vn-date" placeholder="e.g. March 2026">
           </div>
-          <div><!-- spacer --></div>
           <div>
-            <label>Client name (mandante):</label>
+            <label>Client name:</label>
             <input type="text" id="vn-client" placeholder="e.g. John Smith">
           </div>
           <div>
-            <label>Designer name (proyectista):</label>
+            <label>Designer name:</label>
             <input type="text" id="vn-designer" placeholder="e.g. Jane Doe, Architect">
+          </div>
+          <div>
+            <label>North arrow rotation (°) <span style="color:var(--mid);font-weight:normal;">0° = up, clockwise</span>:</label>
+            <input type="number" id="vn-north" placeholder="0" min="0" max="360" step="1"
+              style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
+          </div>
+          <div>
+            <label>Project No.:</label>
+            <input type="text" id="vn-projno" placeholder="e.g. 2024-047">
           </div>
         </div>
 
@@ -2489,14 +2497,11 @@ document.getElementById('patch-apply').addEventListener('click',
 
 // ─── 12. TITLE BLOCK (VIÑETA) ────────────────────────────────────────────
 {
-  // Block width per ISO format (mm). Height is dynamic (auto from content).
   const VN_WIDTHS = { A4:36, A3:50, A2:59, A1:68, A0:77 };
-  const VN_MARGIN_MM = 8;   // slightly larger margin from corner
+  const VN_MARGIN_MM = 8;
   let vnBytes = null;
-
-  // Dark gray (not black) for all ink
-  const INK  = PDFLib.rgb(0.22, 0.22, 0.22);   // text & lines
-  const INK2 = PDFLib.rgb(0.30, 0.30, 0.30);   // lighter for dividers
+  const INK  = PDFLib.rgb(0.22, 0.22, 0.22);
+  const INK2 = PDFLib.rgb(0.30, 0.30, 0.30);
 
   document.getElementById('vn-btn').addEventListener('click', async () => {
     if (!currentBuffer) return;
@@ -2506,211 +2511,292 @@ document.getElementById('patch-apply').addEventListener('click',
       const doc   = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption:true });
       const fontR = await doc.embedFont(PDFLib.StandardFonts.Helvetica);
       const fontB = await doc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-
       const applyTo     = document.getElementById('vn-pages').value;
       const pageSizeSel = document.getElementById('vn-pagesize').value;
       const pages       = applyTo === 'all' ? doc.getPages() : [doc.getPages()[0]];
-
       function uc(s){ return s ? s.trim().toUpperCase() : ''; }
-
       const F = {
         project:  uc(document.getElementById('vn-project').value),
-        address:  uc(document.getElementById('vn-address').value),
-        contents: document.getElementById('vn-content').value
-                    .split('\n').map(l => uc(l)).filter(Boolean),
+        site:     uc(document.getElementById('vn-address').value),
+        contents: document.getElementById('vn-content').value.split('\n').map(l=>uc(l)).filter(Boolean),
         type:     uc(document.getElementById('vn-type').value),
         number:   uc(document.getElementById('vn-number').value),
         scale:    uc(document.getElementById('vn-scale').value),
         date:     uc(document.getElementById('vn-date').value),
         client:   uc(document.getElementById('vn-client').value),
         designer: uc(document.getElementById('vn-designer').value),
+        northDeg: parseFloat(document.getElementById('vn-north').value) || 0,
+        projno:   uc(document.getElementById('vn-projno').value),
       };
       const planId = [F.type, F.number].filter(Boolean).join('-');
 
       pages.forEach(page => {
         const { width: rawW, height: rawH } = page.getSize();
         let rot = 0;
-        try {
-          const rn = page.node.get(PDFLib.PDFName.of('Rotate'));
-          if (rn) rot = ((rn.value() % 360) + 360) % 360;
-        } catch(_){}
-        const sw   = rot === 90 || rot === 270;
+        try { const rn = page.node.get(PDFLib.PDFName.of('Rotate')); if (rn) rot = ((rn.value()%360)+360)%360; } catch(_){}
+        const sw = rot===90||rot===270;
         const visW = sw ? rawH : rawW;
         const visH = sw ? rawW : rawH;
 
-        function toPdf(vx, vy) {
-          switch (rot) {
-            case 0:   return { x: vx,         y: vy         };
-            case 90:  return { x: rawW - vy,  y: vx         };
-            case 180: return { x: rawW - vx,  y: rawH - vy  };
-            default:  return { x: vy,         y: rawH - vx  };
+        function toPdf(vx,vy) {
+          switch(rot){
+            case 0:   return {x:vx,        y:vy};
+            case 90:  return {x:rawW-vy,   y:vx};
+            case 180: return {x:rawW-vx,   y:rawH-vy};
+            default:  return {x:vy,        y:rawH-vx};
           }
         }
         const textRot = PDFLib.degrees(rot);
 
-        function dRect(vx, vy, vw, vh, bw, fill) {
-          const cs = [toPdf(vx,vy), toPdf(vx+vw,vy), toPdf(vx,vy+vh), toPdf(vx+vw,vy+vh)];
-          const minX = Math.min(...cs.map(c=>c.x)), minY = Math.min(...cs.map(c=>c.y));
-          page.drawRectangle({
-            x:minX, y:minY,
-            width:  Math.max(...cs.map(c=>c.x))-minX,
-            height: Math.max(...cs.map(c=>c.y))-minY,
-            color:       fill !== undefined ? fill : PDFLib.rgb(1,1,1),
-            borderColor: INK2, borderWidth: bw || 0.35,
+        function dRect(vx,vy,vw,vh,bw,fill) {
+          const cs=[toPdf(vx,vy),toPdf(vx+vw,vy),toPdf(vx,vy+vh),toPdf(vx+vw,vy+vh)];
+          const minX=Math.min(...cs.map(c=>c.x)),minY=Math.min(...cs.map(c=>c.y));
+          page.drawRectangle({x:minX,y:minY,width:Math.max(...cs.map(c=>c.x))-minX,height:Math.max(...cs.map(c=>c.y))-minY,
+            color:fill!==undefined?fill:PDFLib.rgb(1,1,1),borderColor:INK2,borderWidth:bw||0.35});
+        }
+        function dLine(vx0,vy0,vx1,vy1,w) {
+          page.drawLine({start:toPdf(vx0,vy0),end:toPdf(vx1,vy1),thickness:w||0.35,color:INK2});
+        }
+        function dText(str,vx,vy,size,bold,maxW) {
+          if(!str) return;
+          const f=bold?fontB:fontR, p=toPdf(vx,vy);
+          const o={x:p.x,y:p.y,size:size,font:f,color:INK,rotate:textRot};
+          if(maxW) o.maxWidth=maxW;
+          page.drawText(str,o);
+        }
+
+        // Word-wrap: returns array of lines fitting maxW
+        function wrapText(str,f,size,maxW) {
+          if(!str) return [];
+          const words=str.split(/\s+/).filter(Boolean);
+          if(!words.length) return [];
+          const lines=[]; let cur='';
+          for(const w of words){
+            const t=cur?cur+' '+w:w;
+            if(f.widthOfTextAtSize(t,size)<=maxW){cur=t;}
+            else{if(cur)lines.push(cur); cur=w;}
+          }
+          if(cur) lines.push(cur);
+          return lines.length?lines:[str];
+        }
+
+        // Draw wrapped centered text, bottom-anchored at baseY
+        function drawWC(str,f,sz,bold,cellX,cellW,baseY) {
+          if(!str) return;
+          const maxW=cellW-pad*1.2;
+          const lines=wrapText(str,f,sz,maxW);
+          const lh=sz*LH;
+          lines.forEach((ln,i)=>{
+            const tw=f.widthOfTextAtSize(ln,sz);
+            dText(ln, cellX+(cellW-tw)/2, baseY+(lines.length-1-i)*lh, sz, bold, maxW);
           });
         }
 
-        function dLine(vx0,vy0,vx1,vy1, w) {
-          page.drawLine({ start:toPdf(vx0,vy0), end:toPdf(vx1,vy1),
-            thickness: w||0.35, color: INK2 });
+        // Shrink font size until str fits in maxW (min 2pt)
+        function shrinkFit(str,f,sz,maxW) {
+          let s=sz;
+          while(s>2.0 && str && f.widthOfTextAtSize(str,s)>maxW) s-=0.25;
+          return s;
         }
 
-        function dText(str, vx, vy, size, bold, maxW) {
-          if (!str) return;
-          const f = bold ? fontB : fontR;
-          const p = toPdf(vx, vy);
-          const opts = { x:p.x, y:p.y, size:size, font:f, color:INK, rotate:textRot };
-          if (maxW) opts.maxWidth = maxW;
-          page.drawText(str, opts);
-        }
+        let isoKey = pageSizeSel!=='auto' ? pageSizeSel : detectISOSize(visW,visH).key;
+        if(!VN_WIDTHS[isoKey]) isoKey='A4';
 
-        // Detect ISO format
-        let isoKey = pageSizeSel !== 'auto' ? pageSizeSel : detectISOSize(visW, visH).key;
-        if (!VN_WIDTHS[isoKey]) isoKey = 'A4';
+        const BW   = VN_WIDTHS[isoKey] * PT_PER_MM;
+        const mg   = VN_MARGIN_MM * PT_PER_MM;
+        const pad  = 1.8 * PT_PER_MM;
+        const gap  = 1.2 * PT_PER_MM;
+        const LH   = 1.42;   // line-height multiplier
+        const rPad = pad * 0.9;
+        const iW2  = BW - gap*2;    // inner width between double-border lines
 
-        const BW  = VN_WIDTHS[isoKey] * PT_PER_MM;
-        const mg  = VN_MARGIN_MM * PT_PER_MM;
-        const pad = 1.8 * PT_PER_MM;
-        const iW  = BW - pad * 2;  // inner width
+        // Wrap helpers using inner widths
+        function nW(str,f,sz)     { return Math.max(1, wrapText(str,f,sz, iW2-pad*1.2).length); }
+        function nWh(str,f,sz)    { return Math.max(1, wrapText(str,f,sz, iW2*0.5-pad*1.2).length); }
 
-        // ── Font sizes ───────────────────────────────────────────────
-        const szSect  = Math.max(2.0, BW * 0.033);   // section labels — very small
-        const szVal   = Math.max(3.0, BW * 0.048);   // regular values
-        const szBold  = Math.max(3.0, BW * 0.050);   // bold values
-        const szSig   = Math.max(2.5, BW * 0.038);   // signature names
+        // Row height: label + n value-lines + padding
+        function dynH(n,sz) { return szSect + n*sz*LH + rPad*2.0; }
 
-        // ── Dynamic row heights ──────────────────────────────────────
-        const rowPad  = pad * 0.9;     // vertical padding inside each row
-        // Fixed rows (label + value stacked, each with top/bottom padding)
-        const rProj   = szSect + szBold + rowPad * 2.2;
-        const rAddr   = szSect + szVal  + rowPad * 2.2;
-        const rSD     = szSect + szBold + rowPad * 2.0;  // scale+date
-        const rSig    = szSect + szSig  + rowPad * 3.8;  // extra space for sig line
+        // Font sizes
+        const szSect = Math.max(2.0, BW*0.033);
+        const szVal  = Math.max(3.0, BW*0.048);
+        const szBold = Math.max(3.0, BW*0.050);
+        const szSig  = Math.max(2.5, BW*0.038);
+        const szCont = Math.max(2.8, BW*0.046);
 
-        // Plan ID row — scales with BW
-        let szId = Math.max(6, BW * 0.15);
-        while (szId > 5 && fontB.widthOfTextAtSize(planId || 'A-00', szId) > iW) szId -= 0.5;
-        const rPlan = planId ? (szId + rowPad * 2.5) : 0;
+        const nProj  = nW(F.project, fontB, szBold);
+        const nSite  = nW(F.site, fontR, szVal);
+        const nScale = nWh(F.scale, fontB, szBold);
+        const nDate  = nWh(F.date, fontR, szVal);
+        const nCont  = Math.max(1, F.contents.length);
 
-        // Content row — grows with number of lines
-        const szCont  = Math.max(2.8, BW * 0.046);
-        const lineGap = szCont * 0.42;
-        const lineH   = szCont + lineGap;
-        const nLines  = Math.max(1, F.contents.length);
-        const rCont   = szSect + rowPad * 1.8 + nLines * lineH + rowPad * 0.8;
+        const rProj = dynH(nProj, szBold);
+        const rSite = dynH(nSite, szVal);
+        const rCont = szSect + rPad*1.4 + nCont*szCont*LH + rPad*0.6;
+        const rSD   = dynH(Math.max(nScale, nDate), Math.max(szBold, szVal));
 
-        const BH = rProj + rAddr + rCont + rPlan + rSD + rSig;
+        // Plan ID row
+        let szId = Math.max(6, BW*0.15);
+        while(szId>5 && fontB.widthOfTextAtSize(planId||'A-00',szId)>iW2-pad*1.2) szId-=0.5;
+        const rPlan = planId ? (szId + rPad*2.5) : 0;
 
-        // ── Anchor: bottom-right corner ──────────────────────────────
+        // Sig row: label + big blank space (2 written lines) + sig line + name + padding
+        const sigBlank = szSig * LH * 2.4;
+        const rSig = szSect + gap + sigBlank + szSig*1.15 + pad*0.8 + szSig + rPad*1.0;
+
+        // North + project no. row — square-ish
+        const rNorth = BW * 0.44;
+
+        const BH = rProj + rSite + rCont + rPlan + rSD + rSig + rNorth;
+
+        // Anchor: bottom-right
         const bx = visW - mg - BW;
         const by = mg;
 
+        // Absolute inner-border X edges
+        const iX0 = bx + gap;
+        const iX1 = bx + BW - gap;
+
         // Y bottoms (bottom-up)
-        const ySig  = by;
-        const ySD   = ySig  + rSig;
-        const yPlan = ySD   + rSD;
-        const yCont = yPlan + rPlan;
-        const yAddr = yCont + rCont;
-        const yProj = yAddr + rAddr;
+        const yNorth = by;
+        const ySig   = yNorth + rNorth;
+        const ySD    = ySig   + rSig;
+        const yPlan  = ySD    + rSD;
+        const yCont  = yPlan  + rPlan;
+        const ySite  = yCont  + rCont;
+        const yProj  = ySite  + rSite;
 
-        // ── Double border ────────────────────────────────────────────
-        const gap = 1.2 * PT_PER_MM;
-        dRect(bx,     by,     BW,        BH,        0.6);   // outer
-        dRect(bx+gap, by+gap, BW-gap*2, BH-gap*2,  0.35);  // inner
+        // Double border
+        dRect(bx,    by,    BW,       BH,       0.6);
+        dRect(iX0,   by+gap,BW-gap*2, BH-gap*2, 0.35);
 
-        // Inner border edges — divider lines reach only these bounds
-        const iX0 = bx + gap;          // inner left
-        const iX1 = bx + BW - gap;     // inner right
-        const iW2 = iX1 - iX0;         // inner width (same as iW + 2*pad - 2*gap, approx iW)
+        // Helpers
+        function dDiv(vy)      { dLine(iX0, vy, iX1, vy, 0.3); }
+        function dLabel(txt,ry,rh) { dText(txt, iX0+pad*0.6, ry+rh-szSect-gap-pad*0.3, szSect, false, iW2); }
 
-        // ── Text helpers ─────────────────────────────────────────────
-        // Centered text within a cell [cellX .. cellX+cellW]
-        function dTextC(str, cellX, cellW, vy, size, bold) {
-          if (!str) return;
-          const f = bold ? fontB : fontR;
-          const tw = f.widthOfTextAtSize(str, size);
-          const vx = cellX + (cellW - tw) / 2;
-          dText(str, vx, vy, size, bold, cellW);
-        }
-
-        // Section label — always left-aligned, near top of row
-        function dLabel(label, ry, rh) {
-          dText(label, iX0 + pad*0.6, ry + rh - szSect - gap - pad*0.3, szSect, false, iW2);
-        }
-
-        // Horizontal divider between sections (inner width only)
-        function dDiv(vy) { dLine(iX0, vy, iX1, vy, 0.3); }
-
-        // ── PROYECTO ────────────────────────────────────────────────
+        // ── PROJECT ─────────────────────────────────────────────────
         dLabel('PROJECT', yProj, rProj);
-        // Value centered, with gap below top border for topmost row
-        const projValY = yProj + pad*0.8;
-        dTextC(F.project, iX0, iW2, projValY, szBold, true);
+        drawWC(F.project, fontB, szBold, true, iX0, iW2, yProj+rPad*0.8);
 
-        // ── DIRECCIÓN ───────────────────────────────────────────────
+        // ── SITE ────────────────────────────────────────────────────
         dDiv(yProj);
-        dLabel('ADDRESS', yAddr, rAddr);
-        dTextC(F.address, iX0, iW2, yAddr + pad*0.8, szVal, false);
+        dLabel('SITE', ySite, rSite);
+        drawWC(F.site, fontR, szVal, false, iX0, iW2, ySite+rPad*0.8);
 
-        // ── CONTENIDO ───────────────────────────────────────────────
-        dDiv(yAddr);
+        // ── DRAWING CONTENT ─────────────────────────────────────────
+        dDiv(ySite);
         dLabel('DRAWING CONTENT', yCont, rCont);
-        if (F.contents.length > 0) {
+        if(F.contents.length>0){
           const startY = yCont + rCont - szSect - gap - pad*1.0 - szCont;
-          F.contents.forEach((ln, i) => {
-            dTextC(ln, iX0, iW2, startY - i*lineH, szCont, false);
+          F.contents.forEach((ln,i)=>{
+            const tw=fontR.widthOfTextAtSize(ln,szCont);
+            dText(ln, iX0+(iW2-tw)/2, startY-i*szCont*LH, szCont, false, iW2);
           });
         }
 
         // ── PLAN ID ─────────────────────────────────────────────────
-        if (planId) {
+        if(planId){
           dDiv(yCont);
-          // Vertically centered using cap height (~72% of font size)
-          const idY = yPlan + (rPlan - szId * 0.72) / 2;
-          dTextC(planId, iX0, iW2, idY, szId, true);
+          const idW=fontB.widthOfTextAtSize(planId,szId);
+          dText(planId, iX0+(iW2-idW)/2, yPlan+(rPlan-szId*0.72)/2, szId, true, iW2);
         }
 
-        // ── ESCALA | FECHA ──────────────────────────────────────────
+        // ── SCALE | DATE ─────────────────────────────────────────────
         dDiv(yPlan);
-        const colSD = BW * 0.50;
-        const colSDx = bx + colSD; // vertical divider x
-        dLine(colSDx, ySD, colSDx, ySD+rSD, 0.3);  // vertical divider
-        // Left cell: scale
-        dText('SCALE', iX0+pad*0.6,   ySD + rSD - szSect - gap - pad*0.3, szSect, false, colSD-gap-pad);
-        dTextC(F.scale, iX0, colSDx-iX0, ySD + pad*0.8, szBold, true);
-        // Right cell: date
-        dText('DATE',  colSDx+pad*0.6, ySD + rSD - szSect - gap - pad*0.3, szSect, false, colSD-pad);
-        dTextC(F.date, colSDx, iX1-colSDx, ySD + pad*0.8, szVal, false);
+        const colSDx = bx + BW*0.50;
+        dLine(colSDx, ySD, colSDx, ySD+rSD, 0.3);
+        dText('SCALE', iX0+pad*0.6, ySD+rSD-szSect-gap-pad*0.3, szSect, false, BW*0.5-gap-pad);
+        drawWC(F.scale, fontB, szBold, true, iX0, colSDx-iX0, ySD+rPad*0.8);
+        dText('DATE', colSDx+pad*0.6, ySD+rSD-szSect-gap-pad*0.3, szSect, false, BW*0.5-pad);
+        drawWC(F.date, fontR, szVal, false, colSDx, iX1-colSDx, ySD+rPad*0.8);
 
-        // ── FIRMAS ──────────────────────────────────────────────────
+        // ── SIGNATURES ──────────────────────────────────────────────
         dDiv(ySD);
-        const colSig = BW * 0.50;
-        const colSigX = bx + colSig;
+        const colSigX = bx + BW*0.50;
         dLine(colSigX, ySig, colSigX, ySig+rSig, 0.3);
 
-        // Names sit just above bottom inner border
-        const nameY  = ySig + gap + pad*0.6;
-        // Sig line sits just above names with a clear gap
-        const sigY   = nameY + szSig + pad*1.4;
-        dLine(iX0+pad,       sigY, colSigX-pad,  sigY, 0.3);
-        dLine(colSigX+pad,   sigY, iX1-pad,      sigY, 0.3);
+        // Labels at top
+        dText('CLIENT',   iX0+pad*0.6,    ySig+rSig-szSect-gap-pad*0.3, szSect, false, BW*0.5-gap-pad);
+        dText('DESIGNER', colSigX+pad*0.6, ySig+rSig-szSect-gap-pad*0.3, szSect, false, BW*0.5-pad);
 
-        // Labels near top of sig row
-        dText('CLIENT',   iX0+pad*0.6,   ySig + rSig - szSect - gap - pad*0.3, szSect, false, colSig-gap-pad);
-        dText('DESIGNER', colSigX+pad*0.6,ySig + rSig - szSect - gap - pad*0.3, szSect, false, colSig-pad);
-        // Names centered in each column
-        dTextC(F.client,   iX0,    colSigX-iX0,    nameY, szSig, false);
-        dTextC(F.designer, colSigX, iX1-colSigX,   nameY, szSig, false);
+        // Names: shrink to fit, near bottom inner border
+        const nameBaseY = ySig + gap + rPad*0.5;
+        const halfW = colSigX - iX0;
+        const szCl  = shrinkFit(F.client,   fontR, szSig, halfW - pad*1.2);
+        const szDe  = shrinkFit(F.designer, fontR, szSig, iX1-colSigX - pad*1.2);
+        if(F.client){
+          const tw=fontR.widthOfTextAtSize(F.client,szCl);
+          dText(F.client, iX0+(halfW-tw)/2, nameBaseY, szCl, false, halfW);
+        }
+        if(F.designer){
+          const tw=fontR.widthOfTextAtSize(F.designer,szDe);
+          dText(F.designer, colSigX+((iX1-colSigX)-tw)/2, nameBaseY, szDe, false, iX1-colSigX);
+        }
+
+        // Sig line: just above names (clear gap)
+        const sigLineY = nameBaseY + Math.max(szCl,szDe)*1.15 + pad*0.8;
+        dLine(iX0+pad,    sigLineY, colSigX-pad, sigLineY, 0.3);
+        dLine(colSigX+pad,sigLineY, iX1-pad,     sigLineY, 0.3);
+
+        // ── NORTH ARROW | PROJECT NO. ────────────────────────────────
+        dDiv(ySig);
+        const colNX = bx + BW*0.50;
+        dLine(colNX, yNorth, colNX, yNorth+rNorth, 0.3);
+
+        dText('NORTH',      iX0+pad*0.6,    yNorth+rNorth-szSect-gap-pad*0.3, szSect, false, BW*0.5-gap-pad);
+        dText('PROJECT NO.',colNX+pad*0.6,  yNorth+rNorth-szSect-gap-pad*0.3, szSect, false, BW*0.5-pad);
+
+        // Project No. value — centered, shrink-fit
+        if(F.projno){
+          const pnW2 = iX1-colNX;
+          const szPN = shrinkFit(F.projno, fontR, szVal, pnW2-pad*1.2);
+          const tw   = fontR.widthOfTextAtSize(F.projno, szPN);
+          dText(F.projno, colNX+(pnW2-tw)/2, yNorth+rNorth*0.38, szPN, false, pnW2);
+        }
+
+        // North arrow (left cell)
+        const nCellW = colNX - iX0;
+        const nCellH = rNorth - szSect - gap - pad*0.5;
+        const cx     = iX0 + nCellW*0.5;
+        const cy     = yNorth + gap + nCellH*0.44;
+        const R      = Math.min(nCellW, nCellH) * 0.27;
+        const szN    = R * 0.88;
+
+        // Rotation math (θ from north=up, CW positive)
+        const theta  = F.northDeg * Math.PI / 180;
+        const ndx    = Math.sin(theta);   // north x-component (visual, y-up)
+        const ndy    = Math.cos(theta);   // north y-component
+        const pdx    = Math.cos(theta);   // perp x (90° CW from north)
+        const pdy    = -Math.sin(theta);  // perp y
+
+        // Circle
+        const cPdf = toPdf(cx, cy);
+        page.drawEllipse({x:cPdf.x, y:cPdf.y, xScale:R*0.88, yScale:R*0.88,
+          color:PDFLib.rgb(1,1,1), borderColor:INK2, borderWidth:0.4});
+
+        // Arrow shaft
+        const tipFrac  = 0.76;  // tip at 76% of R from center
+        const tailFrac = 0.52;  // tail at 52% back
+        dLine(cx-ndx*R*tailFrac, cy-ndy*R*tailFrac,
+              cx+ndx*R*tipFrac,  cy+ndy*R*tipFrac, 0.5);
+
+        // Filled arrowhead
+        const aHead = R*0.36, aWide = R*0.18;
+        const tipPt = {vx: cx+ndx*R*tipFrac, vy: cy+ndy*R*tipFrac};
+        const hBase = {vx: tipPt.vx-ndx*aHead, vy: tipPt.vy-ndy*aHead};
+        const hL    = {vx: hBase.vx+pdx*aWide, vy: hBase.vy+pdy*aWide};
+        const hR    = {vx: hBase.vx-pdx*aWide, vy: hBase.vy-pdy*aWide};
+        const ap    = [tipPt,hL,hR].map(p=>toPdf(p.vx,p.vy));
+        page.drawSvgPath(
+          `M ${ap[0].x.toFixed(2)} ${ap[0].y.toFixed(2)} L ${ap[1].x.toFixed(2)} ${ap[1].y.toFixed(2)} L ${ap[2].x.toFixed(2)} ${ap[2].y.toFixed(2)} Z`,
+          {color:INK, borderColor:INK, borderWidth:0.2}
+        );
+
+        // "N" at arrow tip (centered)
+        const nTextX = cx + ndx*(R*tipFrac + szN*0.6);
+        const nTextY = cy + ndy*(R*tipFrac + szN*0.6) - szN*0.25;
+        const nTW    = fontB.widthOfTextAtSize('N', szN);
+        dText('N', nTextX-nTW/2, nTextY, szN, true, null);
       });
 
       vnBytes = await doc.save({ useObjectStreams: true });
