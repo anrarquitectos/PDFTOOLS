@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scalebar PDF Tools — Free browser-based PDF tools</title>
+<title>Revision Cloud — Scalebar PDF Tools</title>
 <style>
   :root {
     --bg: #f8f8f6;
@@ -56,59 +56,67 @@
     font-size: 0.75rem; color: var(--mid);
   }
 
-  /* ── TOOLS GRID ── */
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 4px;
+  #drop-zone {
+    border: 2px dashed #bbb; background: var(--white);
+    border-radius: var(--radius); padding: 48px 24px;
+    text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 32px; position: relative; overflow: hidden;
   }
+  #drop-zone.dragover { border-color: var(--ink); background: #f0f0ee; }
+  #drop-zone h3 { font-size: 1rem; font-weight: normal; margin-bottom: 6px; }
+  #drop-zone p { color: var(--mid); font-size: 0.83rem; }
+  #file-input-hidden { display: none; }
+
+  /* Check animation */
+  #drop-check {
+    display: none; position: absolute; inset: 0;
+    background: var(--white); align-items: center; justify-content: center;
+    flex-direction: column; gap: 10px;
+  }
+  #drop-check.show { display: flex; animation: fadeCheck 1.6s ease forwards; }
+  @keyframes fadeCheck { 0%{opacity:0} 20%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+  #drop-check .check-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--ok); display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; color: var(--ok); animation: scaleIn 0.3s ease;
+  }
+  @keyframes scaleIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+  #drop-check p { font-size: 0.85rem; color: var(--ok); }
+
+  /* ── TOOLS CAROUSEL ── */
+  .tools-carousel-wrap { position: relative; margin-bottom: 4px; }
+  .tools-carousel-wrap .scroll-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: var(--white); border: 1px solid #ccc; border-radius: 50%;
+    width: 30px; height: 30px; cursor: pointer; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2; transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .tools-carousel-wrap .scroll-btn:hover { border-color: var(--ink); box-shadow: 1px 1px 0 var(--ink); }
+  .tools-carousel-wrap .scroll-btn.left  { left: -15px; }
+  .tools-carousel-wrap .scroll-btn.right { right: -15px; }
+  .tools-grid {
+    display: flex; gap: 12px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    scroll-behavior: smooth; padding-bottom: 6px;
+    /* hide scrollbar visually but keep functional */
+    scrollbar-width: none;
+  }
+  .tools-grid::-webkit-scrollbar { display: none; }
   .tool-card {
     background: var(--white); border: 1px solid var(--light);
     border-radius: var(--radius); padding: 16px; cursor: pointer;
     transition: border-color 0.15s, box-shadow 0.15s;
+    /* exactly 6 cards visible in 820px container: (820 - 5*12) / 6 = 126.7px */
+    min-width: 185px; max-width: 185px;
+    scroll-snap-align: start; flex-shrink: 0;
   }
   .tool-card:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
   .tool-card .icon { font-size: 1.4rem; margin-bottom: 8px; }
   .tool-card h3 { font-size: 0.82rem; margin-bottom: 4px; line-height: 1.3; }
   .tool-card p { font-size: 0.72rem; color: var(--mid); line-height: 1.35; }
-
-  /* Peek row: half-height overflow reveals row 2 */
-  .tools-peek-wrap {
-    overflow: hidden;
-    /* show row 1 (card ~110px) + peek of row 2 (~85px) */
-    max-height: calc(110px + 12px + 85px);
-    transition: max-height 0.4s ease;
-    margin-bottom: 0;
-  }
-  .tools-peek-wrap.expanded {
-    max-height: 2000px;
-  }
-  /* fade at bottom when collapsed */
-  .tools-peek-outer {
-    position: relative;
-    margin-bottom: 4px;
-  }
-  .tools-peek-fade {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 48px;
-    background: linear-gradient(to bottom, transparent, var(--bg));
-    pointer-events: none;
-    transition: opacity 0.3s;
-  }
-  .tools-peek-outer.expanded .tools-peek-fade { opacity: 0; }
-
-  /* More tools button */
-  #more-tools-btn {
-    display: flex; align-items: center; gap: 6px; margin: 10px auto 0;
-    background: none; border: 1px solid #ccc; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.8rem; color: var(--mid);
-    padding: 6px 18px; cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  #more-tools-btn:hover { border-color: var(--ink); color: var(--ink); }
-  #more-tools-btn .chevron { transition: transform 0.3s; font-size: 0.65rem; }
-  #more-tools-btn.open .chevron { transform: rotate(180deg); }
 
   /* ── TOOL VIEW ── */
   #view-tool { max-width: 860px; margin: 0 auto; padding: 32px 20px; }
@@ -308,37 +316,41 @@
 <!-- TOP BAR -->
 <div id="topbar">
   <h1><a href="index.html" style="color:inherit;text-decoration:none;">▣ SCALEBAR PDF TOOLS</a></h1>
-  <div id="file-indicator" style="display:none"></div>
+  <div id="file-indicator">No file loaded</div>
   <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
-  <div id="lang-switcher" style="display:flex;gap:4px;margin-left:12px;">
-    <button onclick="setLang('en')" style="background:none;border:1px solid #444;color:#aaa;padding:2px 7px;font-size:0.72rem;border-radius:3px;cursor:pointer;font-family:inherit;" id="lang-en">EN</button>
-    <button onclick="setLang('es')" style="background:none;border:1px solid #444;color:#aaa;padding:2px 7px;font-size:0.72rem;border-radius:3px;cursor:pointer;font-family:inherit;" id="lang-es">ES</button>
-  </div>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
-<div id="view-home" class="view active">
+<div id="view-home" class="view" style="display:none!important">
   <div style="max-width:860px; margin:0 auto; padding:40px 20px;">
 
     <div class="home-header">
-      <h2 data-i18n="tagline">Scalebar PDF Tools — 100% free</h2>
-      <p data-i18n="hero_desc">For architects and professionals who need to work with documents efficiently and confidentially. Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.</p>
+      <h2>Scalebar PDF Tools — 100% free</h2>
+      <p>For architects and professionals who need to work with documents efficiently and confidentially.
+         Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.</p>
       <div class="privacy-badge">
-        <span data-i18n="privacy_badge">Your files never leave your browser — 100% local processing</span>
+        Your files never leave your browser — 100% local processing
       </div>
     </div>
 
-    <p style="font-size:0.8rem; color:var(--mid); margin-bottom:12px;" data-i18n="choose_tool">Choose a tool:</p>
-    <div class="tools-peek-outer" id="tools-peek-outer">
-      <div class="tools-peek-wrap" id="tools-peek-wrap">
-        <div class="tools-grid" id="home-tools-grid"></div>
+    <div id="drop-zone" onclick="document.getElementById('file-input-hidden').click()">
+      <div id="drop-zone-content">
+        <div style="font-size:2.2rem; margin-bottom:10px;">⬆</div>
+        <h3>Upload a PDF file</h3>
+        <p>Click here or drag and drop a file</p>
       </div>
-      <div class="tools-peek-fade" id="tools-peek-fade"></div>
+      <div id="drop-check">
+        <div class="check-circle">✓</div>
+        <p id="drop-check-name">File loaded</p>
+      </div>
     </div>
-    <div style="text-align:center;">
-      <button id="more-tools-btn" onclick="toggleMoreTools()">
-        <span id="more-tools-label" data-i18n="more_tools">More tools</span> <span class="chevron">▼</span>
-      </button>
+    <input type="file" id="file-input-hidden" accept="application/pdf">
+
+    <p style="font-size:0.8rem; color:var(--mid); margin-bottom:12px;">Or choose a tool directly:</p>
+    <div class="tools-carousel-wrap">
+      <button class="scroll-btn left" onclick="scrollGrid(-1)">‹</button>
+      <div class="tools-grid" id="home-tools-grid"></div>
+      <button class="scroll-btn right" onclick="scrollGrid(1)">›</button>
     </div>
 
     <!-- Carbon Ads — replace comment with Carbon script tag once approved -->
@@ -353,7 +365,7 @@
     <!-- ── FAQ ── -->
     <section style="margin-top:56px; max-width:720px; margin-left:auto; margin-right:auto;">
       <h3 style="font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:24px; letter-spacing:0.01em;">
-        <span data-i18n="faq_title">Frequently asked questions</span>
+        Frequently asked questions
       </h3>
 
       <style>
@@ -599,7 +611,7 @@
     </div>
 
     <!-- ── 3. WATERMARK TEXT ── -->
-    <div class="tool-panel" id="panel-wm-text">
+    <div class="tool-panel" id="panel-watermark-text">
       <div class="panel-box">
         <h2>Text watermark</h2>
         <label>Watermark text:</label>
@@ -635,17 +647,15 @@
             </select>
           </div>
         </div>
-        <div>
-          <button class="btn btn-primary" id="wt-btn">Apply</button>
-          <button class="btn btn-dl" id="wt-dl" disabled>⬇ Download PDF</button>
-          <button class="btn btn-apply" id="wt-apply" disabled>↩ Keep working with this version</button>
+        <div style="margin-top:10px;">
+          <button class="btn btn-primary" id="wt-btn">Apply &amp; download ZIP</button>
         </div>
         <div class="status" id="wt-status"></div>
       </div>
     </div>
 
     <!-- ── 4. WATERMARK LOGO ── -->
-    <div class="tool-panel" id="panel-wm-logo">
+    <div class="tool-panel" id="panel-watermark-logo">
       <div class="panel-box">
         <h2>Logo watermark</h2>
         <p style="font-size:0.82rem; color:var(--mid); margin-bottom:14px;">
@@ -694,9 +704,7 @@
           </div>
         </div>
         <div>
-          <button class="btn btn-primary" id="wl-btn">Apply logo</button>
-          <button class="btn btn-dl" id="wl-dl" disabled>⬇ Download PDF</button>
-          <button class="btn btn-apply" id="wl-apply" disabled>↩ Keep working with this version</button>
+          <button class="btn btn-primary" id="wl-btn">Apply logo &amp; download ZIP</button>
         </div>
         <div class="status" id="wl-status"></div>
       </div>
@@ -1394,6 +1402,253 @@
       </div>
     </div>
 
+    <!-- ── 13. PAGE GRID ── -->
+    <div class="tool-panel" id="panel-grid">
+      <div class="panel-box">
+        <h2>Page grid</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Adds a reference grid to your drawing. In <strong>scale spacing</strong> mode,
+          specify the drawing scale and the real-world distance between grid lines — the paper
+          spacing is calculated automatically so the grid represents real dimensions correctly.
+          When drawn <em>below</em> existing content the grid is inserted at the start of the
+          page content stream, appearing under all CAD lines and fills.
+        </p>
+
+        <!-- Mode toggle -->
+        <div style="margin-bottom:14px;">
+          <label style="font-size:0.82rem;font-weight:600;display:block;margin-bottom:8px;">Grid spacing mode:</label>
+          <div style="display:flex;gap:0;border:1px solid #ccc;border-radius:var(--radius);overflow:hidden;width:fit-content;">
+            <button type="button" id="grid-mode-spacing" onclick="gridSetMode('spacing')"
+              style="padding:7px 18px;font-size:0.82rem;font-family:inherit;border:none;cursor:pointer;background:#1a1a1a;color:#fff;font-weight:600;">
+              Fixed spacing
+            </button>
+            <button type="button" id="grid-mode-divisions" onclick="gridSetMode('divisions')"
+              style="padding:7px 18px;font-size:0.82rem;font-family:inherit;border:none;cursor:pointer;background:#f8f8f6;color:#555;">
+              Divisions
+            </button>
+          </div>
+        </div>
+
+        <!-- Fixed spacing options -->
+        <div id="grid-spacing-opts">
+          <div class="row">
+            <div>
+              <label>Drawing scale:</label>
+              <select id="grid-scale" onchange="gridUpdateIntervals()">
+                <option value="20">1 : 20</option>
+                <option value="50">1 : 50</option>
+                <option value="100" selected>1 : 100</option>
+                <option value="200">1 : 200</option>
+                <option value="500">1 : 500</option>
+                <option value="1000">1 : 1000</option>
+              </select>
+            </div>
+            <div>
+              <label>Grid interval <span style="color:var(--mid);font-weight:normal;">(real-world distance)</span>:</label>
+              <select id="grid-interval">
+                <!-- populated by gridUpdateIntervals() -->
+              </select>
+            </div>
+          </div>
+          <div class="row" style="margin-top:4px;">
+            <div>
+              <label>Page border (mm) <span style="color:var(--mid);font-weight:normal;">grid starts here</span>:</label>
+              <input type="number" id="grid-border" value="10" min="0" max="100" step="1"
+                style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
+            </div>
+            <div>
+              <label>Paper spacing <span style="color:var(--mid);font-weight:normal;">(calculated)</span>:</label>
+              <input type="text" id="grid-computed-mm" readonly
+                style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;background:#f0f0ec;color:var(--mid);">
+            </div>
+          </div>
+        </div>
+
+        <!-- Division options -->
+        <div id="grid-div-opts" class="row" style="display:none;">
+          <div>
+            <label>Horizontal divisions <span style="color:var(--mid);font-weight:normal;">(2–100)</span>:</label>
+            <input type="number" id="grid-div-h" value="10" min="2" max="100" step="1"
+              style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
+          </div>
+          <div>
+            <label>Vertical divisions <span style="color:var(--mid);font-weight:normal;">(2–100)</span>:</label>
+            <input type="number" id="grid-div-v" value="10" min="2" max="100" step="1"
+              style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:4px;">
+          <div>
+            <label>Line colour:</label>
+            <input type="color" id="grid-color" value="#aaaaaa"
+              style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
+          </div>
+          <div>
+            <label>Line weight (pt):</label>
+            <input type="number" id="grid-lw" value="0.15" min="0.05" max="2" step="0.05"
+              style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:4px;">
+          <div>
+            <label>Position:</label>
+            <select id="grid-position">
+              <option value="below">Below existing content</option>
+              <option value="above">Above existing content</option>
+            </select>
+          </div>
+          <div>
+            <label>Apply to:</label>
+            <select id="grid-pages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" id="grid-btn">Add grid</button>
+          <button class="btn btn-dl"    id="grid-dl"    disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="grid-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="grid-status"></div>
+      </div>
+    </div>
+
+
+    <!-- ── 14. PAGE NUMBERING ── -->
+    <div class="tool-panel" id="panel-plan-numbering">
+      <div class="panel-box">
+        <h2>Plan numbering</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Stamps a sequential plan number on each PDF. Works in batch: upload multiple PDFs and each receives its own number. Downloads as a ZIP.
+        </p>
+        <div class="row">
+          <div>
+            <label>Prefix:</label>
+            <input type="text" id="pn-prefix" value="A-" placeholder="e.g. A-, ARCH-, E-">
+          </div>
+          <div>
+            <label>Starting number:</label>
+            <input type="number" id="pn-start" value="1" min="0" max="9999" step="1">
+          </div>
+          <div>
+            <label>Padding digits:</label>
+            <input type="number" id="pn-pad" value="2" min="1" max="4" step="1" title="01, 001, 0001…">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Position:</label>
+            <select id="pn-pos">
+              <option value="br">Bottom right</option>
+              <option value="bl">Bottom left</option>
+              <option value="tr">Top right</option>
+              <option value="tl">Top left</option>
+            </select>
+          </div>
+          <div>
+            <label>Font size (pt):</label>
+            <input type="number" id="pn-size" value="18" min="6" max="72">
+          </div>
+          <div>
+            <label>Color:</label>
+            <input type="color" id="pn-color" value="#1a1a1a"
+              style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Apply to:</label>
+            <select id="pn-pages">
+              <option value="all">All pages of each PDF</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" id="pn-btn">Number plans &amp; download ZIP</button>
+        </div>
+        <div class="status" id="pn-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 15. REVISION CLOUD ── -->
+    <div class="tool-panel" id="panel-revision-cloud">
+      <div class="panel-box">
+      <div id="tool-choose-wrap" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <button type="button" id="tool-choose-btn" onclick="document.getElementById('tool-choose-file').click()"
+          style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
+          Choose PDF
+        </button>
+        <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;">
+        <span id="tool-choose-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
+      </div>
+        <h2>Revision cloud</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Stamps a revision cloud with a numbered triangle marker on your PDF pages.
+          The cloud is placed at the chosen corner. Adjust size to cover the desired area.
+        </p>
+        <div class="row">
+          <div>
+            <label>Revision number / letter:</label>
+            <input type="text" id="rc-rev" value="1" placeholder="e.g. 1, A, REV-2" style="font-weight:600;">
+          </div>
+          <div>
+            <label>Corner:</label>
+            <select id="rc-corner">
+              <option value="bl">Bottom left</option>
+              <option value="br">Bottom right</option>
+              <option value="tl">Top left</option>
+              <option value="tr">Top right</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Cloud width (mm):</label>
+            <input type="number" id="rc-w" value="80" min="20" max="400" step="5">
+          </div>
+          <div>
+            <label>Cloud height (mm):</label>
+            <input type="number" id="rc-h" value="50" min="10" max="300" step="5">
+          </div>
+          <div>
+            <label>Arc radius (mm):</label>
+            <input type="number" id="rc-arc" value="4" min="2" max="12" step="1"
+              title="Size of each bump in the cloud outline">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Margin from corner (mm):</label>
+            <input type="number" id="rc-margin" value="10" min="0" max="80" step="1">
+          </div>
+          <div>
+            <label>Line colour:</label>
+            <input type="color" id="rc-color" value="#cc0000"
+              style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
+          </div>
+          <div>
+            <label>Apply to:</label>
+            <select id="rc-pages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" id="rc-btn">Add revision cloud</button>
+          <button class="btn btn-dl"    id="rc-dl"    disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="rc-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="rc-status"></div>
+      </div>
+    </div>
+
     <!-- ── OTHER TOOLS STRIP ── -->
     <div id="other-tools-section">
       <h3>OTHER TOOLS — same file</h3>
@@ -1441,22 +1696,22 @@ pdfjsScript.onload = () => {
 
 // ─── TOOL DEFINITIONS ────────────────────────────────────────────────────
 const TOOLS = [
-  { id:'compress',       icon:'🗜', name:'Compress PDF',          desc:'Ghostscript-powered compression with full control over DPI and quality.' },
-  { id:'scalebar',       icon:'📏', name:'Scale bar (m)',          desc:'Add a metric graphic scale bar auto-sized by paper format and drawing scale.' },
-  { id:'scalebar-ft',    icon:'📐', name:'Scale bar (ft)',         desc:'Add an imperial scale bar in feet, auto-sized by paper format and scale.' },
-  { id:'vineta',         icon:'📋', name:'Title block',            desc:'Architectural title block with project info, plan number, scale and signatures.' },
-  { id:'patch',          icon:'⬜', name:'Patch / Redact',         desc:'Draw a white polygon to cover content — with optional permanent flattening.' },
-  { id:'watermark-text', icon:'✒', name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
-  { id:'watermark-logo', icon:'🔖', name:'Logo watermark',         desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
-  { id:'crop',           icon:'⊡', name:'Resize to format',       desc:'Scale pages to A0–A4, Letter or Legal with auto or forced orientation.' },
-  { id:'reorder',        icon:'⇅', name:'Reorder & remove',       desc:'Drag pages to rearrange them and remove any you don\'t need.' },
-  { id:'split',          icon:'✂', name:'Split PDF',              desc:'Select break points between pages and export each section separately.' },
-  { id:'merge',          icon:'⊕', name:'Merge PDFs',             desc:'Upload multiple PDFs, rearrange them and combine into one document.' },
-  { id:'convert',        icon:'🖼', name:'PDF to images',          desc:'Export each page as PNG or JPG at the resolution you need.' },
-  { id:'img2pdf',        icon:'🗒', name:'Images to PDF',          desc:'Convert JPG, PNG or WebP images into a single PDF document.' },
-  { id:'grid',           icon:'⊞', name:'Page grid',              desc:'Add a scale-aware reference grid to PDF pages for architectural drawings.' },
-  { id:'plan-numbering', icon:'🔢', name:'Plan numbering',         desc:'Stamp sequential plan numbers on multiple PDFs in one batch operation.' },
-  { id:'revision-cloud', icon:'☁', name:'Revision cloud',         desc:'Add an architectural revision cloud with numbered corner triangle marker.' },
+  { id:'compress',    icon:'🗜', name:'Compress PDF',           desc:'Ghostscript-powered compression with full control over DPI and quality.' },
+  { id:'vineta',      icon:'📋', name:'Title block',          desc:'Generate an architectural title block (viñeta) with project name, plan number, scale, signatures and more.' },
+  { id:'patch',       icon:'⬜', name:'Patch / Redact',         desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
+  { id:'scalebar',    icon:'📏', name:'Scale bar (m)',          desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
+  { id:'scalebar-ft', icon:'📐', name:'Scale bar (ft)',         desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
+  { id:'watermark-logo',     icon:'🔖', name:'Logo watermark',        desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
+  { id:'watermark-text',     icon:'✒', name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
+  { id:'crop',        icon:'📋', name:'Resize to format',      desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
+  { id:'reorder',     icon:'⇅', name:'Reorder & remove pages', desc:'Drag pages to rearrange them and remove any you don\'t need.' },
+  { id:'split',       icon:'✂', name:'Split PDF',              desc:'Select break points between pages and export each section as a separate PDF.' },
+  { id:'merge',       icon:'⊕', name:'Merge PDFs',            desc:'Upload multiple PDFs, rearrange them and combine into one.', noFile: true },
+  { id:'convert',     icon:'🖼', name:'Convert to images',     desc:'Export each page as PNG or JPG at the resolution you need.' },
+  { id:'img2pdf',     icon:'🗒', name:'Image to PDF',          desc:'Convert one or more images (JPG, PNG) into a PDF document.', noFile: true },
+  { id:'plan-numbering',     icon:'🔢',  name:'Plan numbering',       desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
+  { id:'revision-cloud',    icon:'☁',   name:'Revision cloud',       desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
+  { id:'grid',        icon:'#',   name:'Page grid',             desc:'Add a reference grid to PDF pages — specify spacing or number of divisions. Draws below or above existing content.' },
 ];
 
 // ─── STATE ───────────────────────────────────────────────────────────────
@@ -1466,140 +1721,24 @@ let activeToolId = null;
 let modificationHistory = [];
 let gsInstance = null; // Ghostscript WASM singleton
 
-
-// ─── I18N ─────────────────────────────────────────────────────────────────
-const TRANSLATIONS = {
-  en: {
-    tagline:       'Scalebar PDF Tools — 100% free',
-    hero_desc:     'For architects and professionals who need to work with documents efficiently and confidentially. Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.',
-    privacy_badge: 'Your files never leave your browser — 100% local processing',
-    choose_tool:   'Choose a tool:',
-    more_tools:    'More tools',
-    less_tools:    'Less tools',
-    faq_title:     'Frequently asked questions',
-    // Tool names
-    'compress':       'Compress PDF',
-    'scalebar':       'Scale bar (m)',
-    'scalebar-ft':    'Scale bar (ft)',
-    'vineta':         'Title block',
-    'patch':          'Patch / Redact',
-    'watermark-text': 'Text watermark',
-    'watermark-logo': 'Logo watermark',
-    'crop':           'Resize to format',
-    'reorder':        'Reorder & remove',
-    'split':          'Split PDF',
-    'merge':          'Merge PDFs',
-    'convert':        'PDF to images',
-    'img2pdf':        'Images to PDF',
-    'grid':           'Page grid',
-    'plan-numbering': 'Plan numbering',
-    'revision-cloud': 'Revision cloud',
-    // Tool descriptions
-    'd_compress':       'Ghostscript-powered compression with full control over DPI and quality.',
-    'd_scalebar':       'Add a metric graphic scale bar auto-sized by paper format and drawing scale.',
-    'd_scalebar-ft':    'Add an imperial scale bar in feet, auto-sized by paper format and scale.',
-    'd_vineta':         'Architectural title block with project info, plan number, scale and signatures.',
-    'd_patch':          'Draw a white polygon to cover content — with optional permanent flattening.',
-    'd_watermark-text': 'Add semi-transparent text across pages — customizable size, color and position.',
-    'd_watermark-logo': 'Embed your studio logo in grayscale with adjustable opacity and rotation.',
-    'd_crop':           'Scale pages to A0–A4, Letter or Legal with auto or forced orientation.',
-    'd_reorder':        'Drag pages to rearrange them and remove any you don\'t need.',
-    'd_split':          'Select break points between pages and export each section separately.',
-    'd_merge':          'Upload multiple PDFs, rearrange them and combine into one document.',
-    'd_convert':        'Export each page as PNG or JPG at the resolution you need.',
-    'd_img2pdf':        'Convert JPG, PNG or WebP images into a single PDF document.',
-    'd_grid':           'Add a scale-aware reference grid to PDF pages for architectural drawings.',
-    'd_plan-numbering': 'Stamp sequential plan numbers on multiple PDFs in one batch operation.',
-    'd_revision-cloud': 'Add an architectural revision cloud with numbered corner triangle marker.',
-  },
-  es: {
-    tagline:       'Scalebar PDF Tools — 100% gratis',
-    hero_desc:     'Para arquitectos y profesionales que necesitan trabajar con documentos de forma eficiente y confidencial. Comprime planos, añade escalas gráficas y viñetas, cambia el formato de páginas, añade marcas de agua y más.',
-    privacy_badge: 'Tus archivos nunca salen del navegador — procesamiento 100% local',
-    choose_tool:   'Elige una herramienta:',
-    more_tools:    'Más herramientas',
-    less_tools:    'Menos herramientas',
-    faq_title:     'Preguntas frecuentes',
-    // Tool names
-    'compress':       'Comprimir PDF',
-    'scalebar':       'Escala gráfica (m)',
-    'scalebar-ft':    'Escala gráfica (ft)',
-    'vineta':         'Viñeta / Carátula',
-    'patch':          'Parche / Redactar',
-    'watermark-text': 'Marca de agua texto',
-    'watermark-logo': 'Marca de agua logo',
-    'crop':           'Cambiar formato',
-    'reorder':        'Reordenar páginas',
-    'split':          'Dividir PDF',
-    'merge':          'Unir PDFs',
-    'convert':        'PDF a imágenes',
-    'img2pdf':        'Imágenes a PDF',
-    'grid':           'Grilla de página',
-    'plan-numbering': 'Numeración de planos',
-    'revision-cloud': 'Nube de revisión',
-    // Tool descriptions
-    'd_compress':       'Compresión con Ghostscript — control total sobre DPI y calidad.',
-    'd_scalebar':       'Añade una escala gráfica métrica auto-dimensionada por formato y escala de dibujo.',
-    'd_scalebar-ft':    'Añade una escala gráfica en pies, auto-dimensionada por formato y escala.',
-    'd_vineta':         'Viñeta arquitectónica con nombre de proyecto, número de plano, escala y firmas.',
-    'd_patch':          'Dibuja un polígono blanco para cubrir contenido — con aplanado permanente opcional.',
-    'd_watermark-text': 'Añade texto semitransparente en páginas — tamaño, color y posición personalizables.',
-    'd_watermark-logo': 'Inserta tu logo de estudio en escala de grises con opacidad y rotación ajustables.',
-    'd_crop':           'Escala páginas a A0–A4, Letter o Legal con orientación automática o forzada.',
-    'd_reorder':        'Arrastra páginas para reorganizarlas y elimina las que no necesites.',
-    'd_split':          'Selecciona puntos de corte entre páginas y exporta cada sección por separado.',
-    'd_merge':          'Sube varios PDFs, reorganízalos y combínalos en un solo documento.',
-    'd_convert':        'Exporta cada página como PNG o JPG con la resolución que necesites.',
-    'd_img2pdf':        'Convierte imágenes JPG, PNG o WebP en un único documento PDF.',
-    'd_grid':           'Añade una grilla de referencia a escala en páginas PDF para planos arquitectónicos.',
-    'd_plan-numbering': 'Estampa números de plano correlativos en varios PDFs en una sola operación.',
-    'd_revision-cloud': 'Añade una nube de revisión arquitectónica con triángulo numerado en esquina.',
-  }
-};
-
-// Detect language: check localStorage override first, then browser
-const _langRaw = localStorage.getItem('sb_lang') || navigator.language || 'en';
-const _lang = _langRaw.slice(0, 2).toLowerCase();
-const T = TRANSLATIONS[_lang] || TRANSLATIONS['en'];
-
-// Apply static data-i18n text nodes
-function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    if (T[key]) el.textContent = T[key];
-  });
-}
-
-// Language switcher (call from UI)
-function setLang(lang) {
-  localStorage.setItem('sb_lang', lang);
-  location.reload();
-}
 // ─── HOME GRID ───────────────────────────────────────────────────────────
-const _sm = {'compress':'compress','vineta':'vineta','patch':'patch','scalebar':'scalebar','scalebar-ft':'scalebar_ft','watermark-text':'watermark_text','watermark-logo':'watermark_logo','crop':'crop','reorder':'reorder','split':'split','merge':'merge','convert':'convert','img2pdf':'img2pdf','grid':'grid','plan-numbering':'plan_numbering','revision-cloud':'revision_cloud'};
 const homeGrid = document.getElementById('home-tools-grid');
 TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  const name = T[t.id] || t.name;
-  const desc = T['d_' + t.id] || t.desc;
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${name}</h3><p>${desc}</p>`;
-  card.onclick = () => { const p = _sm[t.id]; if (p) window.location.href = p + '.html'; };
+  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  card.onclick = () => {
+    if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
+    else { openTool(t.id); }
+  };
   homeGrid.appendChild(card);
 });
-// Apply i18n to static elements
-document.addEventListener('DOMContentLoaded', applyI18n);
 let pendingTool = null;
 
-function toggleMoreTools() {
-  const wrap  = document.getElementById('tools-peek-wrap');
-  const outer = document.getElementById('tools-peek-outer');
-  const btn   = document.getElementById('more-tools-btn');
-  const label = document.getElementById('more-tools-label');
-  const open  = wrap.classList.toggle('expanded');
-  outer.classList.toggle('expanded', open);
-  btn.classList.toggle('open', open);
-  label.textContent = open ? (T.less_tools || 'Less tools') : (T.more_tools || 'More tools');
+function scrollGrid(dir) {
+  const grid = document.getElementById('home-tools-grid');
+  // Scroll by 3 card widths (127px + 12px gap = 139px × 3)
+  grid.scrollBy({ left: dir * 197 * 4, behavior: 'smooth' });
 }
 
 // ─── FILE LOADING ─────────────────────────────────────────────────────────
@@ -1628,6 +1767,7 @@ async function loadPDF(file) {
   currentFileName = file.name;
   modificationHistory = [];
   updateTopBar();
+  showDropCheck(file.name);
 }
 
 function updateTopBar() {
@@ -1639,16 +1779,28 @@ function updateTopBar() {
   persistFile();
 }
 
+function showDropCheck(name) {
+  const el = document.getElementById('drop-check');
+  document.getElementById('drop-check-name').textContent = name;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1700);
+}
 
-
-// Highlight active language button
-document.addEventListener('DOMContentLoaded', () => {
-  const activeLang = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
-  const btnEl = document.getElementById('lang-' + activeLang);
-  if (btnEl) { btnEl.style.color = '#fff'; btnEl.style.borderColor = '#fff'; }
+document.getElementById('file-input-hidden').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  await loadPDF(file);
+  if (pendingTool) { openTool(pendingTool); pendingTool = null; }
+  e.target.value = '';
 });
 
-// Drop zone removed — cards navigate directly to tool pages
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', async e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') await loadPDF(file);
+});
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────
 function openTool(id) {
@@ -1946,37 +2098,55 @@ document.getElementById('cv-dl').addEventListener('click', async () => {
 });
 
 // ─── 3. TEXT WATERMARK ────────────────────────────────────────────────────
-let wtBytes = null;
 document.getElementById('wt-btn').addEventListener('click', async () => {
-  if (!currentBuffer) return;
+  const files = (document.getElementById('tool-choose-file') || document.getElementById('wt-files') || {files:[]}).files;
+  if (!files.length) { status('wt-status', 'Choose at least one PDF file.', 'err'); return; }
   const txt = document.getElementById('wt-text').value.trim();
-  if (!txt) { status('wt-status', 'Please enter watermark text.', 'err'); return; }
-  status('wt-status', 'Applying…', 'run');
+  if (!txt) { status('wt-status', 'Enter watermark text first.', 'err'); return; }
+  const sz  = parseInt(document.getElementById('wt-size').value) || 48;
+  const op  = parseFloat(document.getElementById('wt-opacity').value) || 0.15;
+  const { r, g, b } = hexToRgb(document.getElementById('wt-color').value || '#000000');
+  const pos    = document.getElementById('wt-pos').value;
+  const pgMode = document.getElementById('wt-pages').value;
+  status('wt-status', `Processing ${files.length} file(s)…`, 'run');
   try {
-    const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
-    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-    const sz = parseInt(document.getElementById('wt-size').value) || 48;
-    const op = parseFloat(document.getElementById('wt-opacity').value) || 0.15;
-    const { r, g, b } = hexToRgb(document.getElementById('wt-color').value || '#000000');
-    const pos = document.getElementById('wt-pos').value;
-    const pages = document.getElementById('wt-pages').value === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
-    const tw = font.widthOfTextAtSize(txt, sz);
-    pages.forEach(page => {
-      const { width, height } = page.getSize();
-      let x, y, rotate;
-      if (pos === 'center')    { x = (width - tw) / 2; y = height / 2; rotate = PDFLib.degrees(35); }
-      else if (pos === 'br')   { x = width - tw - 24;  y = 24;         rotate = PDFLib.degrees(0); }
-      else                     { x = 20;               y = height - sz - 20; rotate = PDFLib.degrees(0); }
-      page.drawText(txt, { x, y, size: sz, font, color: PDFLib.rgb(r,g,b), opacity: op, rotate });
-    });
-    wtBytes = await pdfDoc.save({ useObjectStreams: true });
-    status('wt-status', `Applied to ${pages.length} page(s).`, 'ok');
-    document.getElementById('wt-dl').disabled = false;
-    document.getElementById('wt-apply').disabled = false;
+    const zip = new JSZip();
+    for (const file of files) {
+      const buf    = await readFile(file);
+      const pdfDoc = await PDFLib.PDFDocument.load(buf.slice(0), { ignoreEncryption: true });
+      const font   = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+      const tw     = font.widthOfTextAtSize(txt, sz);
+      const pg     = pgMode === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+      pg.forEach(page => {
+        let rot = 0;
+        try { const rn = page.node.get(PDFLib.PDFName.of('Rotate')); if (rn) rot = ((rn.value()%360)+360)%360; } catch(_){}
+        const swapped = rot===90||rot===270;
+        const { width: rawW, height: rawH } = page.getSize();
+        const visW = swapped ? rawH : rawW;
+        const visH = swapped ? rawW : rawH;
+        function toPdf(vx,vy){ switch(rot){ case 0:return{x:vx,y:vy}; case 90:return{x:rawW-vy,y:vx}; case 180:return{x:rawW-vx,y:rawH-vy}; default:return{x:vy,y:rawH-vx}; } }
+        const textRot = PDFLib.degrees(rot);
+        let vx, vy, rotate;
+        const margin = 24;
+        if (pos === 'center') {
+          vx = (visW - tw) / 2; vy = visH / 2;
+          rotate = PDFLib.degrees(rot + 35);
+        } else if (pos === 'br') {
+          vx = visW - tw - margin; vy = margin; rotate = textRot;
+        } else { // tl
+          vx = margin; vy = visH - sz - margin; rotate = textRot;
+        }
+        const {x, y} = toPdf(vx, vy);
+        page.drawText(txt, { x, y, size: sz, font, color: PDFLib.rgb(r,g,b), opacity: op, rotate });
+      });
+      zip.file(file.name.replace(/\.pdf$/i,'_watermark.pdf'), await pdfDoc.save({ useObjectStreams:true }));
+    }
+    const blob = await zip.generateAsync({ type:'blob' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'watermarked.zip'; a.click();
+    status('wt-status', `Done — ${files.length} PDF(s) watermarked.`, 'ok');
   } catch(e) { status('wt-status', 'Error: ' + e.message, 'err'); }
 });
-document.getElementById('wt-dl').addEventListener('click', () => { if (wtBytes) download(wtBytes, nameSuffix('_watermark')); });
-document.getElementById('wt-apply').addEventListener('click', () => { if (wtBytes) applyAsActive(wtBytes, 'Text WM', 'wt-status', 'wt-apply'); });
 
 // ─── 4. LOGO WATERMARK ────────────────────────────────────────────────────
 function imageToGrayscalePNG(imgEl) {
@@ -1997,67 +2167,67 @@ function imageToGrayscalePNG(imgEl) {
   });
 }
 
-let wlBytes = null;
 document.getElementById('wl-btn').addEventListener('click', async () => {
-  if (!currentBuffer) return;
-  const imgFile = document.getElementById('wl-img').files[0];
-  if (!imgFile) { status('wl-status', 'Please upload a logo image.', 'err'); return; }
-  status('wl-status', 'Processing image…', 'run');
+  const pdfFiles = (document.getElementById('tool-choose-file') || document.getElementById('wl-pdf-files') || {files:[]}).files;
+  const imgFile  = document.getElementById('wl-img').files[0];
+  if (!pdfFiles.length) { status('wl-status', 'Choose at least one PDF file.', 'err'); return; }
+  if (!imgFile)          { status('wl-status', 'Please upload a logo image.', 'err'); return; }
+  const opacity  = parseFloat(document.getElementById('wl-opacity').value) || 0.18;
+  const scalePct = parseFloat(document.getElementById('wl-scale').value) || 40;
+  const rotDeg   = parseFloat(document.getElementById('wl-rotation').value) || 0;
+  const pos      = document.getElementById('wl-pos').value;
+  const pgMode   = document.getElementById('wl-pages').value;
+  status('wl-status', `Processing ${pdfFiles.length} file(s)…`, 'run');
   try {
     const imgUrl = URL.createObjectURL(imgFile);
-    const imgEl = new Image();
+    const imgEl  = new Image();
     await new Promise((res, rej) => { imgEl.onload = res; imgEl.onerror = rej; imgEl.src = imgUrl; });
     const grayBuf = await imageToGrayscalePNG(imgEl);
     URL.revokeObjectURL(imgUrl);
-
-    const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
-    const embeddedImg = await pdfDoc.embedPng(grayBuf);
-    const opacity  = parseFloat(document.getElementById('wl-opacity').value) || 0.18;
-    const scalePct = parseFloat(document.getElementById('wl-scale').value) || 40;
-    const rotDeg   = parseFloat(document.getElementById('wl-rotation').value) || 0;
-    const pos      = document.getElementById('wl-pos').value;
-    const pages    = document.getElementById('wl-pages').value === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
-
-    // Precompute rotation math for center-pivot
-    const rad = rotDeg * Math.PI / 180;
-    const cos = Math.cos(rad);
-    const sin = Math.sin(rad);
-
-    pages.forEach(page => {
-      const { width, height } = page.getSize();
-      const imgW = width * (scalePct / 100);
-      const imgH = (embeddedImg.height / embeddedImg.width) * imgW;
+    const imgRotRad = rotDeg * Math.PI / 180;
+    const imgCos = Math.cos(imgRotRad), imgSin = Math.sin(imgRotRad);
+    const zip = new JSZip();
+    for (const file of pdfFiles) {
+      const buf    = await readFile(file);
+      const pdfDoc = await PDFLib.PDFDocument.load(buf.slice(0), { ignoreEncryption: true });
+      const emb    = await pdfDoc.embedPng(grayBuf);
+      const pg     = pgMode === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
       const margin = 24;
-
-      // Desired center of the logo on the page (unrotated position)
-      let cx, cy;
-      if (pos === 'center')    { cx = width / 2;               cy = height / 2; }
-      else if (pos === 'br')   { cx = width - imgW/2 - margin; cy = imgH/2 + margin; }
-      else if (pos === 'tl')   { cx = imgW/2 + margin;         cy = height - imgH/2 - margin; }
-      else if (pos === 'tr')   { cx = width - imgW/2 - margin; cy = height - imgH/2 - margin; }
-      else                     { cx = imgW/2 + margin;         cy = imgH/2 + margin; }
-
-      // pdf-lib rotates around bottom-left corner.
-      // To rotate around center (cx,cy), adjust the bottom-left anchor point.
-      const adjX = cx - (imgW/2) * cos + (imgH/2) * sin;
-      const adjY = cy - (imgW/2) * sin - (imgH/2) * cos;
-
-      page.drawImage(embeddedImg, {
-        x: adjX, y: adjY,
-        width: imgW, height: imgH,
-        opacity,
-        rotate: PDFLib.degrees(rotDeg)
+      pg.forEach(page => {
+        let rot = 0;
+        try { const rn = page.node.get(PDFLib.PDFName.of('Rotate')); if (rn) rot = ((rn.value()%360)+360)%360; } catch(_){}
+        const swapped = rot===90||rot===270;
+        const { width: rawW, height: rawH } = page.getSize();
+        const visW = swapped ? rawH : rawW;
+        const visH = swapped ? rawW : rawH;
+        function toPdf(vx,vy){ switch(rot){ case 0:return{x:vx,y:vy}; case 90:return{x:rawW-vy,y:vx}; case 180:return{x:rawW-vx,y:rawH-vy}; default:return{x:vy,y:rawH-vx}; } }
+        // Logo size is % of visual width
+        const imgW = visW * (scalePct / 100);
+        const imgH = (emb.height / emb.width) * imgW;
+        // Visual center of logo
+        let vcx, vcy;
+        if      (pos === 'center') { vcx = visW/2;                vcy = visH/2; }
+        else if (pos === 'br')     { vcx = visW-imgW/2-margin;    vcy = imgH/2+margin; }
+        else if (pos === 'tl')     { vcx = imgW/2+margin;         vcy = visH-imgH/2-margin; }
+        else if (pos === 'tr')     { vcx = visW-imgW/2-margin;    vcy = visH-imgH/2-margin; }
+        else                       { vcx = imgW/2+margin;         vcy = imgH/2+margin; }
+        // Convert visual center to PDF raw coords
+        const {x: pcx, y: pcy} = toPdf(vcx, vcy);
+        // pdf-lib drawImage rotates around bottom-left; adjust for center-pivot + page rotation
+        const totalRad = (rotDeg + rot) * Math.PI / 180;
+        const tCos = Math.cos(totalRad), tSin = Math.sin(totalRad);
+        const adjX = pcx - (imgW/2)*tCos + (imgH/2)*tSin;
+        const adjY = pcy - (imgW/2)*tSin - (imgH/2)*tCos;
+        page.drawImage(emb, { x:adjX, y:adjY, width:imgW, height:imgH, opacity, rotate:PDFLib.degrees(rotDeg+rot) });
       });
-    });
-
-    wlBytes = await pdfDoc.save({ useObjectStreams: true });
-    status('wl-status', `Logo applied — grayscale, ${scalePct}% width, ${rotDeg}° rotation.`, 'ok');
-    document.getElementById('wl-dl').disabled = false;
-    document.getElementById('wl-apply').disabled = false;
+      zip.file(file.name.replace(/\.pdf$/i,'_logo.pdf'), await pdfDoc.save({ useObjectStreams:true }));
+    }
+    const blob = await zip.generateAsync({ type:'blob' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'logo_watermarked.zip'; a.click();
+    status('wl-status', `Done — ${pdfFiles.length} PDF(s) processed.`, 'ok');
   } catch(e) { status('wl-status', 'Error: ' + e.message, 'err'); }
 });
-document.getElementById('wl-dl').addEventListener('click', () => { if (wlBytes) download(wlBytes, nameSuffix('_logo_wm')); });
-document.getElementById('wl-apply').addEventListener('click', () => { if (wlBytes) applyAsActive(wlBytes, 'Logo WM', 'wl-status', 'wl-apply'); });
 
 // ─── 5. RESIZE TO FORMAT ──────────────────────────────────────────────────
 let cropBytes = null;
@@ -3413,6 +3583,448 @@ document.querySelectorAll('.sb-style-btn').forEach(btn => {
   });
 });
 
+
+// ─── 13. PAGE GRID ────────────────────────────────────────────────────────
+{
+  let gridBytes = null;
+  let gridMode = 'spacing';  // 'spacing' | 'divisions'
+
+  window.gridSetMode = function(m) {
+    gridMode = m;
+    document.getElementById('grid-spacing-opts').style.display = m === 'spacing' ? '' : 'none';
+    document.getElementById('grid-div-opts').style.display     = m === 'divisions' ? '' : 'none';
+    document.getElementById('grid-mode-spacing').style.background   = m === 'spacing'   ? '#1a1a1a' : '#f8f8f6';
+    document.getElementById('grid-mode-spacing').style.color        = m === 'spacing'   ? '#fff' : '#555';
+    document.getElementById('grid-mode-divisions').style.background = m === 'divisions' ? '#1a1a1a' : '#f8f8f6';
+    document.getElementById('grid-mode-divisions').style.color      = m === 'divisions' ? '#fff' : '#555';
+  };
+
+
+  // ── Scale/interval lookup table ──────────────────────────────────────────
+  const GRID_INTERVALS = {
+    20:   [{v:'0.5',l:'0.5 m'},{v:'1',l:'1 m'},{v:'5',l:'5 m'}],
+    50:   [{v:'0.5',l:'0.5 m'},{v:'1',l:'1 m'},{v:'5',l:'5 m'}],
+    100:  [{v:'0.5',l:'0.5 m'},{v:'1',l:'1 m'},{v:'5',l:'5 m'}],
+    200:  [{v:'5',l:'5 m'},{v:'10',l:'10 m'},{v:'50',l:'50 m'}],
+    500:  [{v:'5',l:'5 m'},{v:'10',l:'10 m'},{v:'50',l:'50 m'}],
+    1000: [{v:'5',l:'5 m'},{v:'10',l:'10 m'},{v:'50',l:'50 m'}],
+  };
+
+  window.gridUpdateIntervals = function() {
+    const scale = parseInt(document.getElementById('grid-scale').value) || 100;
+    const sel   = document.getElementById('grid-interval');
+    const opts  = GRID_INTERVALS[scale] || GRID_INTERVALS[100];
+    sel.innerHTML = opts.map((o,i) =>
+      `<option value="${o.v}"${i===1?' selected':''}>${o.l}</option>`
+    ).join('');
+    gridComputeMm();
+  };
+
+  window.gridComputeMm = function() {
+    const scale  = parseInt(document.getElementById('grid-scale').value) || 100;
+    const realM  = parseFloat(document.getElementById('grid-interval').value) || 1;
+    const mm     = (realM * 1000) / scale;
+    const txt    = mm < 1 ? mm.toFixed(2) + ' mm' : Number.isInteger(mm) ? mm + ' mm' : mm.toFixed(1) + ' mm';
+    const el     = document.getElementById('grid-computed-mm');
+    if (el) el.value = txt;
+  };
+
+  document.getElementById('grid-interval').addEventListener('change', gridComputeMm);
+  // Init on load
+  gridUpdateIntervals();
+
+  document.getElementById('grid-btn').addEventListener('click', async () => {
+    if (!currentBuffer) return;
+    status('grid-status', 'Adding grid…', 'run');
+    document.getElementById('grid-btn').disabled = true;
+    try {
+      const hex      = document.getElementById('grid-color').value;
+      const cr = parseInt(hex.slice(1,3),16)/255;
+      const cg = parseInt(hex.slice(3,5),16)/255;
+      const cb = parseInt(hex.slice(5,7),16)/255;
+      const lw       = Math.max(0.05, Math.min(2, parseFloat(document.getElementById('grid-lw').value) || 0.15));
+      const position = document.getElementById('grid-position').value;
+      const applyTo  = document.getElementById('grid-pages').value;
+
+      const pdfDoc  = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+      const pages   = applyTo === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+
+      pages.forEach(page => {
+        const { width: W, height: H } = page.getSize();
+
+        // ── Compute grid lines in PDF pts (origin bottom-left, Y up) ──────
+        let xs = [], ys = [];  // x = vertical lines, y = horizontal lines
+
+        if (gridMode === 'spacing') {
+          // spacingMm = realDistance_m * 1000 / scale
+          const scale      = parseInt(document.getElementById('grid-scale').value) || 100;
+          const realM      = parseFloat(document.getElementById('grid-interval').value) || 1;
+          const spacingMm  = (realM * 1000) / scale;
+          const borderMm   = Math.max(0, parseFloat(document.getElementById('grid-border').value) || 0);
+          const spacingPt  = spacingMm * PT_PER_MM;
+          const borderPt   = borderMm  * PT_PER_MM;
+          const x0 = borderPt, x1 = W - borderPt;
+          const y0 = borderPt, y1 = H - borderPt;
+          for (let x = x0; x <= x1 + 0.01; x += spacingPt) xs.push(x);
+          for (let y = y0; y <= y1 + 0.01; y += spacingPt) ys.push(y);
+        } else {
+          const dh = Math.max(2, Math.min(100, parseInt(document.getElementById('grid-div-h').value) || 10));
+          const dv = Math.max(2, Math.min(100, parseInt(document.getElementById('grid-div-v').value) || 10));
+          // horizontal divisions → vertical lines
+          for (let i = 0; i <= dh; i++) xs.push((W / dh) * i);
+          // vertical divisions → horizontal lines
+          for (let i = 0; i <= dv; i++) ys.push((H / dv) * i);
+        }
+
+        // ── Build PDF content stream operators ────────────────────────────
+        const parts = [];
+        parts.push('q');                                           // save state
+        parts.push(`${cr.toFixed(4)} ${cg.toFixed(4)} ${cb.toFixed(4)} RG`); // stroke colour
+        parts.push(`${lw.toFixed(4)} w`);                         // line width
+        parts.push('[] 0 d');                                      // solid line (reset dash)
+        parts.push('0 J 0 j');                                     // butt caps, miter joins
+
+        const y0 = ys[0] ?? 0, y1 = ys[ys.length-1] ?? H;
+        const x0 = xs[0] ?? 0, x1 = xs[xs.length-1] ?? W;
+
+        // Vertical lines
+        xs.forEach(x => {
+          parts.push(`${x.toFixed(3)} ${y0.toFixed(3)} m`);
+          parts.push(`${x.toFixed(3)} ${y1.toFixed(3)} l`);
+        });
+        // Horizontal lines
+        ys.forEach(y => {
+          parts.push(`${x0.toFixed(3)} ${y.toFixed(3)} m`);
+          parts.push(`${x1.toFixed(3)} ${y.toFixed(3)} l`);
+        });
+        parts.push('S');    // stroke all paths
+        parts.push('Q');    // restore state
+
+        const gridStreamBytes = new TextEncoder().encode(parts.join('\n') + '\n');
+
+        // ── Inject into page content stream ───────────────────────────────
+        // pdf-lib stores Contents as a single stream ref or an array of refs.
+        // We create a new PDFRawStream and inject it before (below) or after (above).
+        const gridStream = pdfDoc.context.stream(gridStreamBytes, {});
+        const gridRef    = pdfDoc.context.register(gridStream);
+
+        const contentsRef  = page.node.get(PDFLib.PDFName.of('Contents'));
+
+        if (!contentsRef) {
+          // No existing contents — just set ours
+          page.node.set(PDFLib.PDFName.of('Contents'), gridRef);
+        } else {
+          // Normalise to array
+          let existingRefs;
+          if (contentsRef instanceof PDFLib.PDFArray) {
+            existingRefs = contentsRef;
+          } else {
+            // Single ref — wrap in array
+            existingRefs = pdfDoc.context.obj([contentsRef]);
+          }
+          const newArray = position === 'below'
+            ? pdfDoc.context.obj([gridRef, ...existingRefs.asArray()])
+            : pdfDoc.context.obj([...existingRefs.asArray(), gridRef]);
+          page.node.set(PDFLib.PDFName.of('Contents'), newArray);
+        }
+      });
+
+      gridBytes = await pdfDoc.save({ useObjectStreams: true });
+      const lineCount = pages.length;
+      const _scl = parseInt(document.getElementById('grid-scale').value)||100;
+      const _rm  = parseFloat(document.getElementById('grid-interval').value)||1;
+      const _smm = ((_rm*1000)/_scl);
+      const _stxt= _smm<1?_smm.toFixed(2)+'mm':Number.isInteger(_smm)?_smm+'mm':_smm.toFixed(1)+'mm';
+      const _msg = gridMode==='spacing'
+        ? `Grid added — 1:${_scl}, ${_rm}m intervals (${_stxt} on paper), ${lineCount} page(s).`
+        : `Grid added — ${lineCount} page(s).`;
+      status('grid-status', _msg, 'ok');
+      document.getElementById('grid-dl').disabled    = false;
+      document.getElementById('grid-apply').disabled = false;
+    } catch(e) {
+      status('grid-status', 'Error: ' + e.message, 'err');
+    } finally {
+      document.getElementById('grid-btn').disabled = false;
+    }
+  });
+
+  document.getElementById('grid-dl').addEventListener('click',
+    () => { if (gridBytes) download(gridBytes, nameSuffix('_grid')); });
+  document.getElementById('grid-apply').addEventListener('click',
+    () => { if (gridBytes) applyAsActive(gridBytes, 'Grid', 'grid-status', 'grid-apply'); });
+}
+
+
+// ─── BATCH WATERMARK HELPERS (moved into wt-btn / wl-btn handlers above) ───
+
+// ─── 14. PLAN NUMBERING ────────────────────────────────────────────────────
+document.getElementById('pn-btn').addEventListener('click', async () => {
+  const files = (document.getElementById('tool-choose-file') || document.getElementById('pn-files') || {files:[]}).files;
+  if (!files.length) { status('pn-status', 'Choose at least one PDF file.', 'err'); return; }
+  const prefix  = document.getElementById('pn-prefix').value;
+  const start   = parseInt(document.getElementById('pn-start').value) || 1;
+  const pad     = parseInt(document.getElementById('pn-pad').value) || 2;
+  const pos     = document.getElementById('pn-pos').value;
+  const sz      = parseInt(document.getElementById('pn-size').value) || 18;
+  const hex     = document.getElementById('pn-color').value;
+  const cr = parseInt(hex.slice(1,3),16)/255;
+  const cg = parseInt(hex.slice(3,5),16)/255;
+  const cb = parseInt(hex.slice(5,7),16)/255;
+  const applyTo = document.getElementById('pn-pages').value;
+  status('pn-status', `Numbering ${files.length} file(s)…`, 'run');
+  try {
+    const zip = new JSZip();
+    for (let fi = 0; fi < files.length; fi++) {
+      const file   = files[fi];
+      const numStr = prefix + String(start + fi).padStart(pad, '0');
+      const buf    = await readFile(file);
+      const pdfDoc = await PDFLib.PDFDocument.load(buf.slice(0), { ignoreEncryption: true });
+      const font   = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+      const tw     = font.widthOfTextAtSize(numStr, sz);
+      const margin = 16;
+      const pg     = applyTo === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+      pg.forEach(page => {
+        let rot = 0;
+        try { const rn = page.node.get(PDFLib.PDFName.of('Rotate')); if (rn) rot = ((rn.value()%360)+360)%360; } catch(_){}
+        const swapped = rot===90||rot===270;
+        const { width: rawW, height: rawH } = page.getSize();
+        const visW = swapped ? rawH : rawW;
+        const visH = swapped ? rawW : rawH;
+        function toPdf(vx,vy){ switch(rot){ case 0:return{x:vx,y:vy}; case 90:return{x:rawW-vy,y:vx}; case 180:return{x:rawW-vx,y:rawH-vy}; default:return{x:vy,y:rawH-vx}; } }
+        const textRot = PDFLib.degrees(rot);
+        let vx, vy;
+        if      (pos === 'br') { vx = visW - tw - margin; vy = margin; }
+        else if (pos === 'bl') { vx = margin;              vy = margin; }
+        else if (pos === 'tr') { vx = visW - tw - margin; vy = visH - sz - margin; }
+        else                   { vx = margin;              vy = visH - sz - margin; }
+        const {x, y} = toPdf(vx, vy);
+        page.drawText(numStr, { x, y, size: sz, font, color: PDFLib.rgb(cr,cg,cb), rotate: textRot });
+      });
+      zip.file(numStr.replace(/[\/\\:*?"<>|]/g,'_') + '_' + file.name, await pdfDoc.save({ useObjectStreams:true }));
+    }
+    const blob = await zip.generateAsync({ type:'blob' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'numbered_plans.zip'; a.click();
+    status('pn-status', `Done — ${files.length} plan(s) numbered and zipped.`, 'ok');
+  } catch(e) { status('pn-status', 'Error: ' + e.message, 'err'); }
+});
+
+// ─── 15. REVISION CLOUD ────────────────────────────────────────────────────
+// drawSvgPath coordinate system (confirmed from pdf-lib 1.17.1 source):
+//   Internal transform: translate(x,y) then scale(1,-1)
+//   So: PDF_x = x_option + path_x
+//       PDF_y = y_option - path_y
+//   → (x,y) option = PDF coords of the TOP-LEFT of the path bounding box
+//   → Inside the path: (0,0)=top-left, y increases DOWNWARD
+//
+// drawText uses standard PDF coords: (0,0)=bottom-left, y increases UP
+//   To convert from the path's local frame: pdf_y = y_option - path_y
+{
+  let rcBytes = null;
+
+  // Build cloud path in local frame: (0,0)=top-left, cW×cH, y-down.
+  // drawSvgPath applies scale(1,-1) internally, flipping arc directions.
+  // sweep-flag=1 in local y-down → after y-flip → bumps convex outward.
+  function buildCloudPath(cW, cH, arcR) {
+    const n_h = Math.max(1, Math.round(cW / (arcR * 2)));
+    const n_v = Math.max(1, Math.round(cH / (arcR * 2)));
+    const sh = cW / n_h, sv = cH / n_v;
+    const p = ['M 0 0'];
+    // Top edge: left→right
+    for (let i = 1; i <= n_h; i++)
+      p.push(`A ${arcR.toFixed(2)} ${arcR.toFixed(2)} 0 0 1 ${(sh*i).toFixed(2)} 0`);
+    // Right edge: top→bottom
+    for (let i = 1; i <= n_v; i++)
+      p.push(`A ${arcR.toFixed(2)} ${arcR.toFixed(2)} 0 0 1 ${cW.toFixed(2)} ${(sv*i).toFixed(2)}`);
+    // Bottom edge: right→left
+    for (let i = 1; i <= n_h; i++)
+      p.push(`A ${arcR.toFixed(2)} ${arcR.toFixed(2)} 0 0 1 ${(cW-sh*i).toFixed(2)} ${cH.toFixed(2)}`);
+    // Left edge: bottom→top
+    for (let i = 1; i <= n_v; i++)
+      p.push(`A ${arcR.toFixed(2)} ${arcR.toFixed(2)} 0 0 1 0 ${(cH-sv*i).toFixed(2)}`);
+    p.push('Z');
+    return p.join(' ');
+  }
+
+  document.getElementById('rc-btn').addEventListener('click', async () => {
+    if (!currentBuffer) return;
+    status('rc-status', 'Adding revision cloud…', 'run');
+    document.getElementById('rc-btn').disabled = true;
+    try {
+      const revText  = document.getElementById('rc-rev').value.trim() || '1';
+      const corner   = document.getElementById('rc-corner').value;
+      const cloudWmm = parseFloat(document.getElementById('rc-w').value)      || 80;
+      const cloudHmm = parseFloat(document.getElementById('rc-h').value)      || 50;
+      const arcRmm   = parseFloat(document.getElementById('rc-arc').value)    || 4;
+      const marginMm = parseFloat(document.getElementById('rc-margin').value) || 10;
+      const applyTo  = document.getElementById('rc-pages').value;
+      const hex      = document.getElementById('rc-color').value;
+      const cr = parseInt(hex.slice(1,3),16)/255;
+      const cg = parseInt(hex.slice(3,5),16)/255;
+      const cb = parseInt(hex.slice(5,7),16)/255;
+      const inkColor = PDFLib.rgb(cr,cg,cb);
+
+      const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption:true });
+      const font   = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+      const pages  = applyTo === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+
+      pages.forEach(page => {
+        const { width: W, height: H } = page.getSize();
+
+        // Page rotation: swap visual dims if rotated 90/270
+        let rot = 0;
+        try { const rn = page.node.get(PDFLib.PDFName.of('Rotate')); if (rn) rot = ((rn.value()%360)+360)%360; } catch(_){}
+        const swapped = rot === 90 || rot === 270;
+        const visW = swapped ? H : W;
+        const visH = swapped ? W : H;
+
+        const cW  = cloudWmm * PT_PER_MM;
+        const cH  = cloudHmm * PT_PER_MM;
+        const mg  = marginMm * PT_PER_MM;
+        const arc = arcRmm   * PT_PER_MM;
+
+        // Cloud bottom-left in PDF coords (y-up), then derive anchor (top-left for drawSvgPath)
+        // Using visual dims so corner labels match what user sees
+        let pdfX0, pdfY0; // bottom-left of cloud in PDF space
+        function vToPdf(vx, vy) {
+          switch(rot) {
+            case 0:   return { x: vx,       y: vy       };
+            case 90:  return { x: W - vy,   y: vx       };
+            case 180: return { x: W - vx,   y: H - vy   };
+            default:  return { x: vy,       y: H - vx   };
+          }
+        }
+        // Visual bottom-left of cloud (in visual space, y-up from visual bottom)
+        let vx0, vy0;
+        if      (corner === 'bl') { vx0 = mg;          vy0 = mg; }
+        else if (corner === 'br') { vx0 = visW-mg-cW;  vy0 = mg; }
+        else if (corner === 'tl') { vx0 = mg;           vy0 = visH-mg-cH; }
+        else                      { vx0 = visW-mg-cW;  vy0 = visH-mg-cH; }
+
+        // Convert bottom-left corner to PDF coords
+        const bl = vToPdf(vx0, vy0);
+        const br = vToPdf(vx0+cW, vy0);
+        const tl = vToPdf(vx0, vy0+cH);
+        const tr = vToPdf(vx0+cW, vy0+cH);
+
+        // Bounding box in PDF coords
+        const px0 = Math.min(bl.x, br.x, tl.x, tr.x);
+        const py0 = Math.min(bl.y, br.y, tl.y, tr.y);
+        const px1 = Math.max(bl.x, br.x, tl.x, tr.x);
+        const py1 = Math.max(bl.y, br.y, tl.y, tr.y);
+        const pcW = px1 - px0, pcH = py1 - py0;
+
+        // Draw cloud: anchor x=px0, y=py1 (PDF top-left), path is local cW×cH, y-down
+        page.drawSvgPath(buildCloudPath(pcW, pcH, arc), {
+          x: px0,
+          y: py1,
+          borderColor: inkColor,
+          borderWidth: 1.4
+        });
+
+        // Triangle marker at chosen corner
+        const triSide = Math.min(pcW, pcH) * 0.30;
+        const triH    = triSide * Math.sqrt(3) / 2;
+        // Triangle path in local frame (0,0 = anchor top-left, y-down)
+        // Apex at the cloud corner, base inward
+        let triPathStr, triAnchorX, triAnchorY;
+        if (corner === 'bl') {
+          // Apex at PDF (px0, py0) = path-local bottom-left = (0, triH) when anchor = (px0, py0+triH)
+          triAnchorX = px0; triAnchorY = py0 + triH;
+          triPathStr = `M 0 ${triH.toFixed(2)} L ${triSide.toFixed(2)} ${triH.toFixed(2)} L 0 0 Z`;
+        } else if (corner === 'br') {
+          triAnchorX = px1 - triSide; triAnchorY = py0 + triH;
+          triPathStr = `M 0 ${triH.toFixed(2)} L ${triSide.toFixed(2)} ${triH.toFixed(2)} L ${triSide.toFixed(2)} 0 Z`;
+        } else if (corner === 'tl') {
+          triAnchorX = px0; triAnchorY = py1;
+          triPathStr = `M 0 0 L ${triSide.toFixed(2)} 0 L 0 ${triH.toFixed(2)} Z`;
+        } else { // tr
+          triAnchorX = px1 - triSide; triAnchorY = py1;
+          triPathStr = `M 0 0 L ${triSide.toFixed(2)} 0 L ${triSide.toFixed(2)} ${triH.toFixed(2)} Z`;
+        }
+        page.drawSvgPath(triPathStr, { x: triAnchorX, y: triAnchorY, color: inkColor, borderWidth: 0 });
+
+        // Revision text: drawText uses PDF coords (y-up)
+        // Centroid of triangle in PDF space
+        const fontSize = triH * 0.48;
+        const tw = font.widthOfTextAtSize(revText, fontSize);
+        let tcx, tcy;
+        if (corner === 'bl') {
+          tcx = px0 + triSide / 3;
+          tcy = py0 + triH / 3;
+        } else if (corner === 'br') {
+          tcx = px1 - triSide * 2 / 3;
+          tcy = py0 + triH / 3;
+        } else if (corner === 'tl') {
+          tcx = px0 + triSide / 3;
+          tcy = py1 - triH * 2 / 3;
+        } else {
+          tcx = px1 - triSide * 2 / 3;
+          tcy = py1 - triH * 2 / 3;
+        }
+        page.drawText(revText, {
+          x: tcx - tw / 2,
+          y: tcy - fontSize * 0.35,
+          size: fontSize,
+          font,
+          color: PDFLib.rgb(1, 1, 1)
+        });
+      });
+
+      rcBytes = await pdfDoc.save({ useObjectStreams:true });
+      status('rc-status', `Revision cloud "${revText}" added to ${pages.length} page(s).`, 'ok');
+      document.getElementById('rc-dl').disabled    = false;
+      document.getElementById('rc-apply').disabled = false;
+    } catch(e) {
+      status('rc-status', 'Error: ' + e.message, 'err');
+    } finally {
+      document.getElementById('rc-btn').disabled = false;
+    }
+  });
+
+  document.getElementById('rc-dl').addEventListener('click',
+    () => { if (rcBytes) download(rcBytes, nameSuffix('_revcloud')); });
+  document.getElementById('rc-apply').addEventListener('click',
+    () => { if (rcBytes) applyAsActive(rcBytes, 'Rev cloud', 'rc-status', 'rc-apply'); });
+}
+
+document.addEventListener('DOMContentLoaded', () => {{ openTool('revision-cloud'); }});
+function resetToHome() {{
+  currentBuffer=null; currentFileName=''; modificationHistory=[];
+  try {{ sessionStorage.removeItem('sb_file'); sessionStorage.removeItem('sb_name'); }} catch(e){{}}
+  document.getElementById('file-indicator').textContent='No file loaded';
+  document.getElementById('btn-change-file').style.display='none';
+  const btn=document.getElementById('tool-choose-btn'), nm=document.getElementById('tool-choose-name');
+  if(btn) btn.textContent='Choose PDF'; if(nm) nm.textContent='';
+  const inp=document.getElementById('tool-choose-file'); if(inp) inp.value='';
+}}
+(async function(){{
+  try {{
+    const b64=sessionStorage.getItem('sb_file'), name=sessionStorage.getItem('sb_name')||'document.pdf';
+    if(b64){{
+      const bin=atob(b64),arr=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+      currentBuffer=arr.buffer; currentFileName=name; _updateChooseBtn(name);
+      document.getElementById('file-indicator').innerHTML='File: <span style="color:#fff">'+name+'</span>';
+      document.getElementById('btn-change-file').style.display='inline-block';
+    }}
+  }}catch(e){{}}
+  const inp=document.getElementById('tool-choose-file');
+  if(inp) inp.addEventListener('change',async e=>{{
+    const file=e.target.files[0]; if(!file) return;
+    await loadPDF(file); _updateChooseBtn(file.name);
+  }});
+  document.addEventListener('dragover',e=>e.preventDefault());
+  document.addEventListener('drop',async e=>{{
+    e.preventDefault();
+    const file=[...(e.dataTransfer.files||[])].find(f=>f.type==='application/pdf');
+    if(file){{await loadPDF(file);_updateChooseBtn(file.name);}}
+  }});
+}})();
+function _updateChooseBtn(name){{
+  const btn=document.getElementById('tool-choose-btn'),span=document.getElementById('tool-choose-name');
+  if(btn) btn.textContent='\u2713 PDF loaded'; if(span) span.textContent=name;
+}}
 </script>
 </body>
 </html>

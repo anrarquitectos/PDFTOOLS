@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scalebar PDF Tools — Free browser-based PDF tools</title>
+<title>Scale Bar (metres) — Scalebar PDF Tools</title>
+  <meta name="description" content="Add a metric graphic scale bar.">
 <style>
   :root {
     --bg: #f8f8f6;
@@ -56,59 +57,67 @@
     font-size: 0.75rem; color: var(--mid);
   }
 
-  /* ── TOOLS GRID ── */
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 4px;
+  #drop-zone {
+    border: 2px dashed #bbb; background: var(--white);
+    border-radius: var(--radius); padding: 48px 24px;
+    text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 32px; position: relative; overflow: hidden;
   }
+  #drop-zone.dragover { border-color: var(--ink); background: #f0f0ee; }
+  #drop-zone h3 { font-size: 1rem; font-weight: normal; margin-bottom: 6px; }
+  #drop-zone p { color: var(--mid); font-size: 0.83rem; }
+  #file-input-hidden { display: none; }
+
+  /* Check animation */
+  #drop-check {
+    display: none; position: absolute; inset: 0;
+    background: var(--white); align-items: center; justify-content: center;
+    flex-direction: column; gap: 10px;
+  }
+  #drop-check.show { display: flex; animation: fadeCheck 1.6s ease forwards; }
+  @keyframes fadeCheck { 0%{opacity:0} 20%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+  #drop-check .check-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--ok); display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; color: var(--ok); animation: scaleIn 0.3s ease;
+  }
+  @keyframes scaleIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+  #drop-check p { font-size: 0.85rem; color: var(--ok); }
+
+  /* ── TOOLS CAROUSEL ── */
+  .tools-carousel-wrap { position: relative; margin-bottom: 4px; }
+  .tools-carousel-wrap .scroll-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: var(--white); border: 1px solid #ccc; border-radius: 50%;
+    width: 30px; height: 30px; cursor: pointer; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2; transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .tools-carousel-wrap .scroll-btn:hover { border-color: var(--ink); box-shadow: 1px 1px 0 var(--ink); }
+  .tools-carousel-wrap .scroll-btn.left  { left: -15px; }
+  .tools-carousel-wrap .scroll-btn.right { right: -15px; }
+  .tools-grid {
+    display: flex; gap: 12px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    scroll-behavior: smooth; padding-bottom: 6px;
+    /* hide scrollbar visually but keep functional */
+    scrollbar-width: none;
+  }
+  .tools-grid::-webkit-scrollbar { display: none; }
   .tool-card {
     background: var(--white); border: 1px solid var(--light);
     border-radius: var(--radius); padding: 16px; cursor: pointer;
     transition: border-color 0.15s, box-shadow 0.15s;
+    /* exactly 6 cards visible in 820px container: (820 - 5*12) / 6 = 126.7px */
+    min-width: 185px; max-width: 185px;
+    scroll-snap-align: start; flex-shrink: 0;
   }
   .tool-card:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
   .tool-card .icon { font-size: 1.4rem; margin-bottom: 8px; }
   .tool-card h3 { font-size: 0.82rem; margin-bottom: 4px; line-height: 1.3; }
   .tool-card p { font-size: 0.72rem; color: var(--mid); line-height: 1.35; }
-
-  /* Peek row: half-height overflow reveals row 2 */
-  .tools-peek-wrap {
-    overflow: hidden;
-    /* show row 1 (card ~110px) + peek of row 2 (~85px) */
-    max-height: calc(110px + 12px + 85px);
-    transition: max-height 0.4s ease;
-    margin-bottom: 0;
-  }
-  .tools-peek-wrap.expanded {
-    max-height: 2000px;
-  }
-  /* fade at bottom when collapsed */
-  .tools-peek-outer {
-    position: relative;
-    margin-bottom: 4px;
-  }
-  .tools-peek-fade {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 48px;
-    background: linear-gradient(to bottom, transparent, var(--bg));
-    pointer-events: none;
-    transition: opacity 0.3s;
-  }
-  .tools-peek-outer.expanded .tools-peek-fade { opacity: 0; }
-
-  /* More tools button */
-  #more-tools-btn {
-    display: flex; align-items: center; gap: 6px; margin: 10px auto 0;
-    background: none; border: 1px solid #ccc; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.8rem; color: var(--mid);
-    padding: 6px 18px; cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  #more-tools-btn:hover { border-color: var(--ink); color: var(--ink); }
-  #more-tools-btn .chevron { transition: transform 0.3s; font-size: 0.65rem; }
-  #more-tools-btn.open .chevron { transform: rotate(180deg); }
 
   /* ── TOOL VIEW ── */
   #view-tool { max-width: 860px; margin: 0 auto; padding: 32px 20px; }
@@ -308,37 +317,41 @@
 <!-- TOP BAR -->
 <div id="topbar">
   <h1><a href="index.html" style="color:inherit;text-decoration:none;">▣ SCALEBAR PDF TOOLS</a></h1>
-  <div id="file-indicator" style="display:none"></div>
+  <div id="file-indicator">No file loaded</div>
   <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
-  <div id="lang-switcher" style="display:flex;gap:4px;margin-left:12px;">
-    <button onclick="setLang('en')" style="background:none;border:1px solid #444;color:#aaa;padding:2px 7px;font-size:0.72rem;border-radius:3px;cursor:pointer;font-family:inherit;" id="lang-en">EN</button>
-    <button onclick="setLang('es')" style="background:none;border:1px solid #444;color:#aaa;padding:2px 7px;font-size:0.72rem;border-radius:3px;cursor:pointer;font-family:inherit;" id="lang-es">ES</button>
-  </div>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
-<div id="view-home" class="view active">
+<div id="view-home" class="view" style="display:none!important">
   <div style="max-width:860px; margin:0 auto; padding:40px 20px;">
 
     <div class="home-header">
-      <h2 data-i18n="tagline">Scalebar PDF Tools — 100% free</h2>
-      <p data-i18n="hero_desc">For architects and professionals who need to work with documents efficiently and confidentially. Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.</p>
+      <h2>Scalebar PDF Tools — 100% free</h2>
+      <p>For architects and professionals who need to work with documents efficiently and confidentially.
+         Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.</p>
       <div class="privacy-badge">
-        <span data-i18n="privacy_badge">Your files never leave your browser — 100% local processing</span>
+        Your files never leave your browser — 100% local processing
       </div>
     </div>
 
-    <p style="font-size:0.8rem; color:var(--mid); margin-bottom:12px;" data-i18n="choose_tool">Choose a tool:</p>
-    <div class="tools-peek-outer" id="tools-peek-outer">
-      <div class="tools-peek-wrap" id="tools-peek-wrap">
-        <div class="tools-grid" id="home-tools-grid"></div>
+    <div id="drop-zone" onclick="document.getElementById('file-input-hidden').click()">
+      <div id="drop-zone-content">
+        <div style="font-size:2.2rem; margin-bottom:10px;">⬆</div>
+        <h3>Upload a PDF file</h3>
+        <p>Click here or drag and drop a file</p>
       </div>
-      <div class="tools-peek-fade" id="tools-peek-fade"></div>
+      <div id="drop-check">
+        <div class="check-circle">✓</div>
+        <p id="drop-check-name">File loaded</p>
+      </div>
     </div>
-    <div style="text-align:center;">
-      <button id="more-tools-btn" onclick="toggleMoreTools()">
-        <span id="more-tools-label" data-i18n="more_tools">More tools</span> <span class="chevron">▼</span>
-      </button>
+    <input type="file" id="file-input-hidden" accept="application/pdf">
+
+    <p style="font-size:0.8rem; color:var(--mid); margin-bottom:12px;">Or choose a tool directly:</p>
+    <div class="tools-carousel-wrap">
+      <button class="scroll-btn left" onclick="scrollGrid(-1)">‹</button>
+      <div class="tools-grid" id="home-tools-grid"></div>
+      <button class="scroll-btn right" onclick="scrollGrid(1)">›</button>
     </div>
 
     <!-- Carbon Ads — replace comment with Carbon script tag once approved -->
@@ -353,7 +366,7 @@
     <!-- ── FAQ ── -->
     <section style="margin-top:56px; max-width:720px; margin-left:auto; margin-right:auto;">
       <h3 style="font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:24px; letter-spacing:0.01em;">
-        <span data-i18n="faq_title">Frequently asked questions</span>
+        Frequently asked questions
       </h3>
 
       <style>
@@ -768,6 +781,15 @@
     <!-- ── 7. GRAPHIC SCALE BAR ── -->
     <div class="tool-panel" id="panel-scalebar">
       <div class="panel-box">
+      <div id="tool-choose-wrap" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <button type="button" id="tool-choose-btn"
+          onclick="document.getElementById('tool-choose-file').click()"
+          style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
+          Choose PDF
+        </button>
+        <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;">
+        <span id="tool-choose-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
+      </div>
         <h2>Graphic scale bar</h2>
         <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
           Adds an architectural scale bar to every page. Page rotation is automatically detected
@@ -1441,22 +1463,19 @@ pdfjsScript.onload = () => {
 
 // ─── TOOL DEFINITIONS ────────────────────────────────────────────────────
 const TOOLS = [
-  { id:'compress',       icon:'🗜', name:'Compress PDF',          desc:'Ghostscript-powered compression with full control over DPI and quality.' },
-  { id:'scalebar',       icon:'📏', name:'Scale bar (m)',          desc:'Add a metric graphic scale bar auto-sized by paper format and drawing scale.' },
-  { id:'scalebar-ft',    icon:'📐', name:'Scale bar (ft)',         desc:'Add an imperial scale bar in feet, auto-sized by paper format and scale.' },
-  { id:'vineta',         icon:'📋', name:'Title block',            desc:'Architectural title block with project info, plan number, scale and signatures.' },
-  { id:'patch',          icon:'⬜', name:'Patch / Redact',         desc:'Draw a white polygon to cover content — with optional permanent flattening.' },
-  { id:'watermark-text', icon:'✒', name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
-  { id:'watermark-logo', icon:'🔖', name:'Logo watermark',         desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
-  { id:'crop',           icon:'⊡', name:'Resize to format',       desc:'Scale pages to A0–A4, Letter or Legal with auto or forced orientation.' },
-  { id:'reorder',        icon:'⇅', name:'Reorder & remove',       desc:'Drag pages to rearrange them and remove any you don\'t need.' },
-  { id:'split',          icon:'✂', name:'Split PDF',              desc:'Select break points between pages and export each section separately.' },
-  { id:'merge',          icon:'⊕', name:'Merge PDFs',             desc:'Upload multiple PDFs, rearrange them and combine into one document.' },
-  { id:'convert',        icon:'🖼', name:'PDF to images',          desc:'Export each page as PNG or JPG at the resolution you need.' },
-  { id:'img2pdf',        icon:'🗒', name:'Images to PDF',          desc:'Convert JPG, PNG or WebP images into a single PDF document.' },
-  { id:'grid',           icon:'⊞', name:'Page grid',              desc:'Add a scale-aware reference grid to PDF pages for architectural drawings.' },
-  { id:'plan-numbering', icon:'🔢', name:'Plan numbering',         desc:'Stamp sequential plan numbers on multiple PDFs in one batch operation.' },
-  { id:'revision-cloud', icon:'☁', name:'Revision cloud',         desc:'Add an architectural revision cloud with numbered corner triangle marker.' },
+  { id:'compress',    icon:'🗜', name:'Compress PDF',           desc:'Ghostscript-powered compression with full control over DPI and quality.' },
+  { id:'vineta',      icon:'📋', name:'Title block',          desc:'Generate an architectural title block (viñeta) with project name, plan number, scale, signatures and more.' },
+  { id:'patch',       icon:'⬜', name:'Patch / Redact',         desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
+  { id:'scalebar',    icon:'📏', name:'Scale bar (m)',          desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
+  { id:'scalebar-ft', icon:'📐', name:'Scale bar (ft)',         desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
+  { id:'wm-logo',     icon:'🔖', name:'Logo watermark',        desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
+  { id:'wm-text',     icon:'✒', name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
+  { id:'crop',        icon:'📋', name:'Resize to format',      desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
+  { id:'reorder',     icon:'⇅', name:'Reorder & remove pages', desc:'Drag pages to rearrange them and remove any you don\'t need.' },
+  { id:'split',       icon:'✂', name:'Split PDF',              desc:'Select break points between pages and export each section as a separate PDF.' },
+  { id:'merge',       icon:'⊕', name:'Merge PDFs',            desc:'Upload multiple PDFs, rearrange them and combine into one.', noFile: true },
+  { id:'convert',     icon:'🖼', name:'Convert to images',     desc:'Export each page as PNG or JPG at the resolution you need.' },
+  { id:'img2pdf',     icon:'🗒', name:'Image to PDF',          desc:'Convert one or more images (JPG, PNG) into a PDF document.', noFile: true },
 ];
 
 // ─── STATE ───────────────────────────────────────────────────────────────
@@ -1466,140 +1485,24 @@ let activeToolId = null;
 let modificationHistory = [];
 let gsInstance = null; // Ghostscript WASM singleton
 
-
-// ─── I18N ─────────────────────────────────────────────────────────────────
-const TRANSLATIONS = {
-  en: {
-    tagline:       'Scalebar PDF Tools — 100% free',
-    hero_desc:     'For architects and professionals who need to work with documents efficiently and confidentially. Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.',
-    privacy_badge: 'Your files never leave your browser — 100% local processing',
-    choose_tool:   'Choose a tool:',
-    more_tools:    'More tools',
-    less_tools:    'Less tools',
-    faq_title:     'Frequently asked questions',
-    // Tool names
-    'compress':       'Compress PDF',
-    'scalebar':       'Scale bar (m)',
-    'scalebar-ft':    'Scale bar (ft)',
-    'vineta':         'Title block',
-    'patch':          'Patch / Redact',
-    'watermark-text': 'Text watermark',
-    'watermark-logo': 'Logo watermark',
-    'crop':           'Resize to format',
-    'reorder':        'Reorder & remove',
-    'split':          'Split PDF',
-    'merge':          'Merge PDFs',
-    'convert':        'PDF to images',
-    'img2pdf':        'Images to PDF',
-    'grid':           'Page grid',
-    'plan-numbering': 'Plan numbering',
-    'revision-cloud': 'Revision cloud',
-    // Tool descriptions
-    'd_compress':       'Ghostscript-powered compression with full control over DPI and quality.',
-    'd_scalebar':       'Add a metric graphic scale bar auto-sized by paper format and drawing scale.',
-    'd_scalebar-ft':    'Add an imperial scale bar in feet, auto-sized by paper format and scale.',
-    'd_vineta':         'Architectural title block with project info, plan number, scale and signatures.',
-    'd_patch':          'Draw a white polygon to cover content — with optional permanent flattening.',
-    'd_watermark-text': 'Add semi-transparent text across pages — customizable size, color and position.',
-    'd_watermark-logo': 'Embed your studio logo in grayscale with adjustable opacity and rotation.',
-    'd_crop':           'Scale pages to A0–A4, Letter or Legal with auto or forced orientation.',
-    'd_reorder':        'Drag pages to rearrange them and remove any you don\'t need.',
-    'd_split':          'Select break points between pages and export each section separately.',
-    'd_merge':          'Upload multiple PDFs, rearrange them and combine into one document.',
-    'd_convert':        'Export each page as PNG or JPG at the resolution you need.',
-    'd_img2pdf':        'Convert JPG, PNG or WebP images into a single PDF document.',
-    'd_grid':           'Add a scale-aware reference grid to PDF pages for architectural drawings.',
-    'd_plan-numbering': 'Stamp sequential plan numbers on multiple PDFs in one batch operation.',
-    'd_revision-cloud': 'Add an architectural revision cloud with numbered corner triangle marker.',
-  },
-  es: {
-    tagline:       'Scalebar PDF Tools — 100% gratis',
-    hero_desc:     'Para arquitectos y profesionales que necesitan trabajar con documentos de forma eficiente y confidencial. Comprime planos, añade escalas gráficas y viñetas, cambia el formato de páginas, añade marcas de agua y más.',
-    privacy_badge: 'Tus archivos nunca salen del navegador — procesamiento 100% local',
-    choose_tool:   'Elige una herramienta:',
-    more_tools:    'Más herramientas',
-    less_tools:    'Menos herramientas',
-    faq_title:     'Preguntas frecuentes',
-    // Tool names
-    'compress':       'Comprimir PDF',
-    'scalebar':       'Escala gráfica (m)',
-    'scalebar-ft':    'Escala gráfica (ft)',
-    'vineta':         'Viñeta / Carátula',
-    'patch':          'Parche / Redactar',
-    'watermark-text': 'Marca de agua texto',
-    'watermark-logo': 'Marca de agua logo',
-    'crop':           'Cambiar formato',
-    'reorder':        'Reordenar páginas',
-    'split':          'Dividir PDF',
-    'merge':          'Unir PDFs',
-    'convert':        'PDF a imágenes',
-    'img2pdf':        'Imágenes a PDF',
-    'grid':           'Grilla de página',
-    'plan-numbering': 'Numeración de planos',
-    'revision-cloud': 'Nube de revisión',
-    // Tool descriptions
-    'd_compress':       'Compresión con Ghostscript — control total sobre DPI y calidad.',
-    'd_scalebar':       'Añade una escala gráfica métrica auto-dimensionada por formato y escala de dibujo.',
-    'd_scalebar-ft':    'Añade una escala gráfica en pies, auto-dimensionada por formato y escala.',
-    'd_vineta':         'Viñeta arquitectónica con nombre de proyecto, número de plano, escala y firmas.',
-    'd_patch':          'Dibuja un polígono blanco para cubrir contenido — con aplanado permanente opcional.',
-    'd_watermark-text': 'Añade texto semitransparente en páginas — tamaño, color y posición personalizables.',
-    'd_watermark-logo': 'Inserta tu logo de estudio en escala de grises con opacidad y rotación ajustables.',
-    'd_crop':           'Escala páginas a A0–A4, Letter o Legal con orientación automática o forzada.',
-    'd_reorder':        'Arrastra páginas para reorganizarlas y elimina las que no necesites.',
-    'd_split':          'Selecciona puntos de corte entre páginas y exporta cada sección por separado.',
-    'd_merge':          'Sube varios PDFs, reorganízalos y combínalos en un solo documento.',
-    'd_convert':        'Exporta cada página como PNG o JPG con la resolución que necesites.',
-    'd_img2pdf':        'Convierte imágenes JPG, PNG o WebP en un único documento PDF.',
-    'd_grid':           'Añade una grilla de referencia a escala en páginas PDF para planos arquitectónicos.',
-    'd_plan-numbering': 'Estampa números de plano correlativos en varios PDFs en una sola operación.',
-    'd_revision-cloud': 'Añade una nube de revisión arquitectónica con triángulo numerado en esquina.',
-  }
-};
-
-// Detect language: check localStorage override first, then browser
-const _langRaw = localStorage.getItem('sb_lang') || navigator.language || 'en';
-const _lang = _langRaw.slice(0, 2).toLowerCase();
-const T = TRANSLATIONS[_lang] || TRANSLATIONS['en'];
-
-// Apply static data-i18n text nodes
-function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    if (T[key]) el.textContent = T[key];
-  });
-}
-
-// Language switcher (call from UI)
-function setLang(lang) {
-  localStorage.setItem('sb_lang', lang);
-  location.reload();
-}
 // ─── HOME GRID ───────────────────────────────────────────────────────────
-const _sm = {'compress':'compress','vineta':'vineta','patch':'patch','scalebar':'scalebar','scalebar-ft':'scalebar_ft','watermark-text':'watermark_text','watermark-logo':'watermark_logo','crop':'crop','reorder':'reorder','split':'split','merge':'merge','convert':'convert','img2pdf':'img2pdf','grid':'grid','plan-numbering':'plan_numbering','revision-cloud':'revision_cloud'};
 const homeGrid = document.getElementById('home-tools-grid');
 TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  const name = T[t.id] || t.name;
-  const desc = T['d_' + t.id] || t.desc;
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${name}</h3><p>${desc}</p>`;
-  card.onclick = () => { const p = _sm[t.id]; if (p) window.location.href = p + '.html'; };
+  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  card.onclick = () => {
+    if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
+    else { openTool(t.id); }
+  };
   homeGrid.appendChild(card);
 });
-// Apply i18n to static elements
-document.addEventListener('DOMContentLoaded', applyI18n);
 let pendingTool = null;
 
-function toggleMoreTools() {
-  const wrap  = document.getElementById('tools-peek-wrap');
-  const outer = document.getElementById('tools-peek-outer');
-  const btn   = document.getElementById('more-tools-btn');
-  const label = document.getElementById('more-tools-label');
-  const open  = wrap.classList.toggle('expanded');
-  outer.classList.toggle('expanded', open);
-  btn.classList.toggle('open', open);
-  label.textContent = open ? (T.less_tools || 'Less tools') : (T.more_tools || 'More tools');
+function scrollGrid(dir) {
+  const grid = document.getElementById('home-tools-grid');
+  // Scroll by 3 card widths (127px + 12px gap = 139px × 3)
+  grid.scrollBy({ left: dir * 197 * 4, behavior: 'smooth' });
 }
 
 // ─── FILE LOADING ─────────────────────────────────────────────────────────
@@ -1628,6 +1531,7 @@ async function loadPDF(file) {
   currentFileName = file.name;
   modificationHistory = [];
   updateTopBar();
+  showDropCheck(file.name);
 }
 
 function updateTopBar() {
@@ -1639,16 +1543,28 @@ function updateTopBar() {
   persistFile();
 }
 
+function showDropCheck(name) {
+  const el = document.getElementById('drop-check');
+  document.getElementById('drop-check-name').textContent = name;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1700);
+}
 
-
-// Highlight active language button
-document.addEventListener('DOMContentLoaded', () => {
-  const activeLang = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
-  const btnEl = document.getElementById('lang-' + activeLang);
-  if (btnEl) { btnEl.style.color = '#fff'; btnEl.style.borderColor = '#fff'; }
+document.getElementById('file-input-hidden').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  await loadPDF(file);
+  if (pendingTool) { openTool(pendingTool); pendingTool = null; }
+  e.target.value = '';
 });
 
-// Drop zone removed — cards navigate directly to tool pages
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', async e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') await loadPDF(file);
+});
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────
 function openTool(id) {
@@ -3413,6 +3329,58 @@ document.querySelectorAll('.sb-style-btn').forEach(btn => {
   });
 });
 
+// ── Auto-open ────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => { openTool('scalebar');  });
+
+// ── Override resetToHome: clear file only, no navigation ─────────────────
+function resetToHome() {
+  currentBuffer = null; currentFileName = ''; modificationHistory = [];
+  try { sessionStorage.removeItem('sb_file'); sessionStorage.removeItem('sb_name'); } catch(e){}
+  document.getElementById('file-indicator').textContent = 'No file loaded';
+  document.getElementById('btn-change-file').style.display = 'none';
+  const btn  = document.getElementById('tool-choose-btn');
+  const name = document.getElementById('tool-choose-name');
+  if (btn)  btn.textContent = 'Choose PDF';
+  if (name) name.textContent = '';
+  const inp = document.getElementById('tool-choose-file');
+  if (inp) inp.value = '';
+}
+
+// ── Session restore + wire choose input ──────────────────────────────────
+(async function() {
+  try {
+    const b64  = sessionStorage.getItem('sb_file');
+    const name = sessionStorage.getItem('sb_name') || 'document.pdf';
+    if (b64) {
+      const bin = atob(b64); const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      currentBuffer = arr.buffer; currentFileName = name;
+      _updateChooseBtn(name);
+      document.getElementById('file-indicator').innerHTML = 'File: <span style="color:#fff">' + name + '</span>';
+      document.getElementById('btn-change-file').style.display = 'inline-block';
+      
+    }
+  } catch(e) {}
+  const inp = document.getElementById('tool-choose-file');
+  if (inp) inp.addEventListener('change', async e => {
+    const file = e.target.files[0]; if (!file) return;
+    await loadPDF(file); _updateChooseBtn(file.name);
+    
+  });
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', async e => {
+    e.preventDefault();
+    const file = [...(e.dataTransfer.files||[])].find(f => f.type==='application/pdf');
+    if (file) { await loadPDF(file); _updateChooseBtn(file.name);  }
+  });
+})();
+
+function _updateChooseBtn(name) {
+  const btn  = document.getElementById('tool-choose-btn');
+  const span = document.getElementById('tool-choose-name');
+  if (btn)  btn.textContent = '\u2713 PDF loaded';
+  if (span) span.textContent = name;
+}
 </script>
 </body>
 </html>
