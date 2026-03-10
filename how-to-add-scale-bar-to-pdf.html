@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Add a Scale Bar to a PDF — Scalebar PDF Tools</title>
+<meta name="description" content="Add a professional graphic scale bar to any architectural PDF in seconds — automatically sized for your drawing scale and paper format. No CAD software required.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://scalebar.tools/how-to-add-scale-bar-to-pdf">
+<!-- Open Graph -->
+<meta property="og:title" content="How to Add a Scale Bar to a PDF">
+<meta property="og:description" content="Automatically sized for your drawing scale and paper format. Works on any PDF, in your browser.">
+<meta property="og:type" content="article">
+<style>
+  :root {
+    --bg: #f8f8f6;
+    --white: #ffffff;
+    --ink: #1a1a1a;
+    --mid: #555;
+    --light: #e8e8e4;
+    --ok: #2d6a2d;
+    --radius: 4px;
+    --accent: #1a4db3;
+    --max: 720px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--bg); color: var(--ink);
+    font-size: 14px; line-height: 1.7;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background: var(--ink); color: var(--white);
+    padding: 12px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
+  #topbar a { color: inherit; text-decoration: none; }
+
+  /* ── LANG SWITCHER ── */
+  #lang-switcher { display: flex; gap: 4px; }
+  #lang-switcher button {
+    background: none; border: 1px solid #444; color: #aaa;
+    padding: 2px 7px; font-size: 0.72rem; border-radius: 3px;
+    cursor: pointer; font-family: inherit;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color: #fff; border-color: #fff; }
+  #lang-switcher button.active { color: #fff; border-color: #fff; }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    font-size: 0.75rem; color: var(--mid);
+    margin-bottom: 32px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .breadcrumb a { color: var(--mid); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--ink); }
+  .breadcrumb span { opacity: 0.5; }
+
+  /* ── ARTICLE HEADER ── */
+  .article-header { margin-bottom: 40px; }
+  .article-meta {
+    font-size: 0.75rem; color: var(--mid);
+    margin-bottom: 14px; letter-spacing: 0.05em;
+  }
+  .article-header h2 {
+    font-size: 1.6rem; font-weight: normal;
+    letter-spacing: 0.02em; line-height: 1.3;
+    margin-bottom: 16px;
+  }
+  .article-header .lede {
+    font-size: 0.95rem; color: var(--mid);
+    line-height: 1.7; max-width: 600px;
+    border-left: 3px solid var(--ink);
+    padding-left: 16px;
+  }
+
+  /* ── PROSE ── */
+  .prose { max-width: var(--max); }
+  .prose h3 {
+    font-size: 1rem; font-weight: bold;
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--light);
+    letter-spacing: 0.04em;
+  }
+  .prose h3 .step-num {
+    display: inline-block;
+    background: var(--ink); color: var(--white);
+    font-size: 0.72rem; padding: 1px 7px;
+    border-radius: 2px; margin-right: 8px;
+    vertical-align: middle; letter-spacing: 0.05em;
+  }
+  .prose p { margin-bottom: 16px; font-size: 0.88rem; color: var(--ink); }
+  .prose p.note {
+    background: var(--white); border: 1px solid var(--light);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--mid); font-size: 0.82rem; margin-bottom: 20px;
+  }
+  .prose strong { color: var(--ink); }
+
+  /* ── SCREENSHOT PLACEHOLDER ── */
+  .screenshot-wrap {
+    margin: 24px 0 28px;
+    border: 1px solid var(--light);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .screenshot-wrap img {
+    display: block; width: 100%; height: auto;
+  }
+  .screenshot-placeholder {
+    background: var(--white);
+    border: 2px dashed #ccc;
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--mid);
+    font-size: 0.8rem;
+  }
+  .screenshot-placeholder .sc-icon { font-size: 2rem; margin-bottom: 8px; }
+  .screenshot-caption {
+    padding: 8px 14px;
+    background: #f2f2f0;
+    border-top: 1px solid var(--light);
+    font-size: 0.75rem; color: var(--mid);
+    font-style: italic;
+  }
+
+  /* ── RESULT BOX ── */
+  .result-box {
+    background: var(--white);
+    border: 1px solid var(--light);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin: 24px 0;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .result-box .rb-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+  .result-box .rb-text { font-size: 0.85rem; }
+  .result-box .rb-text strong { display: block; margin-bottom: 4px; }
+
+  /* ── CTA ── */
+  .cta-block {
+    background: var(--ink); color: var(--white);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    margin-top: 48px;
+    text-align: center;
+  }
+  .cta-block p {
+    font-size: 0.85rem; color: #aaa;
+    margin-bottom: 20px; margin-top: 8px;
+  }
+  .cta-block h3 {
+    font-size: 1.1rem; font-weight: normal;
+    letter-spacing: 0.06em; margin-bottom: 0;
+    border: none; padding: 0; color: var(--white);
+  }
+  .cta-btn {
+    display: inline-block;
+    background: var(--white); color: var(--ink);
+    padding: 11px 28px; border-radius: var(--radius);
+    font-family: inherit; font-size: 0.9rem; font-weight: bold;
+    text-decoration: none; letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s;
+    border: 2px solid var(--white);
+  }
+  .cta-btn:hover { background: transparent; color: var(--white); }
+
+  /* ── RELATED ── */
+  .related-wrap {
+    margin-top: 56px;
+    border-top: 1px solid var(--light);
+    padding-top: 28px;
+  }
+  .related-wrap h4 {
+    font-size: 0.75rem; color: var(--mid);
+    letter-spacing: 0.1em; margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .related-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .related-tools a {
+    padding: 6px 14px; border: 1px solid #ccc;
+    background: var(--white); border-radius: var(--radius);
+    font-size: 0.8rem; color: var(--ink); text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <h1><a href="index.html">▣ SCALEBAR PDF TOOLS</a></h1>
+  <div id="lang-switcher">
+    <button id="lang-en" onclick="setLang('en')">EN</button>
+    <button id="lang-es" onclick="setLang('es')">ES</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb">
+    <a href="index.html" data-i18n="home">Home</a>
+    <span>›</span>
+    <span data-i18n="tutorials_label">Tutorials</span>
+  </nav>
+
+  <!-- ARTICLE HEADER -->
+  <header class="article-header">
+    <div class="article-meta" data-i18n="article_meta">TUTORIAL — SCALE BAR · PDF WORKFLOW</div>
+    <h2 data-i18n="article_title">How to add a scale bar to a PDF — automatically sized for any drawing scale</h2>
+    <p class="lede" data-i18n="article_lede">Most PDF editors treat a scale bar as a decoration you draw by hand. This tutorial shows how to add one that is mathematically correct and automatically proportioned to your drawing scale and paper size — without opening AutoCAD or Revit.</p>
+  </header>
+
+  <!-- ARTICLE BODY -->
+  <article class="prose">
+
+    <p data-i18n="intro_p1">Architectural drawings exported to PDF often lose their graphic scale bar — or never had one to begin with. A consultant requests a PDF with scale, a client needs a printable sheet with a legible bar, or you are assembling a set from multiple sources. In any case, adding the bar manually in Acrobat or Inkscape means measuring, guessing a length, and hoping the output matches the stated scale. It rarely does.</p>
+
+    <p data-i18n="intro_p2">The correct approach is to compute the bar length from the scale ratio and the paper format, then draw it at an exact point size. That is what this tool does automatically.</p>
+
+    <!-- STEP 1 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step1_title">Open the Scale Bar tool and load your PDF</span></h3>
+
+    <p data-i18n="step1_p1">Navigate to the <strong>Scale bar (m)</strong> tool from the homepage and click <strong>Choose PDF</strong>. The file is loaded entirely in your browser — nothing is uploaded to any server.</p>
+
+    <p data-i18n="step1_p2">If your drawings are in feet and inches, use the <strong>Scale bar (ft)</strong> tool instead. Both tools work identically, only the unit system changes.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc1-placeholder">
+        <div class="sc-icon">🖼</div>
+        <div id="sc1-caption-placeholder" data-i18n="sc1_placeholder">Screenshot 1 — to be added</div>
+      </div>
+      <img id="sc1-img" src="img/tutorial-scalebar-01.png" alt="Scale bar tool with a PDF loaded showing the tool panel" style="display:none;" onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';" onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc1_caption">The tool panel after loading a PDF. The file name confirms the PDF is active.</div>
+    </div>
+
+    <p class="note" data-i18n="sc1_note">📸 <strong data-i18n="capture_note_label">What to show in this screenshot:</strong> <span data-i18n="sc1_note_text">The Scale bar (m) tool panel with a PDF already loaded. The "✓ PDF loaded" button is visible at the top, the panel shows the controls (scale selector, style, position, color). The file name appears next to the button. No need to show the PDF preview — the focus is the control panel.</span></p>
+
+    <!-- STEP 2 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step2_title">Set your drawing scale — the bar length is calculated automatically</span></h3>
+
+    <p data-i18n="step2_p1">This is where automatic sizing matters. Select your drawing scale from the dropdown — 1:50, 1:100, 1:200, and so on. The tool detects the paper format from the PDF geometry and computes a bar length that is:</p>
+
+    <ul style="margin: 0 0 16px 20px; font-size:0.88rem; line-height:1.9;">
+      <li data-i18n="bullet1">A round number of metres (e.g. 5 m, 10 m, 20 m — never 7.3 m)</li>
+      <li data-i18n="bullet2">Approximately 20% of the page width — legible without dominating the sheet</li>
+      <li data-i18n="bullet3">Correct at the stated scale — if you print at 100%, the bar measures what it says</li>
+    </ul>
+
+    <p data-i18n="step2_p2">You can override the auto-sized length if needed, or select a specific page format manually if the PDF has non-standard dimensions. Position and offset are set as a percentage of the page width so they work regardless of page size.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc2-placeholder">
+        <div class="sc-icon">🖼</div>
+        <div id="sc2-caption-placeholder" data-i18n="sc2_placeholder">Screenshot 2 — to be added</div>
+      </div>
+      <img id="sc2-img" src="img/tutorial-scalebar-02.png" alt="Scale bar controls showing scale dropdown set to 1:100 with auto-computed bar length" style="display:none;" onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';" onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc2_caption">Scale set to 1:100 on an A1 sheet. The tool has automatically selected a 10 m bar — exactly 100 mm on paper at that scale.</div>
+    </div>
+
+    <p class="note" data-i18n="sc2_note">📸 <strong data-i18n="capture_note_label">What to show in this screenshot:</strong> <span data-i18n="sc2_note_text">Close-up of the scale controls area: the scale dropdown showing "1:100", the page size showing "A1 (auto)", and the bar length field showing the computed value (e.g. "10 m"). Ideally show the style selector with one of the classic/hatch styles selected. The key message is that the length field was filled automatically.</span></p>
+
+    <!-- STEP 3 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step3_title">Apply and download — or continue working on the same file</span></h3>
+
+    <p data-i18n="step3_p1">Click <strong>Add scale bar</strong>. The bar is drawn as vector content directly into the PDF content stream — it will print at full resolution regardless of the output DPI. Download the result immediately or click <strong>↩ Keep working</strong> to promote it as the active file and apply further tools (title block, watermark, etc.) in the same session.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc3-placeholder">
+        <div class="sc-icon">🖼</div>
+        <div id="sc3-caption-placeholder" data-i18n="sc3_placeholder">Screenshot 3 — to be added</div>
+      </div>
+      <img id="sc3-img" src="img/tutorial-scalebar-03.png" alt="PDF page with the finished scale bar in the bottom-left corner" style="display:none;" onerror="this.style.display='none';document.getElementById('sc3-placeholder').style.display='block';" onload="this.style.display='block';document.getElementById('sc3-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc3_caption">The finished result: a clean, correctly-proportioned scale bar embedded in the PDF as vector content.</div>
+    </div>
+
+    <p class="note" data-i18n="sc3_note">📸 <strong data-i18n="capture_note_label">What to show in this screenshot:</strong> <span data-i18n="sc3_note_text">The PDF open in a viewer (or the browser) showing the bottom portion of an architectural drawing with the scale bar visible. Zoom in enough so the bar segments and labels are clearly readable. The "Classic" or "Hatch" style reads best in a screenshot. The drawing content does not need to be real — any A1 or A3 plan works.</span></p>
+
+    <div class="result-box">
+      <div class="rb-icon">✓</div>
+      <div class="rb-text">
+        <strong data-i18n="result_title">The bar is embedded as vector content</strong>
+        <span data-i18n="result_desc">Unlike a rasterized overlay, the scale bar drawn by this tool is made of PDF path and text operators. It stays sharp at any zoom level or print resolution, and passes through further PDF processing (merge, compress) without quality loss.</span>
+      </div>
+    </div>
+
+    <h3 style="border:none; padding:0;" data-i18n="about_title">About automatic sizing</h3>
+
+    <p data-i18n="about_p1">The auto-sizing logic works as follows: given scale 1:N and detected paper width W (in mm), the nominal bar length is computed as <code style="background:var(--light);padding:1px 5px;border-radius:3px;">W × N × 0.20</code> in real-world units. That value is then rounded down to the nearest "nice" number — a multiple of 1, 2, 5, 10, 20, 50, 100, 250, 500 or 1000 m — so the label always reads cleanly. The final bar length in points is <code style="background:var(--light);padding:1px 5px;border-radius:3px;">nice_metres × 1000 / N × (72/25.4)</code>.</p>
+
+    <p data-i18n="about_p2">This means that on an A1 sheet at 1:200 you get a 20 m bar (100 mm on paper), while on an A4 sheet at 1:50 you get a 2 m bar (40 mm on paper). You never need to calculate the bar length yourself.</p>
+
+  </article>
+
+  <!-- CTA -->
+  <div class="cta-block">
+    <h3 data-i18n="cta_title">ADD A SCALE BAR TO YOUR PDF</h3>
+    <p data-i18n="cta_desc">Free, browser-only. No account. No upload. Works on rotated and non-standard page sizes.</p>
+    <a href="scalebar.html" class="cta-btn" data-i18n="cta_btn">Open Scale Bar tool →</a>
+  </div>
+
+  <!-- RELATED TOOLS -->
+  <div class="related-wrap">
+    <h4 data-i18n="related_title">RELATED TOOLS</h4>
+    <div class="related-tools">
+      <a href="scalebar_ft.html" data-i18n="rel_scalebar_ft">Scale bar (ft)</a>
+      <a href="vineta.html" data-i18n="rel_vineta">Title block</a>
+      <a href="revision_cloud.html" data-i18n="rel_revcloud">Revision cloud</a>
+      <a href="plan_numbering.html" data-i18n="rel_plannum">Plan numbering</a>
+      <a href="watermark_text.html" data-i18n="rel_watermark">Text watermark</a>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+// ─── I18N ─────────────────────────────────────────────────────────────────
+const T = {
+  en: {
+    home: 'Home', tutorials_label: 'Tutorials',
+    article_meta: 'TUTORIAL — SCALE BAR · PDF WORKFLOW',
+    article_title: 'How to add a scale bar to a PDF — automatically sized for any drawing scale',
+    article_lede: 'Most PDF editors treat a scale bar as a decoration you draw by hand. This tutorial shows how to add one that is mathematically correct and automatically proportioned to your drawing scale and paper size — without opening AutoCAD or Revit.',
+    intro_p1: 'Architectural drawings exported to PDF often lose their graphic scale bar — or never had one to begin with. A consultant requests a PDF with scale, a client needs a printable sheet with a legible bar, or you are assembling a set from multiple sources. In any case, adding the bar manually in Acrobat or Inkscape means measuring, guessing a length, and hoping the output matches the stated scale. It rarely does.',
+    intro_p2: 'The correct approach is to compute the bar length from the scale ratio and the paper format, then draw it at an exact point size. That is what this tool does automatically.',
+    step: 'STEP',
+    step1_title: 'Open the Scale Bar tool and load your PDF',
+    step1_p1: 'Navigate to the <strong>Scale bar (m)</strong> tool from the homepage and click <strong>Choose PDF</strong>. The file is loaded entirely in your browser — nothing is uploaded to any server.',
+    step1_p2: 'If your drawings are in feet and inches, use the <strong>Scale bar (ft)</strong> tool instead. Both tools work identically, only the unit system changes.',
+    sc1_caption: 'The tool panel after loading a PDF. The file name confirms the PDF is active.',
+    capture_note_label: 'What to show in this screenshot:',
+    sc1_note_text: 'The Scale bar (m) tool panel with a PDF already loaded. The "✓ PDF loaded" button is visible at the top, the panel shows the controls (scale selector, style, position, color). The file name appears next to the button.',
+    step2_title: 'Set your drawing scale — the bar length is calculated automatically',
+    step2_p1: 'This is where automatic sizing matters. Select your drawing scale from the dropdown — 1:50, 1:100, 1:200, and so on. The tool detects the paper format from the PDF geometry and computes a bar length that is:',
+    bullet1: 'A round number of metres (e.g. 5 m, 10 m, 20 m — never 7.3 m)',
+    bullet2: 'Approximately 20% of the page width — legible without dominating the sheet',
+    bullet3: 'Correct at the stated scale — if you print at 100%, the bar measures what it says',
+    step2_p2: 'You can override the auto-sized length if needed, or select a specific page format manually if the PDF has non-standard dimensions.',
+    sc2_caption: 'Scale set to 1:100 on an A1 sheet. The tool has automatically selected a 10 m bar — exactly 100 mm on paper at that scale.',
+    sc2_note_text: 'Close-up of the scale controls area: the scale dropdown showing "1:100", the page size showing "A1 (auto)", and the bar length field showing the computed value (e.g. "10 m"). The key message is that the length field was filled automatically.',
+    step3_title: 'Apply and download — or continue working on the same file',
+    step3_p1: 'Click <strong>Add scale bar</strong>. The bar is drawn as vector content directly into the PDF content stream — it will print at full resolution regardless of the output DPI. Download the result immediately or click <strong>↩ Keep working</strong> to promote it as the active file and apply further tools in the same session.',
+    sc3_caption: 'The finished result: a clean, correctly-proportioned scale bar embedded in the PDF as vector content.',
+    sc3_note_text: 'The PDF open in a viewer showing the bottom portion of an architectural drawing with the scale bar visible. Zoom in enough so the bar segments and labels are clearly readable. The "Classic" or "Hatch" style reads best.',
+    result_title: 'The bar is embedded as vector content',
+    result_desc: 'Unlike a rasterized overlay, the scale bar drawn by this tool is made of PDF path and text operators. It stays sharp at any zoom level or print resolution, and passes through further PDF processing without quality loss.',
+    about_title: 'About automatic sizing',
+    about_p1: 'The auto-sizing logic works as follows: given scale 1:N and detected paper width W (in mm), the nominal bar length is computed as W × N × 0.20 in real-world units. That value is then rounded down to the nearest "nice" number — a multiple of 1, 2, 5, 10, 20, 50, 100, 250, 500 or 1000 m — so the label always reads cleanly.',
+    about_p2: 'This means that on an A1 sheet at 1:200 you get a 20 m bar (100 mm on paper), while on an A4 sheet at 1:50 you get a 2 m bar (40 mm on paper). You never need to calculate the bar length yourself.',
+    cta_title: 'ADD A SCALE BAR TO YOUR PDF',
+    cta_desc: 'Free, browser-only. No account. No upload. Works on rotated and non-standard page sizes.',
+    cta_btn: 'Open Scale Bar tool →',
+    related_title: 'RELATED TOOLS',
+    rel_scalebar_ft: 'Scale bar (ft)', rel_vineta: 'Title block',
+    rel_revcloud: 'Revision cloud', rel_plannum: 'Plan numbering', rel_watermark: 'Text watermark',
+  },
+  es: {
+    home: 'Inicio', tutorials_label: 'Tutoriales',
+    article_meta: 'TUTORIAL — ESCALA GRÁFICA · FLUJO DE TRABAJO PDF',
+    article_title: 'Cómo añadir una escala gráfica a un PDF — dimensionada automáticamente para cualquier escala de dibujo',
+    article_lede: 'La mayoría de los editores PDF tratan la escala gráfica como un elemento decorativo que se dibuja a mano. Este tutorial muestra cómo añadir una que sea matemáticamente correcta y proporcionada automáticamente a la escala del dibujo y al formato del papel — sin abrir AutoCAD ni Revit.',
+    intro_p1: 'Los planos arquitectónicos exportados a PDF suelen perder la escala gráfica — o nunca la tuvieron. Un consultor pide un PDF con escala, un cliente necesita una lámina imprimible con barra legible, o estás armando un juego de planos de varias fuentes. Añadir la barra manualmente en Acrobat o Inkscape implica medir, adivinar una longitud y esperar que el resultado coincida con la escala declarada. Rara vez lo hace.',
+    intro_p2: 'La forma correcta es calcular la longitud de la barra a partir de la relación de escala y el formato del papel, y dibujarla a un tamaño exacto en puntos. Eso es lo que hace esta herramienta automáticamente.',
+    step: 'PASO',
+    step1_title: 'Abre la herramienta Escala gráfica y carga tu PDF',
+    step1_p1: 'Ve a la herramienta <strong>Escala gráfica (m)</strong> desde la página de inicio y haz clic en <strong>Choose PDF</strong>. El archivo se carga completamente en tu navegador — nada se sube a ningún servidor.',
+    step1_p2: 'Si tus planos están en pies y pulgadas, usa la herramienta <strong>Escala gráfica (ft)</strong>. Ambas funcionan de forma idéntica, solo cambia el sistema de unidades.',
+    sc1_caption: 'El panel de la herramienta después de cargar un PDF. El nombre del archivo confirma que el PDF está activo.',
+    capture_note_label: 'Qué mostrar en esta captura:',
+    sc1_note_text: 'El panel de la herramienta Escala gráfica (m) con un PDF ya cargado. El botón "✓ PDF loaded" es visible en la parte superior, el panel muestra los controles (selector de escala, estilo, posición, color). El nombre del archivo aparece junto al botón.',
+    step2_title: 'Establece la escala del dibujo — la longitud de la barra se calcula automáticamente',
+    step2_p1: 'Aquí es donde importa el dimensionado automático. Selecciona la escala del dibujo en el desplegable — 1:50, 1:100, 1:200, etc. La herramienta detecta el formato del papel a partir de la geometría del PDF y calcula una longitud de barra que es:',
+    bullet1: 'Un número redondo de metros (p. ej. 5 m, 10 m, 20 m — nunca 7,3 m)',
+    bullet2: 'Aproximadamente el 20% del ancho de la página — legible sin dominar la lámina',
+    bullet3: 'Correcta a la escala declarada — si imprimes al 100%, la barra mide lo que indica',
+    step2_p2: 'Puedes anular la longitud auto-calculada si es necesario, o seleccionar manualmente un formato de página específico si el PDF tiene dimensiones no estándar.',
+    sc2_caption: 'Escala 1:100 en una lámina A1. La herramienta ha seleccionado automáticamente una barra de 10 m — exactamente 100 mm en papel a esa escala.',
+    sc2_note_text: 'Primer plano del área de controles: el desplegable de escala mostrando "1:100", el tamaño de página mostrando "A1 (auto)", y el campo de longitud de barra con el valor calculado (p. ej. "10 m"). El mensaje clave es que el campo de longitud se llenó automáticamente.',
+    step3_title: 'Aplica y descarga — o continúa trabajando sobre el mismo archivo',
+    step3_p1: 'Haz clic en <strong>Añadir escala gráfica</strong>. La barra se dibuja como contenido vectorial directamente en el flujo de contenido del PDF — se imprimirá a resolución completa independientemente del DPI de salida. Descarga el resultado de inmediato o haz clic en <strong>↩ Seguir trabajando</strong> para activarlo como archivo de trabajo y aplicar más herramientas en la misma sesión.',
+    sc3_caption: 'El resultado final: una escala gráfica limpia y correctamente proporcionada embebida en el PDF como contenido vectorial.',
+    sc3_note_text: 'El PDF abierto en un visor mostrando la parte inferior de un plano arquitectónico con la escala gráfica visible. Acerca suficiente para que los segmentos y etiquetas sean claramente legibles. El estilo "Classic" o "Hatch" se lee mejor en captura.',
+    result_title: 'La barra se embebe como contenido vectorial',
+    result_desc: 'A diferencia de una superposición rasterizada, la escala gráfica dibujada por esta herramienta está compuesta de operadores de trayecto y texto PDF. Permanece nítida a cualquier nivel de zoom o resolución de impresión, y pasa por procesos PDF posteriores (unión, compresión) sin pérdida de calidad.',
+    about_title: 'Sobre el dimensionado automático',
+    about_p1: 'La lógica de dimensionado automático funciona así: dada la escala 1:N y el ancho de papel detectado W (en mm), la longitud nominal de la barra se calcula como W × N × 0,20 en unidades reales. Ese valor se redondea hacia abajo al número "redondo" más cercano — múltiplo de 1, 2, 5, 10, 20, 50, 100, 250, 500 o 1000 m — de modo que la etiqueta siempre se lea con claridad.',
+    about_p2: 'Esto significa que en una lámina A1 a 1:200 obtienes una barra de 20 m (100 mm en papel), mientras que en una A4 a 1:50 obtienes 2 m (40 mm en papel). No necesitas calcular nunca la longitud de la barra.',
+    cta_title: 'AÑADE UNA ESCALA GRÁFICA A TU PDF',
+    cta_desc: 'Gratuito, solo navegador. Sin cuenta. Sin subida de archivos. Funciona en páginas rotadas y formatos no estándar.',
+    cta_btn: 'Abrir herramienta →',
+    related_title: 'HERRAMIENTAS RELACIONADAS',
+    rel_scalebar_ft: 'Escala gráfica (ft)', rel_vineta: 'Viñeta / Carátula',
+    rel_revcloud: 'Nube de revisión', rel_plannum: 'Numeración de planos', rel_watermark: 'Marca de agua',
+  }
+};
+
+const _langRaw = localStorage.getItem('sb_lang') || navigator.language || 'en';
+const lang = _langRaw.slice(0,2).toLowerCase();
+const t = T[lang] || T['en'];
+
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) {
+      if (key.endsWith('_p1') || key.endsWith('_p2') || key === 'step1_p1' || key === 'step1_p2' || key === 'step3_p1') {
+        el.innerHTML = t[key];
+      } else {
+        el.textContent = t[key];
+      }
+    }
+  });
+  // Active lang button
+  const activeBtn = document.getElementById('lang-' + lang);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', applyI18n);
+</script>
+
+</body>
+</html>
