@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Add an Architectural Title Block to a PDF — Scalebar PDF Tools</title>
+<meta name="description" content="Add a fully customisable architectural title block (viñeta) to any PDF plan set — project name, scale, signatures, north arrow, plan number and logo. No CAD software required.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://scalebar.tools/how-to-add-title-block-to-pdf">
+<!-- Open Graph -->
+<meta property="og:title" content="How to Add an Architectural Title Block to a PDF">
+<meta property="og:description" content="A customisable title block for PDF plans: project name, scale, signatures, north arrow, plan ID and logo. Works entirely in your browser.">
+<meta property="og:type" content="article">
+<style>
+  :root {
+    --bg: #f8f8f6;
+    --white: #ffffff;
+    --ink: #1a1a1a;
+    --mid: #555;
+    --light: #e8e8e4;
+    --ok: #2d6a2d;
+    --radius: 4px;
+    --accent: #1a4db3;
+    --max: 720px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--bg); color: var(--ink);
+    font-size: 14px; line-height: 1.7;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background: var(--ink); color: var(--white);
+    padding: 12px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
+  #topbar a { color: inherit; text-decoration: none; }
+
+  /* ── LANG SWITCHER ── */
+  #lang-switcher { display: flex; gap: 4px; }
+  #lang-switcher button {
+    background: none; border: 1px solid #444; color: #aaa;
+    padding: 2px 7px; font-size: 0.72rem; border-radius: 3px;
+    cursor: pointer; font-family: inherit;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color: #fff; border-color: #fff; }
+  #lang-switcher button.active { color: #fff; border-color: #fff; }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    font-size: 0.75rem; color: var(--mid);
+    margin-bottom: 32px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .breadcrumb a { color: var(--mid); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--ink); }
+  .breadcrumb span { opacity: 0.5; }
+
+  /* ── ARTICLE HEADER ── */
+  .article-header { margin-bottom: 40px; }
+  .article-meta {
+    font-size: 0.75rem; color: var(--mid);
+    margin-bottom: 14px; letter-spacing: 0.05em;
+  }
+  .article-header h2 {
+    font-size: 1.6rem; font-weight: normal;
+    letter-spacing: 0.02em; line-height: 1.3;
+    margin-bottom: 16px;
+  }
+  .article-header .lede {
+    font-size: 0.95rem; color: var(--mid);
+    line-height: 1.7; max-width: 600px;
+    border-left: 3px solid var(--ink);
+    padding-left: 16px;
+  }
+
+  /* ── PROSE ── */
+  .prose { max-width: var(--max); }
+  .prose h3 {
+    font-size: 1rem; font-weight: bold;
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--light);
+    letter-spacing: 0.04em;
+  }
+  .prose h3 .step-num {
+    display: inline-block;
+    background: var(--ink); color: var(--white);
+    font-size: 0.72rem; padding: 1px 7px;
+    border-radius: 2px; margin-right: 8px;
+    vertical-align: middle; letter-spacing: 0.05em;
+  }
+  .prose p { margin-bottom: 16px; font-size: 0.88rem; color: var(--ink); }
+  .prose p.note {
+    background: var(--white); border: 1px solid var(--light);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--mid); font-size: 0.82rem; margin-bottom: 20px;
+  }
+  .prose strong { color: var(--ink); }
+
+  /* ── FIELD TABLE ── */
+  .field-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.82rem; margin: 20px 0 24px;
+  }
+  .field-table th {
+    text-align: left; font-weight: bold;
+    font-size: 0.72rem; letter-spacing: 0.06em;
+    padding: 6px 10px; border-bottom: 2px solid var(--ink);
+    color: var(--ink);
+  }
+  .field-table td {
+    padding: 7px 10px; border-bottom: 1px solid var(--light);
+    vertical-align: top; line-height: 1.5;
+  }
+  .field-table td:first-child { font-weight: bold; white-space: nowrap; }
+  .field-table tr:last-child td { border-bottom: none; }
+
+  /* ── SCREENSHOT PLACEHOLDER ── */
+  .screenshot-wrap {
+    margin: 24px 0 28px;
+    border: 1px solid var(--light);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .screenshot-wrap img {
+    display: block; width: 100%; height: auto;
+  }
+  .screenshot-placeholder {
+    background: var(--white);
+    border: 2px dashed #ccc;
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--mid);
+    font-size: 0.8rem;
+  }
+  .screenshot-placeholder .sc-icon { font-size: 2rem; margin-bottom: 8px; }
+  .screenshot-caption {
+    padding: 8px 14px;
+    background: #f2f2f0;
+    border-top: 1px solid var(--light);
+    font-size: 0.75rem; color: var(--mid);
+    font-style: italic;
+  }
+
+  /* ── RESULT BOX ── */
+  .result-box {
+    background: var(--white);
+    border: 1px solid var(--light);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin: 24px 0;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .result-box .rb-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+  .result-box .rb-text { font-size: 0.85rem; }
+  .result-box .rb-text strong { display: block; margin-bottom: 4px; }
+
+  /* ── CTA ── */
+  .cta-block {
+    background: var(--ink); color: var(--white);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    margin-top: 48px;
+    text-align: center;
+  }
+  .cta-block p {
+    font-size: 0.85rem; color: #aaa;
+    margin-bottom: 20px; margin-top: 8px;
+  }
+  .cta-block h3 {
+    font-size: 1.1rem; font-weight: normal;
+    letter-spacing: 0.06em; margin-bottom: 0;
+    border: none; padding: 0; color: var(--white);
+  }
+  .cta-btn {
+    display: inline-block;
+    background: var(--white); color: var(--ink);
+    padding: 11px 28px; border-radius: var(--radius);
+    font-family: inherit; font-size: 0.9rem; font-weight: bold;
+    text-decoration: none; letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s;
+    border: 2px solid var(--white);
+  }
+  .cta-btn:hover { background: transparent; color: var(--white); }
+
+  /* ── RELATED ── */
+  .related-wrap {
+    margin-top: 56px;
+    border-top: 1px solid var(--light);
+    padding-top: 28px;
+  }
+  .related-wrap h4 {
+    font-size: 0.75rem; color: var(--mid);
+    letter-spacing: 0.1em; margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .related-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .related-tools a {
+    padding: 6px 14px; border: 1px solid #ccc;
+    background: var(--white); border-radius: var(--radius);
+    font-size: 0.8rem; color: var(--ink); text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <h1><a href="index.html">▣ SCALEBAR PDF TOOLS</a></h1>
+  <div id="lang-switcher">
+    <button id="lang-en" onclick="setLang('en')">EN</button>
+    <button id="lang-es" onclick="setLang('es')">ES</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb">
+    <a href="index.html" data-i18n="home">Home</a>
+    <span>›</span>
+    <span data-i18n="tutorials_label">Tutorials</span>
+  </nav>
+
+  <!-- ARTICLE HEADER -->
+  <header class="article-header">
+    <div class="article-meta" data-i18n="article_meta">TUTORIAL — TITLE BLOCK · PDF WORKFLOW</div>
+    <h2 data-i18n="article_title">How to add a custom architectural title block to your PDF plans</h2>
+    <p class="lede" data-i18n="article_lede">Most PDF tools let you add a text box. An architectural title block is a different thing: a structured panel with project data, signatures, a north arrow and a plan ID — all correctly laid out and scaled to your sheet format. This tutorial shows how to generate one directly in your browser.</p>
+  </header>
+
+  <!-- ARTICLE BODY -->
+  <article class="prose">
+
+    <p data-i18n="intro_p1">Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content — the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:var(--accent);">here</a>.</p>
+
+    <p data-i18n="intro_p2">The block anchors to the bottom-right corner, its width adapts to the detected paper format (A4 through A0), and its height adjusts dynamically to the amount of text you enter. Empty fields are simply left out — the block contracts accordingly.</p>
+
+    <!-- STEP 1 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step1_title">Open the Title Block tool and load your PDF</span></h3>
+
+    <p data-i18n="step1_p1">Navigate to the <strong>Title block</strong> tool from the homepage and click <strong>Choose PDF</strong>. The file is processed entirely in your browser — nothing is sent to any server at any point.</p>
+
+    <p data-i18n="step1_p2">If you have a multi-page plan set, you can apply the title block to all pages at once or to the first page only. The tool detects each page's paper format independently, so the block width will adapt correctly even if your set mixes A1 and A3 sheets.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc1-placeholder">
+        <div class="sc-icon">🖼</div>
+        <div data-i18n="sc_placeholder">Screenshot — to be added</div>
+      </div>
+      <img id="sc1-img" src="img/tutorial-vineta-01.png" alt="Title block tool panel with a PDF loaded" style="display:none;"
+           onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';"
+           onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc1_caption">The tool panel after loading a PDF, with the input fields ready to fill in.</div>
+    </div>
+
+    <!-- STEP 2 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step2_title">Fill in the project data fields</span></h3>
+
+    <p data-i18n="step2_p1">The tool provides a set of standard architectural fields. All text is automatically uppercased. Fields left empty are omitted from the block — the layout contracts cleanly around whatever you provide.</p>
+
+    <table class="field-table">
+      <thead>
+        <tr>
+          <th data-i18n="th_field">Field</th>
+          <th data-i18n="th_notes">Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td data-i18n="f_project">Project name</td><td data-i18n="fn_project">Main header of the block. Displayed large and bold. Wraps to multiple lines if long.</td></tr>
+        <tr><td data-i18n="f_site">Site</td><td data-i18n="fn_site">Address or location. Also wraps automatically.</td></tr>
+        <tr><td data-i18n="f_content">Drawing content</td><td data-i18n="fn_content">One item per line — e.g. "Ground Floor Plan", "Section A-A". Each line is centred in the cell.</td></tr>
+        <tr><td data-i18n="f_type">Type / Number</td><td data-i18n="fn_type">Combined into the plan ID (e.g. ARCH-01). Displayed large in a dedicated row with a colour of your choice.</td></tr>
+        <tr><td data-i18n="f_scale">Scale / Date</td><td data-i18n="fn_scale">Side by side in a split row. Scale is displayed bold.</td></tr>
+        <tr><td data-i18n="f_sigs">Client / Designer</td><td data-i18n="fn_sigs">Signature row with a blank space and a signature line above each name.</td></tr>
+        <tr><td data-i18n="f_north">North rotation (°)</td><td data-i18n="fn_north">0° points up. The arrow rotates clockwise. Leave at 0 if north is at the top of your drawings.</td></tr>
+        <tr><td data-i18n="f_projno">Project No.</td><td data-i18n="fn_projno">Shown in the same row as the north arrow, bottom-aligned.</td></tr>
+        <tr><td data-i18n="f_logo">Logo</td><td data-i18n="fn_logo">Optional. Uploaded as any image format, converted to greyscale, and placed in a top row whose height adapts to the image's aspect ratio.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc2-placeholder">
+        <div class="sc-icon">🖼</div>
+        <div data-i18n="sc_placeholder">Screenshot — to be added</div>
+      </div>
+      <img id="sc2-img" src="img/tutorial-vineta-02.png" alt="Title block form fields filled in with sample project data" style="display:none;"
+           onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';"
+           onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc2_caption">The input fields filled in for a sample project. The plan ID colour picker lets you match the colour used in the drawing itself.</div>
+    </div>
+
+    <!-- STEP 3 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step3_title">Adjust size, colour and page format</span></h3>
+
+    <p data-i18n="step3_p1">Three options affect the visual result without changing the content:</p>
+
+    <ul style="margin: 0 0 16px 20px; font-size:0.88rem; line-height:1.9;">
+      <li data-i18n="bullet1"><strong data-i18n="b1_label">Size</strong> — <span data-i18n="b1_text">Small / Normal / Large. Scales the entire block proportionally from the bottom-right anchor. Use Small on busy sheets, Large on presentation drawings.</span></li>
+      <li data-i18n="bullet2"><strong data-i18n="b2_label">Plan ID colour</strong> — <span data-i18n="b2_text">The colour of the plan number (e.g. ARCH-01). The tool detects the colours already present in the PDF and offers them as swatches so you can match the drawing style in one click.</span></li>
+      <li data-i18n="bullet3"><strong data-i18n="b3_label">Page size override</strong> — <span data-i18n="b3_text">Leave on Auto-detect for standard ISO sheets. Override manually if the PDF uses a non-standard format or the detection result is wrong.</span></li>
+    </ul>
+
+    <p class="note" data-i18n="note_vector">The block is drawn as pure PDF vector content — lines, rectangles and text operators — so it is resolution-independent and survives any subsequent compression or merge operation without quality loss.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc3-placeholder">
+        <div class="sc-icon">🖼</div>
+        <div data-i18n="sc_placeholder">Screenshot — to be added</div>
+      </div>
+      <img id="sc3-img" src="img/tutorial-vineta-03.png" alt="Options row showing size selector, plan ID colour picker and colour swatches" style="display:none;"
+           onerror="this.style.display='none';document.getElementById('sc3-placeholder').style.display='block';"
+           onload="this.style.display='block';document.getElementById('sc3-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc3_caption">The options row. The colour swatches are extracted automatically from the PDF — clicking one sets the plan ID colour instantly.</div>
+    </div>
+
+    <!-- STEP 4 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step4_title">Apply and download — or continue working on the same file</span></h3>
+
+    <p data-i18n="step4_p1">Click <strong>Add title block</strong>. The block is drawn into the PDF content stream of each selected page. Download the result immediately, or click <strong>↩ Keep working</strong> to promote the output as the active file and apply further tools in the same session — a scale bar, a watermark, compression — without any intermediate downloads.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc4-placeholder">
+        <div class="sc-icon">🖼</div>
+        <div data-i18n="sc_placeholder">Screenshot — to be added</div>
+      </div>
+      <img id="sc4-img" src="img/tutorial-vineta-04.png" alt="A finished architectural PDF with the title block visible in the bottom-right corner" style="display:none;"
+           onerror="this.style.display='none';document.getElementById('sc4-placeholder').style.display='block';"
+           onload="this.style.display='block';document.getElementById('sc4-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc4_caption">The finished result: a complete architectural title block in the bottom-right corner, scaled correctly to the A1 sheet.</div>
+    </div>
+
+    <div class="result-box">
+      <div class="rb-icon">✓</div>
+      <div class="rb-text">
+        <strong data-i18n="result_title">The block adapts to content, not the other way around</strong>
+        <span data-i18n="result_desc">Row heights are computed dynamically from the text you enter. A project name that wraps to three lines will produce a taller project row; a single-line name produces a compact one. The overall block height is always the exact sum of its content — no fixed template, no wasted white space.</span>
+      </div>
+    </div>
+
+    <h3 style="border:none; padding:0;" data-i18n="about_title">How block width is determined</h3>
+
+    <p data-i18n="about_p1">The block width follows a fixed mapping to ISO paper formats: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, and 77 mm on A0. These values correspond roughly to 1/6 of the page width — wide enough to be readable, narrow enough to leave the drawing untouched. All internal dimensions (font sizes, padding, row heights) scale proportionally from this width, so the block looks correct on any sheet size without any manual adjustment.</p>
+
+    <p data-i18n="about_p2">If you select a size multiplier (Small = ×0.82, Large = ×1.20), the entire block is scaled from the bottom-right anchor point. The width changes, but the position relative to the page corner remains constant.</p>
+
+  </article>
+
+  <!-- CTA -->
+  <div class="cta-block">
+    <a href="vineta.html" class="cta-btn" data-i18n="cta_btn">Open Title Block tool →</a>
+    <p data-i18n="cta_desc">Free, browser-only. No account. No upload. Works on rotated and non-standard page sizes.</p>
+  </div>
+
+  <!-- RELATED TOOLS -->
+  <div class="related-wrap">
+    <h4 data-i18n="related_title">RELATED TOOLS</h4>
+    <div class="related-tools">
+      <a href="scalebar.html" data-i18n="rel_scalebar">Scale bar (m)</a>
+      <a href="scalebar_ft.html" data-i18n="rel_scalebar_ft">Scale bar (ft)</a>
+      <a href="watermark_logo.html" data-i18n="rel_logo">Logo watermark</a>
+      <a href="revision_cloud.html" data-i18n="rel_revcloud">Revision cloud</a>
+      <a href="plan_numbering.html" data-i18n="rel_plannum">Plan numbering</a>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+// ─── I18N ─────────────────────────────────────────────────────────────────
+const T = {
+  en: {
+    home: 'Home', tutorials_label: 'Tutorials',
+    article_meta: 'TUTORIAL — TITLE BLOCK · PDF WORKFLOW',
+    article_title: 'How to add a custom architectural title block to your PDF plans',
+    article_lede: 'Most PDF tools let you add a text box. An architectural title block is a different thing: a structured panel with project data, signatures, a north arrow and a plan ID — all correctly laid out and scaled to your sheet format. This tutorial shows how to generate one directly in your browser.',
+    intro_p1: 'Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content — the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:#1a4db3;">here</a>.',
+    intro_p2: 'The block anchors to the bottom-right corner, its width adapts to the detected paper format (A4 through A0), and its height adjusts dynamically to the amount of text you enter. Empty fields are simply left out — the block contracts accordingly.',
+    step: 'STEP',
+    step1_title: 'Open the Title Block tool and load your PDF',
+    step1_p1: 'Navigate to the <strong>Title block</strong> tool from the homepage and click <strong>Choose PDF</strong>. The file is processed entirely in your browser — nothing is sent to any server at any point.',
+    step1_p2: 'If you have a multi-page plan set, you can apply the title block to all pages at once or to the first page only. The tool detects each page\'s paper format independently, so the block width will adapt correctly even if your set mixes A1 and A3 sheets.',
+    sc1_caption: 'The tool panel after loading a PDF, with the input fields ready to fill in.',
+    sc_placeholder: 'Screenshot — to be added',
+    step2_title: 'Fill in the project data fields',
+    step2_p1: 'The tool provides a set of standard architectural fields. All text is automatically uppercased. Fields left empty are omitted from the block — the layout contracts cleanly around whatever you provide.',
+    th_field: 'Field', th_notes: 'Notes',
+    f_project: 'Project name', fn_project: 'Main header of the block. Displayed large and bold. Wraps to multiple lines if long.',
+    f_site: 'Site', fn_site: 'Address or location. Also wraps automatically.',
+    f_content: 'Drawing content', fn_content: 'One item per line — e.g. "Ground Floor Plan", "Section A-A". Each line is centred in the cell.',
+    f_type: 'Type / Number', fn_type: 'Combined into the plan ID (e.g. ARCH-01). Displayed large in a dedicated row with a colour of your choice.',
+    f_scale: 'Scale / Date', fn_scale: 'Side by side in a split row. Scale is displayed bold.',
+    f_sigs: 'Client / Designer', fn_sigs: 'Signature row with a blank space and a signature line above each name.',
+    f_north: 'North rotation (°)', fn_north: '0° points up. The arrow rotates clockwise. Leave at 0 if north is at the top of your drawings.',
+    f_projno: 'Project No.', fn_projno: 'Shown in the same row as the north arrow, bottom-aligned.',
+    f_logo: 'Logo', fn_logo: 'Optional. Uploaded as any image format, converted to greyscale, and placed in a top row whose height adapts to the image\'s aspect ratio.',
+    sc2_caption: 'The input fields filled in for a sample project. The plan ID colour picker lets you match the colour used in the drawing itself.',
+    step3_title: 'Adjust size, colour and page format',
+    step3_p1: 'Three options affect the visual result without changing the content:',
+    bullet1: '', bullet2: '', bullet3: '',
+    b1_label: 'Size', b1_text: 'Small / Normal / Large. Scales the entire block proportionally from the bottom-right anchor. Use Small on busy sheets, Large on presentation drawings.',
+    b2_label: 'Plan ID colour', b2_text: 'The colour of the plan number (e.g. ARCH-01). The tool detects the colours already present in the PDF and offers them as swatches so you can match the drawing style in one click.',
+    b3_label: 'Page size override', b3_text: 'Leave on Auto-detect for standard ISO sheets. Override manually if the PDF uses a non-standard format or the detection result is wrong.',
+    note_vector: 'The block is drawn as pure PDF vector content — lines, rectangles and text operators — so it is resolution-independent and survives any subsequent compression or merge operation without quality loss.',
+    sc3_caption: 'The options row. The colour swatches are extracted automatically from the PDF — clicking one sets the plan ID colour instantly.',
+    step4_title: 'Apply and download — or continue working on the same file',
+    step4_p1: 'Click <strong>Add title block</strong>. The block is drawn into the PDF content stream of each selected page. Download the result immediately, or click <strong>↩ Keep working</strong> to promote the output as the active file and apply further tools in the same session — a scale bar, a watermark, compression — without any intermediate downloads.',
+    sc4_caption: 'The finished result: a complete architectural title block in the bottom-right corner, scaled correctly to the A1 sheet.',
+    result_title: 'The block adapts to content, not the other way around',
+    result_desc: 'Row heights are computed dynamically from the text you enter. A project name that wraps to three lines will produce a taller project row; a single-line name produces a compact one. The overall block height is always the exact sum of its content — no fixed template, no wasted white space.',
+    about_title: 'How block width is determined',
+    about_p1: 'The block width follows a fixed mapping to ISO paper formats: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, and 77 mm on A0. These values correspond roughly to 1/6 of the page width — wide enough to be readable, narrow enough to leave the drawing untouched. All internal dimensions scale proportionally from this width.',
+    about_p2: 'If you select a size multiplier (Small = ×0.82, Large = ×1.20), the entire block is scaled from the bottom-right anchor point. The width changes, but the position relative to the page corner remains constant.',
+    cta_btn: 'Open Title Block tool →',
+    cta_desc: 'Free, browser-only. No account. No upload. Works on rotated and non-standard page sizes.',
+    related_title: 'RELATED TOOLS',
+    rel_scalebar: 'Scale bar (m)', rel_scalebar_ft: 'Scale bar (ft)',
+    rel_logo: 'Logo watermark', rel_revcloud: 'Revision cloud', rel_plannum: 'Plan numbering',
+  },
+  es: {
+    home: 'Inicio', tutorials_label: 'Tutoriales',
+    article_meta: 'TUTORIAL — VIÑETA · FLUJO DE TRABAJO PDF',
+    article_title: 'Cómo añadir una viñeta arquitectónica personalizada a tus planos en PDF',
+    article_lede: 'La mayoría de las herramientas PDF permiten añadir un cuadro de texto. Una viñeta arquitectónica es algo distinto: un panel estructurado con datos del proyecto, firmas, flecha de norte y número de plano — todo correctamente dispuesto y escalado al formato de la lámina. Este tutorial muestra cómo generarla directamente en el navegador.',
+    intro_p1: 'Todo conjunto de planos arquitectónicos necesita una viñeta. El problema es que una vez exportado el dibujo a PDF, añadirla correctamente suele significar volver al archivo original o insertar una imagen rasterizada. Ninguna opción es ideal. Por eso construí una herramienta que dibuja la viñeta como contenido vectorial nativo en el PDF — exactamente igual que lo haría una aplicación CAD. La puedes encontrar <a href="vineta.html" style="color:#1a4db3;">aquí</a>.',
+    intro_p2: 'La viñeta se ancla en la esquina inferior derecha, su ancho se adapta al formato de papel detectado (de A4 a A0) y su alto se ajusta dinámicamente a la cantidad de texto ingresado. Los campos vacíos simplemente se omiten — la viñeta se contrae en consecuencia.',
+    step: 'PASO',
+    step1_title: 'Abre la herramienta Viñeta y carga tu PDF',
+    step1_p1: 'Ve a la herramienta <strong>Title block</strong> desde la página de inicio y haz clic en <strong>Choose PDF</strong>. El archivo se procesa completamente en tu navegador — nada se envía a ningún servidor.',
+    step1_p2: 'Si tienes un conjunto de planos de varias páginas, puedes aplicar la viñeta a todas las páginas a la vez o solo a la primera. La herramienta detecta el formato de cada página de forma independiente, por lo que el ancho de la viñeta se adaptará correctamente incluso si el conjunto mezcla láminas A1 y A3.',
+    sc1_caption: 'El panel de la herramienta después de cargar un PDF, con los campos de entrada listos para completar.',
+    sc_placeholder: 'Captura de pantalla — pendiente de añadir',
+    step2_title: 'Completa los campos de datos del proyecto',
+    step2_p1: 'La herramienta dispone de un conjunto de campos arquitectónicos estándar. Todo el texto se convierte automáticamente a mayúsculas. Los campos que se dejan vacíos se omiten de la viñeta — el diseño se contrae limpiamente alrededor de lo que proporciones.',
+    th_field: 'Campo', th_notes: 'Notas',
+    f_project: 'Nombre de proyecto', fn_project: 'Encabezado principal de la viñeta. Se muestra grande y en negrita. Se ajusta a varias líneas si es largo.',
+    f_site: 'Sitio', fn_site: 'Dirección o ubicación. También se ajusta automáticamente.',
+    f_content: 'Contenido del plano', fn_content: 'Un elemento por línea — p. ej. "Planta Baja", "Sección A-A". Cada línea se centra en la celda.',
+    f_type: 'Tipo / Número', fn_type: 'Se combinan en el ID del plano (p. ej. ARQ-01). Se muestra grande en una fila dedicada con el color que elijas.',
+    f_scale: 'Escala / Fecha', fn_scale: 'Uno al lado del otro en una fila dividida. La escala se muestra en negrita.',
+    f_sigs: 'Cliente / Proyectista', fn_sigs: 'Fila de firmas con un espacio en blanco y una línea de firma encima de cada nombre.',
+    f_north: 'Rotación norte (°)', fn_north: '0° apunta hacia arriba. La flecha gira en sentido horario. Déjalo en 0 si el norte está en la parte superior de tus planos.',
+    f_projno: 'N° de proyecto', fn_projno: 'Se muestra en la misma fila que la flecha de norte, alineado abajo.',
+    f_logo: 'Logo', fn_logo: 'Opcional. Se sube en cualquier formato de imagen, se convierte a escala de grises y se coloca en una fila superior cuya altura se adapta a la proporción de la imagen.',
+    sc2_caption: 'Los campos completados para un proyecto de ejemplo. El selector de color del ID de plano permite igualar el color utilizado en el propio dibujo.',
+    step3_title: 'Ajusta tamaño, color y formato de página',
+    step3_p1: 'Tres opciones afectan al resultado visual sin cambiar el contenido:',
+    bullet1: '', bullet2: '', bullet3: '',
+    b1_label: 'Tamaño', b1_text: 'Pequeño / Normal / Grande. Escala toda la viñeta proporcionalmente desde el ancla inferior derecha. Usa Pequeño en láminas con mucho contenido, Grande en presentaciones.',
+    b2_label: 'Color del N° de plano', b2_text: 'El color del número de plano (p. ej. ARQ-01). La herramienta detecta los colores presentes en el PDF y los ofrece como muestras para que puedas igualar el estilo del dibujo con un clic.',
+    b3_label: 'Formato de página', b3_text: 'Déjalo en Detección automática para láminas ISO estándar. Anula manualmente si el PDF usa un formato no estándar o el resultado de detección es incorrecto.',
+    note_vector: 'La viñeta se dibuja como contenido vectorial PDF puro — líneas, rectángulos y operadores de texto — por lo que es independiente de la resolución y sobrevive cualquier operación posterior de compresión o unión sin pérdida de calidad.',
+    sc3_caption: 'La fila de opciones. Las muestras de color se extraen automáticamente del PDF — hacer clic en una establece el color del ID de plano al instante.',
+    step4_title: 'Aplica y descarga — o continúa trabajando sobre el mismo archivo',
+    step4_p1: 'Haz clic en <strong>Add title block</strong>. La viñeta se dibuja en el flujo de contenido del PDF de cada página seleccionada. Descarga el resultado de inmediato, o haz clic en <strong>↩ Seguir trabajando</strong> para activarlo como archivo de trabajo y aplicar más herramientas en la misma sesión — escala gráfica, marca de agua, compresión — sin descargas intermedias.',
+    sc4_caption: 'El resultado final: una viñeta arquitectónica completa en la esquina inferior derecha, escalada correctamente a la lámina A1.',
+    result_title: 'La viñeta se adapta al contenido, no al revés',
+    result_desc: 'Las alturas de las filas se calculan dinámicamente a partir del texto que introduces. Un nombre de proyecto que se ajusta a tres líneas producirá una fila de proyecto más alta; un nombre de una sola línea produce una compacta. El alto total de la viñeta es siempre la suma exacta de su contenido — sin plantilla fija, sin espacio en blanco desperdiciado.',
+    about_title: 'Cómo se determina el ancho de la viñeta',
+    about_p1: 'El ancho de la viñeta sigue un mapeo fijo a los formatos de papel ISO: 36 mm en A4, 50 mm en A3, 59 mm en A2, 68 mm en A1 y 77 mm en A0. Estos valores corresponden aproximadamente a 1/6 del ancho de la página — lo suficientemente ancho para ser legible, lo suficientemente estrecho para no invadir el dibujo. Todas las dimensiones internas escalan proporcionalmente desde este ancho.',
+    about_p2: 'Si seleccionas un multiplicador de tamaño (Pequeño = ×0,82, Grande = ×1,20), toda la viñeta se escala desde el punto de anclaje inferior derecho. El ancho cambia, pero la posición relativa a la esquina de la página se mantiene constante.',
+    cta_btn: 'Abrir herramienta Viñeta →',
+    cta_desc: 'Gratuito, solo navegador. Sin cuenta. Sin subida de archivos. Funciona en páginas rotadas y formatos no estándar.',
+    related_title: 'HERRAMIENTAS RELACIONADAS',
+    rel_scalebar: 'Escala gráfica (m)', rel_scalebar_ft: 'Escala gráfica (ft)',
+    rel_logo: 'Marca de agua con logo', rel_revcloud: 'Nube de revisión', rel_plannum: 'Numeración de planos',
+  }
+};
+
+const _langRaw = localStorage.getItem('sb_lang') || navigator.language || 'en';
+const lang = _langRaw.slice(0,2).toLowerCase();
+const t = T[lang] || T['en'];
+
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+
+function applyI18n() {
+  const htmlKeys = new Set(['intro_p1','intro_p2','step1_p1','step1_p2','step3_p1','step4_p1',
+    'fn_project','fn_site','fn_content','fn_type','fn_scale','fn_sigs','fn_north','fn_projno','fn_logo',
+    'b1_text','b2_text','b3_text']);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) {
+      if (htmlKeys.has(key)) el.innerHTML = t[key];
+      else el.textContent = t[key];
+    }
+  });
+  const activeBtn = document.getElementById('lang-' + lang);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', applyI18n);
+</script>
+
+</body>
+</html>
