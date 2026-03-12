@@ -27,8 +27,9 @@
   #topbar {
     background: var(--ink); color: var(--white);
     padding: 12px 28px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100;
   }
+  #topbar-right { display:flex; align-items:center; gap:14px; flex-shrink:0; }
   #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
   #file-indicator { font-size: 0.78rem; color: #aaa; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #file-indicator span { color: #fff; }
@@ -323,6 +324,34 @@
     white-space:nowrap;font-size:0.68rem;background:var(--ink);color:#fff;
     padding:2px 5px;border-radius:2px;pointer-events:none;display:none;z-index:5;}
   .lw-bar:hover .lw-tip{display:block;}
+
+  /* ── lang switcher ── */
+  #lang-switcher { display:flex; gap:4px; flex-shrink:0; }
+  #lang-switcher button {
+    background:none; border:1px solid #444; color:#aaa;
+    padding:2px 7px; font-size:0.72rem; border-radius:3px;
+    cursor:pointer; font-family:inherit;
+    transition:color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color:#fff; border-color:#fff; }
+  #lang-switcher button.active { color:#fff; border-color:#fff; }
+  /* ── faq (tool panel) ── */
+  .tp-faq { margin-top:24px; }
+  .tp-faq-item { border-top:1px solid var(--light); }
+  .tp-faq-item:last-child { border-bottom:1px solid var(--light); }
+  .tp-faq-q {
+    width:100%; background:none; border:none; text-align:left;
+    padding:12px 4px; font-size:0.85rem; font-weight:600; color:var(--ink);
+    cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .tp-faq-q:hover { color:var(--accent); }
+  .tp-faq-q .faq-arrow { font-size:0.72rem; color:var(--mid); transition:transform .2s; flex-shrink:0; }
+  .tp-faq-q.open .faq-arrow { transform:rotate(180deg); }
+  .tp-faq-a { display:none; padding:0 4px 14px; font-size:0.82rem; line-height:1.62; color:var(--mid); }
+  .tp-faq-a.open { display:block; }
+  .tp-faq-a strong { color:var(--ink); }
+  .tp-faq-a code { background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.80rem; }
+
 </style>
 </head>
 <body>
@@ -330,8 +359,16 @@
 <!-- TOP BAR -->
 <div id="topbar">
   <h1><a href="index.html" style="color:inherit;text-decoration:none;">▣ SCALEBAR PDF TOOLS</a></h1>
-  <div id="file-indicator">No file loaded</div>
-  <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+  <div id="topbar-right">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+      <div id="file-indicator" style="max-width:220px;" data-i18n-placeholder="no_file">No file loaded</div>
+      <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+    </div>
+    <div id="lang-switcher">
+      <button id="lang-en" onclick="setLang('en')">EN</button>
+      <button id="lang-es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
@@ -525,8 +562,8 @@
 <!-- ═══ TOOL VIEW ═══ -->
 <div id="view-tool" class="view active">
   <div style="max-width:860px; margin:0 auto; padding:32px 20px;">
-    <button id="back-btn" onclick="window.location.href='index.html'">← Home</button>
-    <div id="working-banner"><span>✓</span><span id="working-banner-text">Working on modified file</span></div>
+    <button id="back-btn" onclick="window.location.href='index.html'"><span data-i18n="btn_home">← Home</span></button>
+    <div id="working-banner"><span>✓</span><span id="working-banner-text" data-i18n="banner_working">Working on modified file</span></div>
 
     <div class="tool-panel active" id="panel-linewidth">
       <div class="panel-box">
@@ -534,26 +571,24 @@
         <button type="button" id="tool-choose-btn"
           onclick="document.getElementById('tool-choose-file').click()"
           style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
-          Choose PDF
+          <span data-i18n="btn_choose_pdf">Choose PDF</span>
         </button>
         <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;">
         <span id="tool-choose-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
       </div>
-        <h2>Change line thickness by range</h2>
+        <h2 data-i18n="lw_h2">Change line thickness by range</h2>
         <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
-          Scans all vector content streams for the <code>w</code> (setlinewidth) PDF operator,
-          shows a histogram of all values found, and replaces those in a selected range via
-          Ghostscript — guaranteeing the changes are applied to the rendered output.
+          <span data-i18n-html="lw_desc">Scans all vector content streams for the <code>w</code> (setlinewidth) PDF operator, shows a histogram of all values found, and replaces those in a selected range via Ghostscript — guaranteeing the changes are applied to the rendered output.</span>
         </p>
 
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
-          <button class="btn btn-primary" id="lw-scan-btn" style="margin:0;">Scan line widths</button>
+          <button class="btn btn-primary" id="lw-scan-btn" style="margin:0;" data-i18n="lw_scan_btn">Scan line widths</button>
           <span id="lw-found-info" style="font-size:0.8rem;color:var(--mid);"></span>
         </div>
 
         <div id="lw-histogram-wrap" style="display:none;margin-bottom:8px;">
           <label style="font-size:0.8rem;margin-bottom:4px;display:block;">
-            Width distribution &mdash; click a bar to select that range:
+            <span data-i18n="lw_hist_label">Width distribution — click a bar to select that range:</span>
           </label>
           <div class="lw-histogram" id="lw-histogram"></div>
         </div>
@@ -569,33 +604,43 @@
         </div>
 
         <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:10px;">
-          <div><label>Min (pt):</label>
+          <div><label data-i18n="lw_label_min">Min (pt):</label>
             <input type="number" id="lw-min" value="0" min="0" step="0.01" style="width:90px;"></div>
-          <div><label>Max (pt):</label>
+          <div><label data-i18n="lw_label_max">Max (pt):</label>
             <input type="number" id="lw-max" value="0" min="0" step="0.01" style="width:90px;"></div>
-          <div><label>Replace with (pt):</label>
+          <div><label data-i18n="lw_label_new">Replace with (pt):</label>
             <input type="number" id="lw-new" value="0.1" min="0" step="0.01" style="width:90px;"></div>
         </div>
 
         <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:12px;align-items:center;">
-          <div><label>Apply to pages:</label>
+          <div><label data-i18n="lw_label_pages">Apply to pages:</label>
             <input type="text" id="lw-pages" value="" placeholder="all  or  1,3,5-8" style="width:160px;"></div>
           <div style="margin-top:16px;">
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:0.82rem;">
               <input type="checkbox" id="lw-also-zero" style="width:auto;margin:0;" checked>
-              Include hairline (width&nbsp;=&nbsp;0)
+              <span data-i18n="lw_hairline">Include hairline (width = 0)</span>
             </label>
           </div>
         </div>
 
         <div>
-          <button class="btn btn-primary" id="lw-btn">Apply line width change</button>
-          <button class="btn btn-dl" id="lw-dl" disabled>&#x2B07; Download</button>
-          <button class="btn btn-apply" id="lw-apply" disabled>&#x21A9; Keep working with this version</button>
+          <button class="btn btn-primary" id="lw-btn" data-i18n="lw_btn">Apply line width change</button>
+          <button class="btn btn-dl" id="lw-dl" disabled>⬇ <span data-i18n="btn_dl">Download</span></button>
+          <button class="btn btn-apply" id="lw-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
         </div>
         <div class="status" id="lw-status"></div>
       </div>
     </div>
+      <div class="tp-faq">
+      <div class="tp-faq-item">
+        <button class="tp-faq-q" onclick="toggleTpFaq(this)">
+          <span data-i18n="faq_free_q"></span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
+      </div>
+      </div>
+
     <div id="other-tools-section"><h3>Other tools</h3><div class="other-tools-strip" id="other-tools-strip"></div></div>
   </div>
 </div>
@@ -1122,6 +1167,73 @@ function _updateChooseBtn(name){
   const btn=document.getElementById('tool-choose-btn'),span=document.getElementById('tool-choose-name');
   if(btn)btn.textContent='✓ PDF loaded';if(span)span.textContent=name;
 }
+
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: {
+    no_file: 'No file loaded',
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'banner_working': 'Working on modified file',
+    'btn_dl': 'Download',
+    'btn_keep': 'Keep working with this version',
+    'lw_h2': 'Change line thickness by range',
+    'lw_desc': 'Scans all vector content streams for the <code>w</code> (setlinewidth) PDF operator, shows a histogram of all values found, and replaces those in a selected range via Ghostscript — guaranteeing the changes are applied to the rendered output.',
+    'lw_scan_btn': 'Scan line widths',
+    'lw_hist_label': 'Width distribution — click a bar to select that range:',
+    'lw_label_min': 'Min (pt):',
+    'lw_label_max': 'Max (pt):',
+    'lw_label_new': 'Replace with (pt):',
+    'lw_label_pages': 'Apply to pages:',
+    'lw_hairline': 'Include hairline (width\xa0=\xa00)',
+    'lw_btn': 'Apply line width change',
+  },
+  es: {
+    no_file: 'Sin archivo cargado',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl': 'Descargar',
+    'btn_keep': 'Seguir trabajando con esta versión',
+    'lw_h2': 'Cambiar grosor de línea por rango',
+    'lw_desc': 'Escanea todos los flujos de contenido vectorial buscando el operador PDF <code>w</code> (setlinewidth), muestra un histograma de todos los valores encontrados y reemplaza los de un rango seleccionado mediante Ghostscript — garantizando que los cambios se aplican al resultado renderizado.',
+    'lw_scan_btn': 'Escanear grosores de línea',
+    'lw_hist_label': 'Distribución de grosores — haz clic en una barra para seleccionar ese rango:',
+    'lw_label_min': 'Mín (pt):',
+    'lw_label_max': 'Máx (pt):',
+    'lw_label_new': 'Reemplazar por (pt):',
+    'lw_label_pages': 'Aplicar a páginas:',
+    'lw_hairline': 'Incluir hairline (grosor\xa0=\xa00)',
+    'lw_btn': 'Aplicar cambio de grosor',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
 </script>
 </body>
 </html>

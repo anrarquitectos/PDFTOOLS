@@ -310,13 +310,7 @@
     <!-- STEP 3 -->
     <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step3_title">Adjust size, colour and page format</span></h3>
 
-    <p data-i18n="step3_p1">Three options affect the visual result without changing the content:</p>
-
-    <ul style="margin: 0 0 16px 20px; font-size:0.88rem; line-height:1.9;">
-      <li data-i18n="bullet1"><strong data-i18n="b1_label">Size</strong> — <span data-i18n="b1_text">Small / Normal / Large. Scales the entire block proportionally from the bottom-right anchor. Use Small on busy sheets, Large on presentation drawings.</span></li>
-      <li data-i18n="bullet2"><strong data-i18n="b2_label">Plan ID colour</strong> — <span data-i18n="b2_text">The colour of the plan number (e.g. ARCH-01). The tool detects the colours already present in the PDF and offers them as swatches so you can match the drawing style in one click.</span></li>
-      <li data-i18n="bullet3"><strong data-i18n="b3_label">Page size override</strong> — <span data-i18n="b3_text">Leave on Auto-detect for standard ISO sheets. Override manually if the PDF uses a non-standard format or the detection result is wrong.</span></li>
-    </ul>
+    <p data-i18n="step3_p1">Three options let you fine-tune the result: <strong>Size</strong> (Small / Normal / Large) scales the entire block proportionally from the bottom-right anchor — useful for busy sheets or presentation drawings. <strong>Plan ID colour</strong> sets the colour of the plan number (e.g. ARCH-01); the tool detects the colours already present in the PDF and offers them as swatches so you can match the drawing style in one click. <strong>Page size override</strong> should normally stay on Auto-detect, but can be set manually if the PDF uses a non-standard format.</p>
 
     <p class="note" data-i18n="note_vector">The block is drawn as pure PDF vector content — lines, rectangles and text operators — so it is resolution-independent and survives any subsequent compression or merge operation without quality loss.</p>
 
@@ -413,11 +407,7 @@ const T = {
     f_logo: 'Logo', fn_logo: 'Optional. Uploaded as any image format, converted to greyscale, and placed in a top row whose height adapts to the image\'s aspect ratio.',
     sc2_caption: 'The input fields filled in for a sample project. The plan ID colour picker lets you match the colour used in the drawing itself.',
     step3_title: 'Adjust size, colour and page format',
-    step3_p1: 'Three options affect the visual result without changing the content:',
-    bullet1: '', bullet2: '', bullet3: '',
-    b1_label: 'Size', b1_text: 'Small / Normal / Large. Scales the entire block proportionally from the bottom-right anchor. Use Small on busy sheets, Large on presentation drawings.',
-    b2_label: 'Plan ID colour', b2_text: 'The colour of the plan number (e.g. ARCH-01). The tool detects the colours already present in the PDF and offers them as swatches so you can match the drawing style in one click.',
-    b3_label: 'Page size override', b3_text: 'Leave on Auto-detect for standard ISO sheets. Override manually if the PDF uses a non-standard format or the detection result is wrong.',
+    step3_p1: 'Three options let you fine-tune the result: <strong>Size</strong> (Small / Normal / Large) scales the entire block proportionally from the bottom-right anchor — useful for busy sheets or presentation drawings. <strong>Plan ID colour</strong> sets the colour of the plan number (e.g. ARCH-01); the tool detects the colours already present in the PDF and offers them as swatches so you can match the drawing style in one click. <strong>Page size override</strong> should normally stay on Auto-detect, but can be set manually if the PDF uses a non-standard format.
     note_vector: 'The block is drawn as pure PDF vector content — lines, rectangles and text operators — so it is resolution-independent and survives any subsequent compression or merge operation without quality loss.',
     sc3_caption: 'The options row. The colour swatches are extracted automatically from the PDF — clicking one sets the plan ID colour instantly.',
     step4_title: 'Apply and download — or continue working on the same file',
@@ -461,11 +451,7 @@ const T = {
     f_logo: 'Logo', fn_logo: 'Opcional. Se sube en cualquier formato de imagen, se convierte a escala de grises y se coloca en una fila superior cuya altura se adapta a la proporción de la imagen.',
     sc2_caption: 'Los campos completados para un proyecto de ejemplo. El selector de color del ID de plano permite igualar el color utilizado en el propio dibujo.',
     step3_title: 'Ajusta tamaño, color y formato de página',
-    step3_p1: 'Tres opciones afectan al resultado visual sin cambiar el contenido:',
-    bullet1: '', bullet2: '', bullet3: '',
-    b1_label: 'Tamaño', b1_text: 'Pequeño / Normal / Grande. Escala toda la viñeta proporcionalmente desde el ancla inferior derecha. Usa Pequeño en láminas con mucho contenido, Grande en presentaciones.',
-    b2_label: 'Color del N° de plano', b2_text: 'El color del número de plano (p. ej. ARQ-01). La herramienta detecta los colores presentes en el PDF y los ofrece como muestras para que puedas igualar el estilo del dibujo con un clic.',
-    b3_label: 'Formato de página', b3_text: 'Déjalo en Detección automática para láminas ISO estándar. Anula manualmente si el PDF usa un formato no estándar o el resultado de detección es incorrecto.',
+    step3_p1: 'Tres opciones permiten ajustar el resultado: <strong>Tamaño</strong> (Pequeño / Normal / Grande) escala toda la viñeta proporcionalmente desde el ancla inferior derecha — útil en láminas con mucho contenido o en presentaciones. <strong>Color del N° de plano</strong> define el color del identificador (p. ej. ARQ-01); la herramienta detecta los colores presentes en el PDF y los ofrece como muestras para igualar el estilo del dibujo con un clic. <strong>Formato de página</strong> debe dejarse en Detección automática salvo que el PDF use un formato no estándar.
     note_vector: 'La viñeta se dibuja como contenido vectorial PDF puro — líneas, rectángulos y operadores de texto — por lo que es independiente de la resolución y sobrevive cualquier operación posterior de compresión o unión sin pérdida de calidad.',
     sc3_caption: 'La fila de opciones. Las muestras de color se extraen automáticamente del PDF — hacer clic en una establece el color del ID de plano al instante.',
     step4_title: 'Aplica y descarga — o continúa trabajando sobre el mismo archivo',
