@@ -921,7 +921,7 @@ let tnPlacedX = 10, tnPlacedY = 90;  // % position
 // ── Helpers ───────────────────────────────────────────────────────────────
 async function tnRenderPage(pageIdx) {
   const pdfjs = await ensurePdfjs();
-  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(currentBuffer) });
+  const loadingTask = pdfjs.getDocument({ data: new Uint8Array(currentBuffer.slice(0)) });
   const doc  = await loadingTask.promise;
   const page = await doc.getPage(pageIdx + 1);
   const vp   = page.getViewport({ scale: 1.5 });
