@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Best Way to Compress a PDF — Scalebar PDF Tools</title>
+<meta name="description" content="Not all PDF compression is equal. A practical guide to what actually reduces file size, when each method is appropriate, and why running Ghostscript in your browser can be the most accessible option.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://scalebar.tools/best-way-to-compress-a-pdf">
+<meta property="og:title" content="The Best Way to Compress a PDF">
+<meta property="og:description" content="What actually reduces file size, when each method is appropriate, and why running Ghostscript in your browser can be the most accessible option.">
+<meta property="og:type" content="article">
+<style>
+  :root {
+    --bg: #f8f8f6;
+    --white: #ffffff;
+    --ink: #1a1a1a;
+    --mid: #555;
+    --light: #e8e8e4;
+    --ok: #2d6a2d;
+    --radius: 4px;
+    --accent: #1a4db3;
+    --max: 720px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--bg); color: var(--ink);
+    font-size: 14px; line-height: 1.7;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background: var(--ink); color: var(--white);
+    padding: 12px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
+  #topbar a { color: inherit; text-decoration: none; }
+
+  /* ── LANG SWITCHER ── */
+  #lang-switcher { display: flex; gap: 4px; }
+  #lang-switcher button {
+    background: none; border: 1px solid #444; color: #aaa;
+    padding: 2px 7px; font-size: 0.72rem; border-radius: 3px;
+    cursor: pointer; font-family: inherit;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color: #fff; border-color: #fff; }
+  #lang-switcher button.active { color: #fff; border-color: #fff; }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    font-size: 0.75rem; color: var(--mid);
+    margin-bottom: 32px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .breadcrumb a { color: var(--mid); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--ink); }
+  .breadcrumb span { opacity: 0.5; }
+
+  /* ── ARTICLE HEADER ── */
+  .article-header { margin-bottom: 40px; }
+  .article-meta {
+    font-size: 0.75rem; color: var(--mid);
+    margin-bottom: 14px; letter-spacing: 0.05em;
+  }
+  .article-header h2 {
+    font-size: 1.6rem; font-weight: normal;
+    letter-spacing: 0.02em; line-height: 1.3;
+    margin-bottom: 16px;
+  }
+  .article-header .lede {
+    font-size: 0.95rem; color: var(--mid);
+    line-height: 1.7; max-width: 600px;
+    border-left: 3px solid var(--ink);
+    padding-left: 16px;
+  }
+
+  /* ── PROSE ── */
+  .prose { max-width: var(--max); }
+  .prose h3 {
+    font-size: 1rem; font-weight: bold;
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--light);
+    letter-spacing: 0.04em;
+  }
+  .prose p { margin-bottom: 16px; font-size: 0.88rem; color: var(--ink); }
+  .prose p.note {
+    background: var(--white); border: 1px solid var(--light);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--mid); font-size: 0.82rem; margin-bottom: 20px;
+  }
+  .prose strong { color: var(--ink); }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table {
+    width: 100%; border-collapse: collapse;
+    margin: 20px 0 28px; font-size: 0.82rem;
+  }
+  .compare-table th {
+    text-align: left; padding: 8px 12px;
+    background: var(--ink); color: var(--white);
+    font-weight: normal; letter-spacing: 0.06em;
+    font-size: 0.75rem;
+  }
+  .compare-table td {
+    padding: 9px 12px; border-bottom: 1px solid var(--light);
+    vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:nth-child(even) td { background: var(--white); }
+  .tag {
+    display: inline-block; font-size: 0.7rem; padding: 1px 6px;
+    border-radius: 2px; margin-right: 2px; letter-spacing: 0.04em;
+  }
+  .tag-good { background: #e8f4e8; color: var(--ok); }
+  .tag-bad  { background: #f4e8e8; color: #8b1a1a; }
+  .tag-mid  { background: #f0f0e8; color: #5a5a00; }
+
+  /* ── SCREENSHOT ── */
+  .screenshot-wrap {
+    margin: 24px 0 28px;
+    border: 1px solid var(--light);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .screenshot-wrap img { display: block; width: 100%; height: auto; }
+  .screenshot-placeholder {
+    background: var(--white); border: 2px dashed #ccc;
+    border-radius: var(--radius); padding: 48px 24px;
+    text-align: center; color: var(--mid); font-size: 0.8rem;
+  }
+  .screenshot-placeholder .sc-icon { font-size: 2rem; margin-bottom: 8px; }
+  .screenshot-caption {
+    padding: 8px 14px; background: #f2f2f0;
+    border-top: 1px solid var(--light);
+    font-size: 0.75rem; color: var(--mid); font-style: italic;
+  }
+
+  /* ── RESULT BOX ── */
+  .result-box {
+    background: var(--white); border: 1px solid var(--light);
+    border-radius: var(--radius); padding: 18px 20px;
+    margin: 24px 0; display: flex; gap: 14px; align-items: flex-start;
+  }
+  .result-box .rb-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+  .result-box .rb-text { font-size: 0.85rem; }
+  .result-box .rb-text strong { display: block; margin-bottom: 4px; }
+
+  /* ── CTA ── */
+  .cta-block {
+    background: var(--ink); color: var(--white);
+    border-radius: var(--radius); padding: 28px;
+    margin-top: 48px; text-align: center;
+  }
+  .cta-btn {
+    display: inline-block; background: var(--white); color: var(--ink);
+    padding: 11px 28px; border-radius: var(--radius);
+    font-family: inherit; font-size: 0.9rem; font-weight: bold;
+    text-decoration: none; letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s;
+    border: 2px solid var(--white);
+  }
+  .cta-btn:hover { background: transparent; color: var(--white); }
+
+  /* ── RELATED ── */
+  .related-wrap {
+    margin-top: 56px; border-top: 1px solid var(--light); padding-top: 28px;
+  }
+  .related-wrap h4 {
+    font-size: 0.75rem; color: var(--mid);
+    letter-spacing: 0.1em; margin-bottom: 14px; text-transform: uppercase;
+  }
+  .related-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .related-tools a {
+    padding: 6px 14px; border: 1px solid #ccc;
+    background: var(--white); border-radius: var(--radius);
+    font-size: 0.8rem; color: var(--ink); text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <h1><a href="index.html">▣ SCALEBAR PDF TOOLS</a></h1>
+  <div id="lang-switcher">
+    <button id="lang-en" onclick="setLang('en')">EN</button>
+    <button id="lang-es" onclick="setLang('es')">ES</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <nav class="breadcrumb">
+    <a href="index.html" data-i18n="home">Home</a>
+    <span>›</span>
+    <span data-i18n="tutorials_label">Tutorials</span>
+  </nav>
+
+  <header class="article-header">
+    <div class="article-meta" data-i18n="article_meta">GUIDE — PDF COMPRESSION · WORKFLOWS</div>
+    <h2 data-i18n="article_title">The best way to compress a PDF — and why it depends on what you are sending</h2>
+    <p class="lede" data-i18n="article_lede">There is no single correct answer. A PDF going to a client for screen review needs a different approach than one going to a print bureau. This guide breaks down what actually reduces file size, where common free tools fall short, and when a browser-based Ghostscript compressor makes more sense than anything you would install.</p>
+  </header>
+
+  <article class="prose">
+
+    <p data-i18n="intro_p1">Scanned architectural drawings, multi-page specification documents, site reports with embedded photographs — PDFs in a professional context get large quickly and stay large. Most solutions to this problem are either too aggressive (wrecking print quality), inaccessible (requiring paid software or a server upload), or ineffective (online tools that strip metadata but leave images untouched). Understanding why file sizes are large in the first place leads directly to choosing the right method.</p>
+
+    <h3 data-i18n="h_why">Why PDFs are large</h3>
+
+    <p data-i18n="why_p1">The majority of the size in most architectural PDFs comes from embedded raster images — scanned originals, photos in reports, rasterized export from BIM software. A single A1 sheet exported from Revit or ArchiCAD as a raster-heavy PDF can easily reach 30–80 MB. Vector-only PDFs from CAD software are typically small regardless of page count. The compression question is therefore almost always an image compression question.</p>
+
+    <p data-i18n="why_p2">A second category is redundant data: duplicate font subsets, unused objects left by successive editing passes in Acrobat, and uncompressed content streams. These are real savings but usually secondary — stripping them rarely reduces a 50 MB drawing below 45 MB. Image resampling is where the significant reductions happen.</p>
+
+    <h3 data-i18n="h_methods">The main approaches, compared</h3>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th data-i18n="th_method">Method</th>
+          <th data-i18n="th_reduction">Reduction</th>
+          <th data-i18n="th_quality">Quality control</th>
+          <th data-i18n="th_privacy">Privacy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td data-i18n="row1_method">Online upload tools (ilovepdf, smallpdf…)</td>
+          <td><span class="tag tag-mid" data-i18n="moderate">moderate</span></td>
+          <td><span class="tag tag-bad" data-i18n="none">none</span></td>
+          <td><span class="tag tag-bad" data-i18n="upload_risk">file uploaded</span></td>
+        </tr>
+        <tr>
+          <td data-i18n="row2_method">Acrobat Pro — Optimize PDF</td>
+          <td><span class="tag tag-good" data-i18n="high">high</span></td>
+          <td><span class="tag tag-good" data-i18n="full">full</span></td>
+          <td><span class="tag tag-good" data-i18n="local">local</span></td>
+        </tr>
+        <tr>
+          <td data-i18n="row3_method">Print to PDF (macOS, Windows)</td>
+          <td><span class="tag tag-mid" data-i18n="variable">variable</span></td>
+          <td><span class="tag tag-bad" data-i18n="none">none</span></td>
+          <td><span class="tag tag-good" data-i18n="local">local</span></td>
+        </tr>
+        <tr>
+          <td data-i18n="row4_method">Ghostscript (command line)</td>
+          <td><span class="tag tag-good" data-i18n="high">high</span></td>
+          <td><span class="tag tag-good" data-i18n="full">full</span></td>
+          <td><span class="tag tag-good" data-i18n="local">local</span></td>
+        </tr>
+        <tr>
+          <td data-i18n="row5_method">Ghostscript in browser (this tool)</td>
+          <td><span class="tag tag-good" data-i18n="high">high</span></td>
+          <td><span class="tag tag-good" data-i18n="full">full</span></td>
+          <td><span class="tag tag-good" data-i18n="local">local</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p data-i18n="methods_p1">Online upload tools work, but the file leaves your device. For most professionals this is acceptable for non-sensitive documents, but for anything covered by an NDA, a client confidentiality clause, or simply containing unpublished design work, uploading to a third-party server is not an appropriate option. The fact that it is free and easy does not change what is happening.</p>
+
+    <p data-i18n="methods_p2">Acrobat Pro is the professional reference. Its optimizer gives granular control over every image type, font handling and object cleanup. The barrier is cost — a subscription that is reasonable for a studio but not always available to an individual, a student, or someone who needs to compress a file once a month.</p>
+
+    <h3 data-i18n="h_gs">Why Ghostscript produces real results</h3>
+
+    <p data-i18n="gs_p1">Ghostscript is the same engine that drives most commercial PDF RIPs and print workflows. When you run a PDF through Ghostscript, it re-interprets the entire file, resamples embedded images to the target DPI, recompresses streams, and rebuilds the output from scratch. This is substantially different from metadata-stripping tools, which leave the image data completely intact and achieve reductions of only 5–15% on image-heavy files.</p>
+
+    <p data-i18n="gs_p2">On a scanned A1 drawing at 600 DPI, compressing to the eBook preset (150 DPI) typically produces an 80–90% reduction in file size with no visible degradation at screen viewing distances. The Printer preset (300 DPI) typically yields 50–70% reduction while remaining suitable for office laser printing. These are the numbers that matter for day-to-day use in a practice.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc1-placeholder">
+        <div class="sc-icon">🖼</div>
+        <span>Screenshot 1</span>
+      </div>
+      <img id="sc1-img" src="img/tutorial-compress-01.png"
+        alt="Compress tool panel showing the four presets with Screen, eBook, Printer and Prepress options"
+        style="display:none;"
+        onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';"
+        onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc1_caption">The four presets map directly to Ghostscript's -dPDFSETTINGS values. Custom mode exposes DPI and JPEG quality as separate controls.</div>
+    </div>
+
+    <h3 data-i18n="h_presets">Choosing the right preset</h3>
+
+    <p data-i18n="presets_p1">The four presets cover the common scenarios directly:</p>
+
+    <ul style="margin: 0 0 16px 20px; font-size:0.88rem; line-height:2;">
+      <li><strong data-i18n="preset_screen_label">Screen (72 DPI)</strong> <span data-i18n="preset_screen_text">— use for files that will only ever be viewed on screen, never printed. Presentation PDFs, reference documents sent to clients for comment, files attached to emails where size matters and nobody will print them.</span></li>
+      <li><strong data-i18n="preset_ebook_label">eBook (150 DPI)</strong> <span data-i18n="preset_ebook_text">— the most useful preset for general practice. Good for sharing by email or through a project platform, acceptable for printing on a standard office laser printer. The default for a reason.</span></li>
+      <li><strong data-i18n="preset_printer_label">Printer (300 DPI)</strong> <span data-i18n="preset_printer_text">— use when the file will be printed at scale on a large-format plotter. Retains sufficient image resolution for A0 printing while still reducing file size meaningfully compared to the original.</span></li>
+      <li><strong data-i18n="preset_prepress_label">Prepress (300 DPI, color-safe)</strong> <span data-i18n="preset_prepress_text">— same resolution as Printer but with color profile preservation enabled. Use when the file goes to a professional print bureau where color accuracy is specified in the brief.</span></li>
+    </ul>
+
+    <p data-i18n="presets_p2">Custom mode is available for edge cases: a structural survey with fine-detail photography that needs 200 DPI at 85 JPEG quality, or a document where JPEG quality matters more than DPI. In practice, the four presets cover almost everything.</p>
+
+    <h3 data-i18n="h_access">The accessibility argument</h3>
+
+    <p data-i18n="access_p1">Running Ghostscript as a WebAssembly module in the browser closes the gap between the command-line tool (powerful but requiring installation and technical familiarity) and paid desktop software. The compression quality is identical — it is the same Ghostscript binary, compiled to run without installation. The only difference is that it loads once from the browser cache and then runs locally, with no server involved.</p>
+
+    <p data-i18n="access_p2">This matters in several specific contexts: a freelance architect without an Acrobat subscription, a student working from a university computer where installing software is restricted, a practice collaborator on a client-site machine, or anyone in a region where the subscription cost of Adobe tools represents a significant expense. The result they get is equivalent to what a studio with full Acrobat Pro produces.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc2-placeholder">
+        <div class="sc-icon">🖼</div>
+        <span>Screenshot 2</span>
+      </div>
+      <img id="sc2-img" src="img/tutorial-compress-02.png"
+        alt="Status area after compression showing original and compressed file size"
+        style="display:none;"
+        onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';"
+        onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc2_caption">After compression, the status area shows the original size, the compressed size and the reduction percentage.</div>
+    </div>
+
+    <h3 data-i18n="h_limits">When it is not the right tool</h3>
+
+    <p data-i18n="limits_p1">Ghostscript compression is not appropriate when the source PDF consists entirely of vector content — CAD line work, text, and fills with no raster images. Compressing a vector-only PDF through Ghostscript will produce a file of similar or larger size, because there are no images to resample. For those files, a metadata-strip pass (which most online tools do adequately) or simply accepting the file size as-is is the correct approach.</p>
+
+    <p data-i18n="limits_p2">It is also worth noting that Ghostscript rebuilds the PDF from scratch. This means interactive forms, digital signatures, and certain annotation types may not survive the compression pass intact. For files where those elements are load-bearing, compress a working copy and keep the original.</p>
+
+    <div class="result-box">
+      <div class="rb-icon">✓</div>
+      <div class="rb-text">
+        <strong data-i18n="result_title">The short version</strong>
+        <span data-i18n="result_desc">If your PDF contains raster images and you need to reduce its size without uploading it anywhere, Ghostscript-based compression in the browser gives you the same result as Acrobat Pro with no installation, no subscription, and no file leaving your device. Use eBook for sharing, Printer for plotting, Prepress for print bureaus.</span>
+      </div>
+    </div>
+
+  </article>
+
+  <!-- CTA -->
+  <div class="cta-block">
+    <a href="compress.html" class="cta-btn" data-i18n="cta_btn">Open Compress PDF tool →</a>
+  </div>
+
+  <!-- RELATED TOOLS -->
+  <div class="related-wrap">
+    <h4 data-i18n="related_title">RELATED TOOLS</h4>
+    <div class="related-tools">
+      <a href="scalebar.html" data-i18n="rel_scalebar">Scale bar (m)</a>
+      <a href="watermark_logo.html" data-i18n="rel_wlogo">Logo watermark</a>
+      <a href="convert.html" data-i18n="rel_convert">PDF to images</a>
+      <a href="split.html" data-i18n="rel_split">Split PDF</a>
+      <a href="merge.html" data-i18n="rel_merge">Merge PDFs</a>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+// ─── I18N ─────────────────────────────────────────────────────────────────
+const T = {
+  en: {
+    home: 'Home', tutorials_label: 'Tutorials',
+    article_meta: 'GUIDE — PDF COMPRESSION · WORKFLOWS',
+    article_title: 'The best way to compress a PDF — and why it depends on what you are sending',
+    article_lede: 'There is no single correct answer. A PDF going to a client for screen review needs a different approach than one going to a print bureau. This guide breaks down what actually reduces file size, where common free tools fall short, and when a browser-based Ghostscript compressor makes more sense than anything you would install.',
+    intro_p1: 'Scanned architectural drawings, multi-page specification documents, site reports with embedded photographs — PDFs in a professional context get large quickly and stay large. Most solutions to this problem are either too aggressive (wrecking print quality), inaccessible (requiring paid software or a server upload), or ineffective (online tools that strip metadata but leave images untouched). Understanding why file sizes are large in the first place leads directly to choosing the right method.',
+    h_why: 'Why PDFs are large',
+    why_p1: 'The majority of the size in most architectural PDFs comes from embedded raster images — scanned originals, photos in reports, rasterized exports from BIM software. A single A1 sheet exported from Revit or ArchiCAD as a raster-heavy PDF can easily reach 30–80 MB. Vector-only PDFs from CAD software are typically small regardless of page count. The compression question is therefore almost always an image compression question.',
+    why_p2: 'A second category is redundant data: duplicate font subsets, unused objects left by successive editing passes, and uncompressed content streams. These are real savings but usually secondary — stripping them rarely reduces a 50 MB drawing below 45 MB. Image resampling is where the significant reductions happen.',
+    h_methods: 'The main approaches, compared',
+    th_method: 'Method', th_reduction: 'Reduction', th_quality: 'Quality control', th_privacy: 'Privacy',
+    row1_method: 'Online upload tools (ilovepdf, smallpdf…)',
+    row2_method: 'Acrobat Pro — Optimize PDF',
+    row3_method: 'Print to PDF (macOS, Windows)',
+    row4_method: 'Ghostscript (command line)',
+    row5_method: 'Ghostscript in browser (this tool)',
+    moderate: 'moderate', high: 'high', variable: 'variable',
+    none: 'none', full: 'full', upload_risk: 'file uploaded', local: 'local',
+    methods_p1: 'Online upload tools work, but the file leaves your device. For most professionals this is acceptable for non-sensitive documents, but for anything covered by an NDA, a client confidentiality clause, or simply containing unpublished design work, uploading to a third-party server is not an appropriate option. The fact that it is free and easy does not change what is happening.',
+    methods_p2: 'Acrobat Pro is the professional reference. Its optimizer gives granular control over every image type, font handling and object cleanup. The barrier is cost — a subscription that is reasonable for a studio but not always available to an individual, a student, or someone who needs to compress a file once a month.',
+    h_gs: 'Why Ghostscript produces real results',
+    gs_p1: 'Ghostscript is the same engine that drives most commercial PDF RIPs and print workflows. When you run a PDF through Ghostscript, it re-interprets the entire file, resamples embedded images to the target DPI, recompresses streams, and rebuilds the output from scratch. This is substantially different from metadata-stripping tools, which leave the image data completely intact and achieve reductions of only 5–15% on image-heavy files.',
+    gs_p2: 'On a scanned A1 drawing at 600 DPI, compressing to the eBook preset (150 DPI) typically produces an 80–90% reduction in file size with no visible degradation at screen viewing distances. The Printer preset (300 DPI) typically yields 50–70% reduction while remaining suitable for office laser printing. These are the numbers that matter for day-to-day use in a practice.',
+    sc1_caption: 'The four presets map directly to Ghostscript\'s -dPDFSETTINGS values. Custom mode exposes DPI and JPEG quality as separate controls.',
+    h_presets: 'Choosing the right preset',
+    presets_p1: 'The four presets cover the common scenarios directly:',
+    preset_screen_label: 'Screen (72 DPI)',
+    preset_screen_text: '— use for files that will only ever be viewed on screen, never printed. Presentation PDFs, reference documents sent to clients for comment, files attached to emails where size matters and nobody will print them.',
+    preset_ebook_label: 'eBook (150 DPI)',
+    preset_ebook_text: '— the most useful preset for general practice. Good for sharing by email or through a project platform, acceptable for printing on a standard office laser printer. The default for a reason.',
+    preset_printer_label: 'Printer (300 DPI)',
+    preset_printer_text: '— use when the file will be printed at scale on a large-format plotter. Retains sufficient image resolution for A0 printing while still reducing file size meaningfully compared to the original.',
+    preset_prepress_label: 'Prepress (300 DPI, color-safe)',
+    preset_prepress_text: '— same resolution as Printer but with color profile preservation enabled. Use when the file goes to a professional print bureau where color accuracy is specified in the brief.',
+    presets_p2: 'Custom mode is available for edge cases: a structural survey with fine-detail photography that needs 200 DPI at 85 JPEG quality, or a document where JPEG quality matters more than DPI. In practice, the four presets cover almost everything.',
+    h_access: 'The accessibility argument',
+    access_p1: 'Running Ghostscript as a WebAssembly module in the browser closes the gap between the command-line tool (powerful but requiring installation and technical familiarity) and paid desktop software. The compression quality is identical — it is the same Ghostscript binary, compiled to run without installation. The only difference is that it loads once from the browser cache and then runs locally, with no server involved.',
+    access_p2: 'This matters in several specific contexts: a freelance architect without an Acrobat subscription, a student working from a university computer where installing software is restricted, a practice collaborator on a client-site machine, or anyone in a region where the subscription cost of Adobe tools represents a significant expense. The result they get is equivalent to what a studio with full Acrobat Pro produces.',
+    sc2_caption: 'After compression, the status area shows the original size, the compressed size and the reduction percentage.',
+    h_limits: 'When it is not the right tool',
+    limits_p1: 'Ghostscript compression is not appropriate when the source PDF consists entirely of vector content — CAD line work, text, and fills with no raster images. Compressing a vector-only PDF through Ghostscript will produce a file of similar or larger size, because there are no images to resample. For those files, a metadata-strip pass or simply accepting the file size as-is is the correct approach.',
+    limits_p2: 'It is also worth noting that Ghostscript rebuilds the PDF from scratch. This means interactive forms, digital signatures, and certain annotation types may not survive the compression pass intact. For files where those elements are load-bearing, compress a working copy and keep the original.',
+    result_title: 'The short version',
+    result_desc: 'If your PDF contains raster images and you need to reduce its size without uploading it anywhere, Ghostscript-based compression in the browser gives you the same result as Acrobat Pro with no installation, no subscription, and no file leaving your device. Use eBook for sharing, Printer for plotting, Prepress for print bureaus.',
+    cta_btn: 'Open Compress PDF tool →',
+    related_title: 'RELATED TOOLS',
+    rel_scalebar: 'Scale bar (m)', rel_wlogo: 'Logo watermark',
+    rel_convert: 'PDF to images', rel_split: 'Split PDF', rel_merge: 'Merge PDFs',
+  },
+  es: {
+    home: 'Inicio', tutorials_label: 'Tutoriales',
+    article_meta: 'GUÍA — COMPRESIÓN DE PDF · FLUJOS DE TRABAJO',
+    article_title: 'La mejor forma de comprimir un PDF — y por qué depende de lo que vayas a enviar',
+    article_lede: 'No hay una única respuesta correcta. Un PDF que va a un cliente para revisión en pantalla necesita un enfoque distinto al que va a una imprenta. Esta guía explica qué reduce realmente el tamaño del archivo, dónde fallan las herramientas gratuitas comunes, y cuándo un compresor Ghostscript en el navegador tiene más sentido que cualquier cosa que instalarías.',
+    intro_p1: 'Planos arquitectónicos escaneados, documentos de especificaciones de varias páginas, informes de obra con fotografías incrustadas — los PDFs en un contexto profesional se hacen grandes rápidamente y se mantienen así. La mayoría de las soluciones son demasiado agresivas (destruyendo la calidad de impresión), inaccesibles (requiriendo software de pago o una subida a servidor), o ineficaces (herramientas online que eliminan metadatos pero no tocan las imágenes). Entender por qué los archivos son grandes lleva directamente a elegir el método correcto.',
+    h_why: 'Por qué los PDFs son grandes',
+    why_p1: 'La mayor parte del tamaño en la mayoría de PDFs arquitectónicos proviene de imágenes raster incrustadas: originales escaneados, fotos en informes, exportaciones rasterizadas desde software BIM. Una sola lámina A1 exportada desde Revit o ArchiCAD como PDF con muchas imágenes puede alcanzar fácilmente 30–80 MB. Los PDFs solo vectoriales del software CAD son típicamente pequeños independientemente del número de páginas. La pregunta sobre compresión es por tanto casi siempre una pregunta sobre compresión de imágenes.',
+    why_p2: 'Una segunda categoría es la de datos redundantes: subconjuntos de fuentes duplicados, objetos no utilizados dejados por sucesivas ediciones en Acrobat, y flujos de contenido sin comprimir. Son ahorros reales pero generalmente secundarios — eliminarlos rara vez reduce un plano de 50 MB por debajo de 45 MB. El remuestreo de imágenes es donde ocurren las reducciones significativas.',
+    h_methods: 'Los enfoques principales, comparados',
+    th_method: 'Método', th_reduction: 'Reducción', th_quality: 'Control de calidad', th_privacy: 'Privacidad',
+    row1_method: 'Herramientas online (ilovepdf, smallpdf…)',
+    row2_method: 'Acrobat Pro — Optimizar PDF',
+    row3_method: 'Imprimir en PDF (macOS, Windows)',
+    row4_method: 'Ghostscript (línea de comandos)',
+    row5_method: 'Ghostscript en navegador (esta herramienta)',
+    moderate: 'moderada', high: 'alta', variable: 'variable',
+    none: 'ninguno', full: 'completo', upload_risk: 'archivo subido', local: 'local',
+    methods_p1: 'Las herramientas online funcionan, pero el archivo sale de tu dispositivo. Para la mayoría de profesionales esto es aceptable para documentos no sensibles, pero para cualquier cosa cubierta por un NDA, una cláusula de confidencialidad con un cliente, o simplemente conteniendo trabajo de diseño no publicado, subir a un servidor de terceros no es una opción apropiada. Que sea gratis y fácil no cambia lo que está ocurriendo.',
+    methods_p2: 'Acrobat Pro es la referencia profesional. Su optimizador ofrece control granular sobre cada tipo de imagen, manejo de fuentes y limpieza de objetos. La barrera es el coste — una suscripción razonable para un estudio pero no siempre disponible para un freelance, un estudiante, o alguien que necesita comprimir un archivo una vez al mes.',
+    h_gs: 'Por qué Ghostscript produce resultados reales',
+    gs_p1: 'Ghostscript es el mismo motor que impulsa la mayoría de los RIPs PDF comerciales y flujos de trabajo de impresión. Cuando pasas un PDF por Ghostscript, reinterpreta el archivo completo, remuestrea las imágenes incrustadas al DPI objetivo, recomprime los flujos y reconstruye la salida desde cero. Esto es sustancialmente diferente de las herramientas que solo eliminan metadatos, que dejan los datos de imagen completamente intactos y consiguen reducciones de solo el 5–15% en archivos con muchas imágenes.',
+    gs_p2: 'En un plano A1 escaneado a 600 DPI, comprimir al preset eBook (150 DPI) produce típicamente una reducción del 80–90% en el tamaño del archivo sin degradación visible a distancias de visualización en pantalla. El preset Printer (300 DPI) produce típicamente una reducción del 50–70% manteniendo la idoneidad para impresión en láser de oficina. Estos son los números que importan para el uso cotidiano en un despacho.',
+    sc1_caption: 'Los cuatro presets corresponden directamente a los valores -dPDFSETTINGS de Ghostscript. El modo Custom expone DPI y calidad JPEG como controles separados.',
+    h_presets: 'Elegir el preset correcto',
+    presets_p1: 'Los cuatro presets cubren directamente los escenarios comunes:',
+    preset_screen_label: 'Screen (72 DPI)',
+    preset_screen_text: '— para archivos que solo se verán en pantalla, nunca impresos. PDFs de presentación, documentos de referencia enviados a clientes para comentar, archivos adjuntos en emails donde el tamaño importa y nadie va a imprimir.',
+    preset_ebook_label: 'eBook (150 DPI)',
+    preset_ebook_text: '— el preset más útil para la práctica general. Bueno para compartir por email o a través de una plataforma de proyectos, aceptable para imprimir en una impresora láser de oficina estándar. El predeterminado por algo.',
+    preset_printer_label: 'Printer (300 DPI)',
+    preset_printer_text: '— para cuando el archivo se imprimirá a escala en un plotter de gran formato. Mantiene suficiente resolución de imagen para impresión en A0 mientras reduce el tamaño del archivo de forma significativa respecto al original.',
+    preset_prepress_label: 'Prepress (300 DPI, color seguro)',
+    preset_prepress_text: '— misma resolución que Printer pero con preservación de perfil de color activada. Úsalo cuando el archivo va a una imprenta profesional donde la precisión de color está especificada en el encargo.',
+    presets_p2: 'El modo Custom está disponible para casos extremos: un levantamiento estructural con fotografías de detalle fino que necesita 200 DPI a 85 de calidad JPEG, o un documento donde la calidad JPEG importa más que el DPI. En la práctica, los cuatro presets cubren casi todo.',
+    h_access: 'El argumento de la accesibilidad',
+    access_p1: 'Ejecutar Ghostscript como módulo WebAssembly en el navegador cierra la brecha entre la herramienta de línea de comandos (potente pero que requiere instalación y familiaridad técnica) y el software de escritorio de pago. La calidad de compresión es idéntica — es el mismo binario de Ghostscript, compilado para ejecutarse sin instalación. La única diferencia es que se carga una vez desde la caché del navegador y luego se ejecuta localmente, sin involucrar ningún servidor.',
+    access_p2: 'Esto importa en varios contextos específicos: un arquitecto freelance sin suscripción a Acrobat, un estudiante trabajando desde un ordenador universitario donde instalar software está restringido, un colaborador del despacho en una máquina de obra del cliente, o cualquier persona en una región donde el coste de la suscripción a Adobe representa un gasto significativo. El resultado que obtienen es equivalente al que produce un estudio con Acrobat Pro completo.',
+    sc2_caption: 'Tras la compresión, el área de estado muestra el tamaño original, el tamaño comprimido y el porcentaje de reducción.',
+    h_limits: 'Cuándo no es la herramienta correcta',
+    limits_p1: 'La compresión Ghostscript no es apropiada cuando el PDF fuente consiste enteramente en contenido vectorial — trazados CAD, texto y rellenos sin imágenes raster. Comprimir un PDF solo vectorial a través de Ghostscript producirá un archivo de tamaño similar o mayor, porque no hay imágenes que remuestrear. Para esos archivos, una pasada de eliminación de metadatos o simplemente aceptar el tamaño del archivo es el enfoque correcto.',
+    limits_p2: 'También vale la pena señalar que Ghostscript reconstruye el PDF desde cero. Esto significa que los formularios interactivos, las firmas digitales y ciertos tipos de anotaciones pueden no sobrevivir intactos a la compresión. Para archivos donde esos elementos son esenciales, comprime una copia de trabajo y conserva el original.',
+    result_title: 'La versión corta',
+    result_desc: 'Si tu PDF contiene imágenes raster y necesitas reducir su tamaño sin subirlo a ningún sitio, la compresión basada en Ghostscript en el navegador te da el mismo resultado que Acrobat Pro sin instalación, sin suscripción, y sin que ningún archivo salga de tu dispositivo. Usa eBook para compartir, Printer para plottear, Prepress para imprentas.',
+    cta_btn: 'Abrir herramienta Comprimir PDF →',
+    related_title: 'HERRAMIENTAS RELACIONADAS',
+    rel_scalebar: 'Escala gráfica (m)', rel_wlogo: 'Marca de agua logo',
+    rel_convert: 'PDF a imágenes', rel_split: 'Dividir PDF', rel_merge: 'Unir PDFs',
+  }
+};
+
+const _langRaw = localStorage.getItem('sb_lang') || navigator.language || 'en';
+const lang = _langRaw.slice(0,2).toLowerCase();
+const t = T[lang] || T['en'];
+
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) el.textContent = t[key];
+  });
+  const activeBtn = document.getElementById('lang-' + lang);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', applyI18n);
+</script>
+
+</body>
+</html>

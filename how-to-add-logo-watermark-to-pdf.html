@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Add Your Logo as a Watermark to All Your Plans — Scalebar PDF Tools</title>
+<meta name="description" content="Stamp your studio logo across an entire set of architectural PDFs in one step. Automatic grayscale conversion, adjustable opacity and rotation. No software required.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://scalebar.tools/how-to-add-logo-watermark-to-pdf">
+<meta property="og:title" content="How to Add Your Logo as a Watermark to All Your Plans">
+<meta property="og:description" content="Batch logo watermark for architectural PDFs. Grayscale, adjustable opacity, any position. Runs entirely in your browser.">
+<meta property="og:type" content="article">
+<style>
+  :root {
+    --bg: #f8f8f6;
+    --white: #ffffff;
+    --ink: #1a1a1a;
+    --mid: #555;
+    --light: #e8e8e4;
+    --ok: #2d6a2d;
+    --radius: 4px;
+    --accent: #1a4db3;
+    --max: 720px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Courier New', Courier, monospace;
+    background: var(--bg); color: var(--ink);
+    font-size: 14px; line-height: 1.7;
+  }
+
+  /* ── TOP BAR ── */
+  #topbar {
+    background: var(--ink); color: var(--white);
+    padding: 12px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
+  #topbar a { color: inherit; text-decoration: none; }
+
+  /* ── LANG SWITCHER ── */
+  #lang-switcher { display: flex; gap: 4px; }
+  #lang-switcher button {
+    background: none; border: 1px solid #444; color: #aaa;
+    padding: 2px 7px; font-size: 0.72rem; border-radius: 3px;
+    cursor: pointer; font-family: inherit;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color: #fff; border-color: #fff; }
+  #lang-switcher button.active { color: #fff; border-color: #fff; }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    font-size: 0.75rem; color: var(--mid);
+    margin-bottom: 32px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .breadcrumb a { color: var(--mid); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--ink); }
+  .breadcrumb span { opacity: 0.5; }
+
+  /* ── ARTICLE HEADER ── */
+  .article-header { margin-bottom: 40px; }
+  .article-meta {
+    font-size: 0.75rem; color: var(--mid);
+    margin-bottom: 14px; letter-spacing: 0.05em;
+  }
+  .article-header h2 {
+    font-size: 1.6rem; font-weight: normal;
+    letter-spacing: 0.02em; line-height: 1.3;
+    margin-bottom: 16px;
+  }
+  .article-header .lede {
+    font-size: 0.95rem; color: var(--mid);
+    line-height: 1.7; max-width: 600px;
+    border-left: 3px solid var(--ink);
+    padding-left: 16px;
+  }
+
+  /* ── PROSE ── */
+  .prose { max-width: var(--max); }
+  .prose h3 {
+    font-size: 1rem; font-weight: bold;
+    margin: 36px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--light);
+    letter-spacing: 0.04em;
+  }
+  .prose h3 .step-num {
+    display: inline-block;
+    background: var(--ink); color: var(--white);
+    font-size: 0.72rem; padding: 1px 7px;
+    border-radius: 2px; margin-right: 8px;
+    vertical-align: middle; letter-spacing: 0.05em;
+  }
+  .prose p { margin-bottom: 16px; font-size: 0.88rem; color: var(--ink); }
+  .prose p.note {
+    background: var(--white); border: 1px solid var(--light);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--mid); font-size: 0.82rem; margin-bottom: 20px;
+  }
+  .prose strong { color: var(--ink); }
+
+  /* ── SCREENSHOT ── */
+  .screenshot-wrap {
+    margin: 24px 0 28px;
+    border: 1px solid var(--light);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .screenshot-wrap img { display: block; width: 100%; height: auto; }
+  .screenshot-placeholder {
+    background: var(--white);
+    border: 2px dashed #ccc;
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--mid); font-size: 0.8rem;
+  }
+  .screenshot-placeholder .sc-icon { font-size: 2rem; margin-bottom: 8px; }
+  .screenshot-caption {
+    padding: 8px 14px;
+    background: #f2f2f0;
+    border-top: 1px solid var(--light);
+    font-size: 0.75rem; color: var(--mid);
+    font-style: italic;
+  }
+
+  /* ── RESULT BOX ── */
+  .result-box {
+    background: var(--white);
+    border: 1px solid var(--light);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin: 24px 0;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .result-box .rb-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
+  .result-box .rb-text { font-size: 0.85rem; }
+  .result-box .rb-text strong { display: block; margin-bottom: 4px; }
+
+  /* ── CTA ── */
+  .cta-block {
+    background: var(--ink); color: var(--white);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-top: 48px;
+    text-align: center;
+  }
+  .cta-btn {
+    display: inline-block;
+    background: var(--white); color: var(--ink);
+    padding: 11px 28px; border-radius: var(--radius);
+    font-family: inherit; font-size: 0.9rem; font-weight: bold;
+    text-decoration: none; letter-spacing: 0.04em;
+    transition: background 0.15s, color 0.15s;
+    border: 2px solid var(--white);
+  }
+  .cta-btn:hover { background: transparent; color: var(--white); }
+
+  /* ── RELATED ── */
+  .related-wrap {
+    margin-top: 56px;
+    border-top: 1px solid var(--light);
+    padding-top: 28px;
+  }
+  .related-wrap h4 {
+    font-size: 0.75rem; color: var(--mid);
+    letter-spacing: 0.1em; margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .related-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .related-tools a {
+    padding: 6px 14px; border: 1px solid #ccc;
+    background: var(--white); border-radius: var(--radius);
+    font-size: 0.8rem; color: var(--ink); text-decoration: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <h1><a href="index.html">▣ SCALEBAR PDF TOOLS</a></h1>
+  <div id="lang-switcher">
+    <button id="lang-en" onclick="setLang('en')">EN</button>
+    <button id="lang-es" onclick="setLang('es')">ES</button>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- BREADCRUMB -->
+  <nav class="breadcrumb">
+    <a href="index.html" data-i18n="home">Home</a>
+    <span>›</span>
+    <span data-i18n="tutorials_label">Tutorials</span>
+  </nav>
+
+  <!-- ARTICLE HEADER -->
+  <header class="article-header">
+    <div class="article-meta" data-i18n="article_meta">TUTORIAL — LOGO WATERMARK · BATCH PDF</div>
+    <h2 data-i18n="article_title">How to add your logo as a watermark to all your plans, without software</h2>
+    <p class="lede" data-i18n="article_lede">Sending a full drawing set to a client or contractor and want your studio logo on every sheet. This tutorial shows how to stamp it across all your PDFs at once, with the right opacity and position, entirely in your browser.</p>
+  </header>
+
+  <!-- ARTICLE BODY -->
+  <article class="prose">
+
+    <p data-i18n="intro_p1">As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet, as both branding and a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and outputs a ZIP. You can find it <a href="watermark_logo.html" style="color:var(--accent);">here</a>.</p>
+
+    <p data-i18n="intro_p2">The logo is automatically converted to grayscale before embedding, which keeps it neutral against any drawing background and avoids color conflicts with drawing content.</p>
+
+    <!-- STEP 1 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step1_title">Load your PDFs and your logo image</span></h3>
+
+    <p data-i18n="step1_p1">Open the <strong>Logo watermark</strong> tool and click <strong>Choose PDF(s)</strong>. You can select an entire drawing set at once — ten, fifty or more files. Once loaded, the button confirms how many PDFs are ready.</p>
+
+    <p data-i18n="step1_p2">Then click <strong>Choose image</strong> and select your logo file. PNG with a transparent background works best. JPG is also accepted. The tool will convert it to grayscale automatically, so the original colors of your logo file do not matter.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc1-placeholder">
+        <div class="sc-icon">🖼</div>
+        <span>Screenshot 1</span>
+      </div>
+      <img id="sc1-img" src="img/tutorial-wlogo-01.png" alt="Logo watermark tool panel with multiple PDFs loaded and a logo file selected" style="display:none;"
+        onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';"
+        onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc1_caption">The panel after loading several PDFs and a logo file. The button shows the number of PDFs ready.</div>
+    </div>
+
+    <!-- STEP 2 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step2_title">Adjust opacity, size, rotation and position</span></h3>
+
+    <p data-i18n="step2_p1">Four parameters control how the logo appears on each sheet:</p>
+
+    <ul style="margin: 0 0 16px 20px; font-size:0.88rem; line-height:1.9;">
+      <li data-i18n="bullet1"><strong data-i18n="b1_label">Opacity</strong> <span data-i18n="b1_text">— a value between 0.05 and 1. For a background stamp on working drawings, 0.10 to 0.18 is usually enough to be readable without interfering with drawing content. For a title page or cover sheet, 0.30 or higher works well.</span></li>
+      <li data-i18n="bullet2"><strong data-i18n="b2_label">Scale</strong> <span data-i18n="b2_text">— as a percentage of the page width. 40% places a centered logo that reads clearly on A1 or A0 sheets. Reduce to 20–25% for a corner logo.</span></li>
+      <li data-i18n="bullet3"><strong data-i18n="b3_label">Rotation</strong> <span data-i18n="b3_text">— in degrees. A slight diagonal angle (around -30°) is a common choice for central watermarks. For corner positions, 0° tends to look cleaner.</span></li>
+      <li data-i18n="bullet4"><strong data-i18n="b4_label">Position</strong> <span data-i18n="b4_text">— center, bottom right, top left, top right or bottom left. Center with a diagonal rotation is the standard for a discreet full-sheet stamp. Corner positions with 0° rotation work for a persistent logo mark.</span></li>
+    </ul>
+
+    <p data-i18n="step2_p2">The same settings apply to every page of every PDF in the batch. If you need different settings for a cover sheet and the rest of the set, process them as two separate runs.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc2-placeholder">
+        <div class="sc-icon">🖼</div>
+        <span>Screenshot 2</span>
+      </div>
+      <img id="sc2-img" src="img/tutorial-wlogo-02.png" alt="Logo watermark controls showing opacity 0.15, scale 40, rotation -30, position center" style="display:none;"
+        onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';"
+        onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc2_caption">Typical settings for a discreet central stamp: opacity 0.15, scale 40%, rotation -30°, applied to all pages.</div>
+    </div>
+
+    <!-- STEP 3 -->
+    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step3_title">Apply and download the ZIP</span></h3>
+
+    <p data-i18n="step3_p1">Click <strong>Apply logo and download ZIP</strong>. Each PDF is processed in turn and packaged into a single ZIP file that downloads automatically. The original file names are preserved so the set stays organised. The entire operation runs in your browser — no files leave your device at any point.</p>
+
+    <div class="screenshot-wrap">
+      <div class="screenshot-placeholder" id="sc3-placeholder">
+        <div class="sc-icon">🖼</div>
+        <span>Screenshot 3</span>
+      </div>
+      <img id="sc3-img" src="img/tutorial-wlogo-03.png" alt="Architectural drawing with a grayscale studio logo stamped diagonally across the sheet" style="display:none;"
+        onerror="this.style.display='none';document.getElementById('sc3-placeholder').style.display='block';"
+        onload="this.style.display='block';document.getElementById('sc3-placeholder').style.display='none';">
+      <div class="screenshot-caption" data-i18n="sc3_caption">Result: a grayscale studio logo embedded diagonally at low opacity. The drawing content remains fully legible.</div>
+    </div>
+
+    <div class="result-box">
+      <div class="rb-icon">✓</div>
+      <div class="rb-text">
+        <strong data-i18n="result_title">The logo is embedded as a PDF image object</strong>
+        <span data-i18n="result_desc">The watermark is not a flattened raster overlay of the whole page. Only the logo image is composited into the content stream, keeping the rest of the PDF data intact. Text, vectors and annotations on the original pages remain selectable and searchable after watermarking.</span>
+      </div>
+    </div>
+
+    <h3 style="border:none; padding:0;" data-i18n="tips_title">A few practical notes</h3>
+
+    <p data-i18n="tips_p1">PNG logos with a transparent background produce the cleanest result. If your logo has a white background, it will appear as a white rectangle on the drawing. In that case, either use a PNG with transparency, or increase the rotation so the rectangle shape is less noticeable at low opacity.</p>
+
+    <p data-i18n="tips_p2">The grayscale conversion uses luminance weighting, so a logo with strong contrast in its original colors will still read clearly after conversion. A logo that is mostly mid-gray at the same luminance level as the drawing background may become harder to read — in that case, try a slightly higher opacity or a corner position.</p>
+
+  </article>
+
+  <!-- CTA -->
+  <div class="cta-block">
+    <a href="watermark_logo.html" class="cta-btn" data-i18n="cta_btn">Open Logo Watermark tool →</a>
+  </div>
+
+  <!-- RELATED TOOLS -->
+  <div class="related-wrap">
+    <h4 data-i18n="related_title">RELATED TOOLS</h4>
+    <div class="related-tools">
+      <a href="watermark_text.html" data-i18n="rel_wtext">Text watermark</a>
+      <a href="scalebar.html" data-i18n="rel_scalebar">Scale bar (m)</a>
+      <a href="vineta.html" data-i18n="rel_vineta">Title block</a>
+      <a href="plan_numbering.html" data-i18n="rel_plannum">Plan numbering</a>
+      <a href="compress.html" data-i18n="rel_compress">Compress PDF</a>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+// ─── I18N ─────────────────────────────────────────────────────────────────
+const T = {
+  en: {
+    home: 'Home', tutorials_label: 'Tutorials',
+    article_meta: 'TUTORIAL — LOGO WATERMARK · BATCH PDF',
+    article_title: 'How to add your logo as a watermark to all your plans, without software',
+    article_lede: 'Sending a full drawing set to a client or contractor and want your studio logo on every sheet. This tutorial shows how to stamp it across all your PDFs at once, with the right opacity and position, entirely in your browser.',
+    intro_p1: 'As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet, as both branding and a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and outputs a ZIP. You can find it <a href="watermark_logo.html" style="color:#1a4db3;">here</a>.',
+    intro_p2: 'The logo is automatically converted to grayscale before embedding, which keeps it neutral against any drawing background and avoids color conflicts with drawing content.',
+    step: 'STEP',
+    step1_title: 'Load your PDFs and your logo image',
+    step1_p1: 'Open the <strong>Logo watermark</strong> tool and click <strong>Choose PDF(s)</strong>. You can select an entire drawing set at once — ten, fifty or more files. Once loaded, the button confirms how many PDFs are ready.',
+    step1_p2: 'Then click <strong>Choose image</strong> and select your logo file. PNG with a transparent background works best. JPG is also accepted. The tool will convert it to grayscale automatically, so the original colors of your logo file do not matter.',
+    sc1_caption: 'The panel after loading several PDFs and a logo file. The button shows the number of PDFs ready.',
+    step2_title: 'Adjust opacity, size, rotation and position',
+    step2_p1: 'Four parameters control how the logo appears on each sheet:',
+    b1_label: 'Opacity', b1_text: '— a value between 0.05 and 1. For a background stamp on working drawings, 0.10 to 0.18 is usually enough to be readable without interfering with drawing content. For a title page or cover sheet, 0.30 or higher works well.',
+    b2_label: 'Scale', b2_text: '— as a percentage of the page width. 40% places a centered logo that reads clearly on A1 or A0 sheets. Reduce to 20–25% for a corner logo.',
+    b3_label: 'Rotation', b3_text: '— in degrees. A slight diagonal angle (around -30°) is a common choice for central watermarks. For corner positions, 0° tends to look cleaner.',
+    b4_label: 'Position', b4_text: '— center, bottom right, top left, top right or bottom left. Center with a diagonal rotation is the standard for a discreet full-sheet stamp. Corner positions with 0° rotation work for a persistent logo mark.',
+    step2_p2: 'The same settings apply to every page of every PDF in the batch. If you need different settings for a cover sheet and the rest of the set, process them as two separate runs.',
+    sc2_caption: 'Typical settings for a discreet central stamp: opacity 0.15, scale 40%, rotation -30°, applied to all pages.',
+    step3_title: 'Apply and download the ZIP',
+    step3_p1: 'Click <strong>Apply logo and download ZIP</strong>. Each PDF is processed in turn and packaged into a single ZIP file that downloads automatically. The original file names are preserved so the set stays organised. The entire operation runs in your browser — no files leave your device at any point.',
+    sc3_caption: 'Result: a grayscale studio logo embedded diagonally at low opacity. The drawing content remains fully legible.',
+    result_title: 'The logo is embedded as a PDF image object',
+    result_desc: 'The watermark is not a flattened raster overlay of the whole page. Only the logo image is composited into the content stream, keeping the rest of the PDF data intact. Text, vectors and annotations on the original pages remain selectable and searchable after watermarking.',
+    tips_title: 'A few practical notes',
+    tips_p1: 'PNG logos with a transparent background produce the cleanest result. If your logo has a white background, it will appear as a white rectangle on the drawing. In that case, either use a PNG with transparency, or increase the rotation so the rectangle shape is less noticeable at low opacity.',
+    tips_p2: 'The grayscale conversion uses luminance weighting, so a logo with strong contrast in its original colors will still read clearly after conversion. A logo that is mostly mid-gray at the same luminance level as the drawing background may become harder to read — in that case, try a slightly higher opacity or a corner position.',
+    cta_btn: 'Open Logo Watermark tool →',
+    related_title: 'RELATED TOOLS',
+    rel_wtext: 'Text watermark', rel_scalebar: 'Scale bar (m)',
+    rel_vineta: 'Title block', rel_plannum: 'Plan numbering', rel_compress: 'Compress PDF',
+  },
+  es: {
+    home: 'Inicio', tutorials_label: 'Tutoriales',
+    article_meta: 'TUTORIAL — MARCA DE AGUA LOGO · LOTE DE PDFs',
+    article_title: 'Cómo añadir tu logo como marca de agua en todos tus planos, sin softwares',
+    article_lede: 'Vas a enviar un juego completo de planos a un cliente o constructor y quieres el logo de tu estudio en cada lámina. Este tutorial muestra cómo estamparlo en todos tus PDFs a la vez, con la opacidad y posición correctas, enteramente en el navegador.',
+    intro_p1: 'Como arquitecto necesitaba frecuentemente enviar juegos de planos con el logo del estudio en cada lámina, tanto por identidad de marca como como capa básica de protección ante usos indebidos. Hacerlo hoja a hoja en Acrobat es lento, y la mayoría de herramientas gratuitas raszterizan el resultado o gestionan mal los lotes de múltiples archivos. La herramienta de marca de agua con logo procesa cualquier cantidad de PDFs a la vez y entrega un ZIP. La puedes encontrar <a href="watermark_logo.html" style="color:#1a4db3;">aquí</a>.',
+    intro_p2: 'El logo se convierte automáticamente a escala de grises antes de incrustarse, lo que lo mantiene neutro frente a cualquier fondo de plano y evita conflictos de color con el contenido del dibujo.',
+    step: 'PASO',
+    step1_title: 'Carga tus PDFs y tu imagen de logo',
+    step1_p1: 'Abre la herramienta <strong>Marca de agua logo</strong> y haz clic en <strong>Choose PDF(s)</strong>. Puedes seleccionar un juego completo de planos de una vez: diez, cincuenta o más archivos. Una vez cargados, el botón confirma cuántos PDFs están listos.',
+    step1_p2: 'Luego haz clic en <strong>Choose image</strong> y selecciona tu archivo de logo. PNG con fondo transparente funciona mejor. JPG también se acepta. La herramienta lo convertirá a escala de grises automáticamente, por lo que los colores originales del archivo de logo no importan.',
+    sc1_caption: 'El panel tras cargar varios PDFs y un archivo de logo. El botón muestra el número de PDFs listos.',
+    step2_title: 'Ajusta opacidad, tamaño, rotación y posición',
+    step2_p1: 'Cuatro parámetros controlan cómo aparece el logo en cada lámina:',
+    b1_label: 'Opacidad', b1_text: '— un valor entre 0.05 y 1. Para un sello de fondo en planos de trabajo, 0.10 a 0.18 suele ser suficiente para ser legible sin interferir con el contenido del dibujo. Para una portada o carátula, 0.30 o más funciona bien.',
+    b2_label: 'Escala', b2_text: '— como porcentaje del ancho de página. El 40% coloca un logo centrado que se lee claramente en láminas A1 o A0. Reduce a 20–25% para un logo en esquina.',
+    b3_label: 'Rotación', b3_text: '— en grados. Un ángulo diagonal suave (alrededor de -30°) es una elección habitual para marcas de agua centrales. Para posiciones en esquina, 0° tiende a verse más limpio.',
+    b4_label: 'Posición', b4_text: '— centro, esquina inferior derecha, superior izquierda, superior derecha o inferior izquierda. Centro con rotación diagonal es el estándar para un sello discreto de hoja completa. Las posiciones en esquina con 0° funcionan para una marca de logo persistente.',
+    step2_p2: 'Los mismos ajustes se aplican a cada página de cada PDF del lote. Si necesitas ajustes diferentes para una portada y el resto del juego, procésalos en dos operaciones separadas.',
+    sc2_caption: 'Ajustes típicos para un sello central discreto: opacidad 0.15, escala 40%, rotación -30°, aplicado a todas las páginas.',
+    step3_title: 'Aplica y descarga el ZIP',
+    step3_p1: 'Haz clic en <strong>Apply logo and download ZIP</strong>. Cada PDF se procesa por turno y se empaqueta en un único archivo ZIP que se descarga automáticamente. Los nombres de archivo originales se conservan para que el juego se mantenga organizado. Toda la operación se ejecuta en tu navegador: ningún archivo sale de tu dispositivo en ningún momento.',
+    sc3_caption: 'Resultado: un logo de estudio en escala de grises incrustado en diagonal a baja opacidad. El contenido del plano permanece completamente legible.',
+    result_title: 'El logo se incrusta como objeto imagen PDF',
+    result_desc: 'La marca de agua no es una superposición rasterizada de toda la página. Solo la imagen del logo se compone en el flujo de contenido, manteniendo intactos el resto de los datos del PDF. El texto, los vectores y las anotaciones de las páginas originales siguen siendo seleccionables y buscables tras añadir la marca de agua.',
+    tips_title: 'Algunas notas prácticas',
+    tips_p1: 'Los logos PNG con fondo transparente producen el resultado más limpio. Si tu logo tiene fondo blanco, aparecerá como un rectángulo blanco sobre el plano. En ese caso, usa un PNG con transparencia, o aumenta la rotación para que la forma rectangular sea menos perceptible a baja opacidad.',
+    tips_p2: 'La conversión a escala de grises usa ponderación de luminancia, por lo que un logo con alto contraste en sus colores originales seguirá leyéndose con claridad tras la conversión. Un logo que sea principalmente gris medio a la misma luminancia que el fondo del plano puede resultar más difícil de leer: en ese caso prueba una opacidad ligeramente mayor o una posición en esquina.',
+    cta_btn: 'Abrir herramienta Marca de agua logo →',
+    related_title: 'HERRAMIENTAS RELACIONADAS',
+    rel_wtext: 'Marca de agua texto', rel_scalebar: 'Escala gráfica (m)',
+    rel_vineta: 'Viñeta / Carátula', rel_plannum: 'Numeración de planos', rel_compress: 'Comprimir PDF',
+  }
+};
+
+const _langRaw = localStorage.getItem('sb_lang') || navigator.language || 'en';
+const lang = _langRaw.slice(0,2).toLowerCase();
+const t = T[lang] || T['en'];
+
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+
+function applyI18n() {
+  const htmlKeys = new Set(['intro_p1','step1_p1','step1_p2','step3_p1']);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) {
+      if (htmlKeys.has(key)) el.innerHTML = t[key];
+      else el.textContent = t[key];
+    }
+  });
+  const activeBtn = document.getElementById('lang-' + lang);
+  if (activeBtn) activeBtn.classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', applyI18n);
+</script>
+
+</body>
+</html>

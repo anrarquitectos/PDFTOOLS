@@ -1457,6 +1457,10 @@ const TOOLS = [
   { id:'grid',           icon:'⊞', name:'Page grid',              desc:'Add a scale-aware reference grid to PDF pages for architectural drawings.' },
   { id:'plan-numbering', icon:'🔢', name:'Plan numbering',         desc:'Stamp sequential plan numbers on multiple PDFs in one batch operation.' },
   { id:'revision-cloud', icon:'☁', name:'Revision cloud',         desc:'Add an architectural revision cloud with numbered corner triangle marker.' },
+  { id:'pdfa',           icon:'🗂', name:'PDF to PDF/A',            desc:'Convert to the ISO archiving standard — fonts and color profiles fully embedded.' },
+  { id:'ocr',            icon:'🔍', name:'Scanned PDF to text',      desc:'Add a searchable text layer to scanned PDFs using OCR. Select language.' },
+  { id:'text-note',      icon:'📝', name:'Add text notes',           desc:'Click to place text annotations on any page. Detects PDF vector colors automatically.' },
+  { id:'linewidth',      icon:'─', name:'Line thickness by range',  desc:'Scan and replace line widths in vectorial PDFs by value range. Shows histogram.' },
 ];
 
 // ─── STATE ───────────────────────────────────────────────────────────────
@@ -1494,6 +1498,8 @@ const TRANSLATIONS = {
     'grid':           'Page grid',
     'plan-numbering': 'Plan numbering',
     'revision-cloud': 'Revision cloud',
+    'pdfa': 'PDF to PDF/A',
+    'ocr': 'Scanned PDF to text',
     // Tool descriptions
     'd_compress':       'Ghostscript-powered compression with full control over DPI and quality.',
     'd_scalebar':       'Add a metric graphic scale bar auto-sized by paper format and drawing scale.',
@@ -1511,6 +1517,12 @@ const TRANSLATIONS = {
     'd_grid':           'Add a scale-aware reference grid to PDF pages for architectural drawings.',
     'd_plan-numbering': 'Stamp sequential plan numbers on multiple PDFs in one batch operation.',
     'd_revision-cloud': 'Add an architectural revision cloud with numbered corner triangle marker.',
+    'd_pdfa': 'Convert to the ISO archiving standard — fonts and color profiles fully embedded.',
+    'd_ocr': 'Add a searchable text layer to scanned PDFs using OCR. Select language.',
+    'text-note': 'Add text notes',
+    'd_text-note': 'Click to place text annotations on any page. Detects PDF vector colors automatically.',
+    'linewidth': 'Line thickness by range',
+    'd_linewidth': 'Scan and replace line widths in vectorial PDFs by value range. Shows histogram.',
   },
   es: {
     tagline:       'Scalebar PDF Tools — 100% gratis',
@@ -1537,6 +1549,8 @@ const TRANSLATIONS = {
     'grid':           'Grilla de página',
     'plan-numbering': 'Numeración de planos',
     'revision-cloud': 'Nube de revisión',
+    'pdfa': 'PDF a PDF/A',
+    'ocr': 'PDF escaneado a texto',
     // Tool descriptions
     'd_compress':       'Compresión con Ghostscript — control total sobre DPI y calidad.',
     'd_scalebar':       'Añade una escala gráfica métrica auto-dimensionada por formato y escala de dibujo.',
@@ -1554,6 +1568,12 @@ const TRANSLATIONS = {
     'd_grid':           'Añade una grilla de referencia a escala en páginas PDF para planos arquitectónicos.',
     'd_plan-numbering': 'Estampa números de plano correlativos en varios PDFs en una sola operación.',
     'd_revision-cloud': 'Añade una nube de revisión arquitectónica con triángulo numerado en esquina.',
+    'd_pdfa': 'Convierte al estándar ISO de archivo — fuentes y perfiles de color completamente incrustados.',
+    'd_ocr': 'Añade una capa de texto buscable a PDFs escaneados mediante OCR. Selecciona el idioma.',
+    'text-note': 'Añadir notas de texto',
+    'd_text-note': 'Haz clic para colocar anotaciones de texto. Detecta automáticamente los colores vectoriales del PDF.',
+    'linewidth': 'Grosor de línea por rango',
+    'd_linewidth': 'Escanea y reemplaza grosores de línea en PDFs vectoriales por rango de valor.',
   }
 };
 
@@ -1576,7 +1596,7 @@ function setLang(lang) {
   location.reload();
 }
 // ─── HOME GRID ───────────────────────────────────────────────────────────
-const _sm = {'compress':'compress','vineta':'vineta','patch':'patch','scalebar':'scalebar','scalebar-ft':'scalebar_ft','watermark-text':'watermark_text','watermark-logo':'watermark_logo','crop':'crop','reorder':'reorder','split':'split','merge':'merge','convert':'convert','img2pdf':'img2pdf','grid':'grid','plan-numbering':'plan_numbering','revision-cloud':'revision_cloud'};
+const _sm = {'compress':'compress','vineta':'vineta','patch':'patch','scalebar':'scalebar','scalebar-ft':'scalebar_ft','watermark-text':'watermark_text','watermark-logo':'watermark_logo','crop':'crop','reorder':'reorder','split':'split','merge':'merge','convert':'convert','img2pdf':'img2pdf','grid':'grid','plan-numbering':'plan_numbering','revision-cloud':'revision_cloud','pdfa':'pdfa','ocr':'ocr','text-note':'text_note','linewidth':'linewidth'};
 const homeGrid = document.getElementById('home-tools-grid');
 TOOLS.forEach(t => {
   const card = document.createElement('div');
