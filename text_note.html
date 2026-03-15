@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add Text Notes — Scalebar PDF Tools</title>
+<title>Add Text Annotations to a PDF — Scalebar PDF Tools</title>
 <style>
   :root {
     --bg: #f8f8f6;
@@ -357,6 +357,46 @@
   .tp-faq-a strong { color:var(--ink); }
   .tp-faq-a code { background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.80rem; }
 
+
+  /* ── DONATION BANNER ── */
+  @keyframes heartIn {
+    0%   { transform: scale(0); opacity: 0; }
+    50%  { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes heartOut {
+    0%   { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.7); opacity: 0; }
+  }
+  @keyframes donationContentIn {
+    0%   { opacity: 0; transform: translateY(4px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes donationBannerIn {
+    0%   { opacity: 0; transform: translateY(-6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  #donation-banner {
+    display: none; background: var(--white);
+    border: 1px solid var(--light); border-radius: var(--radius);
+    padding: 18px 20px; margin-top: 14px;
+    animation: donationBannerIn 0.25s ease-out forwards;
+  }
+  #donation-heart-stage { display:flex; align-items:center; justify-content:center; height:52px; }
+  #donation-heart { font-size:32px; color:#FF5E5B; display:block;
+    animation: heartIn 0.45s cubic-bezier(.17,.67,.35,1.3) forwards; }
+  #donation-heart.out { animation: heartOut 0.3s ease-in forwards; }
+  #donation-content { display:none; animation: donationContentIn 0.35s ease-out forwards; }
+  #donation-kofi-btn {
+    display:inline-flex; align-items:center; gap:7px;
+    background:#FF5E5B; color:#fff; padding:7px 14px;
+    border-radius:var(--radius); font-family:inherit; font-size:0.8rem;
+    text-decoration:none; font-weight:600; border:none; cursor:pointer;
+  }
+  #donation-dismiss {
+    background:none; border:none; font-family:inherit;
+    font-size:0.75rem; color:var(--mid); cursor:pointer; text-decoration:underline;
+  }
 </style>
 </head>
 <body>
@@ -670,6 +710,23 @@
           <button class="btn btn-apply" id="tn-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
         </div>
         <div class="status" id="tn-status"></div>
+
+        <div id="donation-banner">
+          <div id="donation-heart-stage">
+            <span id="donation-heart">&#9829;</span>
+          </div>
+          <div id="donation-content">
+            <p style="font-size:0.82rem;font-weight:600;margin:0 0 5px;color:var(--ink);" data-i18n="donation_title">File ready — tools like this take time to build.</p>
+            <p style="font-size:0.78rem;color:var(--mid);margin:0 0 12px;line-height:1.6;" data-i18n="donation_desc">If Scalebar PDF Tools saved you some work today, a small tip goes a long way.</p>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <a id="donation-kofi-btn" href="https://ko-fi.com/scalebarpdftools" target="_blank">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682-.028-1.682-.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.015-2.059 2.015z"/></svg>
+                <span data-i18n="donation_btn">Support on Ko-fi</span>
+              </a>
+              <button id="donation-dismiss" data-i18n="donation_dismiss">no thanks</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
       <div class="tp-faq">
@@ -711,22 +768,26 @@ function ensurePdfjs() {
 
 // ─── TOOL DEFINITIONS ────────────────────────────────────────────────────
 const TOOLS = [
-  { id:'compress',    icon:'🗜', name:'Compress PDF',           desc:'Ghostscript-powered compression with full control over DPI and quality.' },
-  { id:'vineta',      icon:'📋', name:'Title block',          desc:'Generate an architectural title block (viñeta) with project name, plan number, scale, signatures and more.' },
-  { id:'patch',       icon:'⬜', name:'Patch / Redact',         desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
-  { id:'scalebar',    icon:'📏', name:'Scale bar (m)',          desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
-  { id:'scalebar-ft', icon:'📐', name:'Scale bar (ft)',         desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
-  { id:'watermark-logo',     icon:'🔖', name:'Logo watermark',        desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
-  { id:'watermark-text',     icon:'✒', name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
-  { id:'crop',        icon:'📋', name:'Resize to format',      desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
-  { id:'reorder',     icon:'⇅', name:'Reorder & remove pages', desc:'Drag pages to rearrange them and remove any you don\'t need.' },
-  { id:'split',       icon:'✂', name:'Split PDF',              desc:'Select break points between pages and export each section as a separate PDF.' },
-  { id:'merge',       icon:'⊕', name:'Merge PDFs',            desc:'Upload multiple PDFs, rearrange them and combine into one.', noFile: true },
-  { id:'convert',     icon:'🖼', name:'Convert to images',     desc:'Export each page as PNG or JPG at the resolution you need.' },
-  { id:'img2pdf',     icon:'🗒', name:'Image to PDF',          desc:'Convert one or more images (JPG, PNG) into a PDF document.', noFile: true },
-  { id:'plan-numbering',     icon:'🔢',  name:'Plan numbering',       desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
-  { id:'revision-cloud',    icon:'☁',   name:'Revision cloud',       desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
-  { id:'grid',        icon:'#',   name:'Page grid',             desc:'Add a reference grid to PDF pages — specify spacing or number of divisions. Draws below or above existing content.' },
+  { id:'compress',        file:'compress.html',        icon:'🗜', name:'Compress PDF',           desc:'Ghostscript-powered compression with full control over DPI and quality.' },
+  { id:'vineta',          file:'vineta.html',           icon:'📋', name:'Title block',             desc:'Architectural title block with project name, plan number, scale, signatures and north arrow.' },
+  { id:'patch',           file:'patch.html',            icon:'⬜', name:'Patch / Redact',          desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
+  { id:'scalebar',        file:'scalebar.html',         icon:'📏', name:'Scale bar (m)',            desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
+  { id:'scalebar-ft',     file:'scalebar_ft.html',      icon:'📐', name:'Scale bar (ft)',           desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
+  { id:'watermark-logo',  file:'watermark_logo.html',   icon:'🔖', name:'Logo watermark',          desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
+  { id:'watermark-text',  file:'watermark_text.html',   icon:'✒',  name:'Text watermark',          desc:'Add semi-transparent text across pages — customizable size, color and position.' },
+  { id:'crop',            file:'crop.html',             icon:'📋', name:'Resize to format',        desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
+  { id:'reorder',         file:'reorder.html',          icon:'⇅',  name:'Reorder & remove pages',  desc:'Drag pages to rearrange them and remove any you don\'t need.' },
+  { id:'split',           file:'split.html',            icon:'✂',  name:'Split PDF',               desc:'Select break points between pages and export each section as a separate PDF.' },
+  { id:'merge',           file:'merge.html',            icon:'⊕',  name:'Merge PDFs',              desc:'Upload multiple PDFs, rearrange them and combine into one.', noFile: true },
+  { id:'convert',         file:'convert.html',          icon:'🖼', name:'Convert to images',       desc:'Export each page as PNG or JPG at the resolution you need.' },
+  { id:'img2pdf',         file:'imagetopdf.html',       icon:'🗒', name:'Image to PDF',            desc:'Convert one or more images (JPG, PNG) into a PDF document.', noFile: true },
+  { id:'plan-numbering',  file:'plan_numbering.html',   icon:'🔢', name:'Plan numbering',          desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
+  { id:'revision-cloud',  file:'revision_cloud.html',   icon:'☁',  name:'Revision cloud',          desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
+  { id:'grid',            file:'grid.html',             icon:'#',  name:'Page grid',               desc:'Add a reference grid to PDF pages — specify spacing or number of divisions.' },
+  { id:'ocr',             file:'ocr.html',              icon:'🔍', name:'OCR — searchable PDF',    desc:'Run optical character recognition to make scanned PDFs searchable and selectable.' },
+  { id:'pdfa',            file:'pdfa.html',             icon:'📄', name:'Convert to PDF/A',        desc:'Convert any PDF to PDF/A-1b for long-term archiving and compliance.' },
+  { id:'linewidth',       file:'linewidth.html',        icon:'✏',  name:'Line weight',             desc:'Globally scale all line widths in a PDF — thicker or thinner in one step.' },
+  { id:'text-note',       file:'text_note.html',        icon:'💬', name:'Text note',               desc:'Add a plain-text annotation box to any page — font, size, color and position.' },
 ];
 
 // ─── STATE ───────────────────────────────────────────────────────────────
@@ -870,7 +931,7 @@ function buildOtherTools(currentId) {
     const btn = document.createElement('button');
     btn.className = 'other-btn';
     btn.textContent = `${t.icon} ${t.name}`;
-    btn.onclick = () => openTool(t.id);
+    btn.onclick = () => { window.location.href = t.file; };
     strip.appendChild(btn);
   });
 }
@@ -1170,8 +1231,30 @@ document.getElementById('tn-btn').addEventListener('click', async () => {
   }
 });
 
+
+function showDonationBanner() {
+  const banner  = document.getElementById('donation-banner');
+  const heart   = document.getElementById('donation-heart');
+  const stage   = document.getElementById('donation-heart-stage');
+  const content = document.getElementById('donation-content');
+  if (!banner) return;
+  banner.style.display = 'block';
+  heart.className = '';
+  void heart.offsetWidth;
+  heart.style.animation = 'heartIn 0.45s cubic-bezier(.17,.67,.35,1.3) forwards';
+  content.style.display = 'none';
+  stage.style.display = 'flex';
+  setTimeout(() => { heart.style.animation = 'heartOut 0.3s ease-in forwards'; }, 650);
+  setTimeout(() => {
+    stage.style.display = 'none';
+    content.style.display = 'block';
+    void content.offsetWidth;
+    content.style.animation = 'donationContentIn 0.35s ease-out forwards';
+  }, 950);
+  document.getElementById('donation-dismiss').onclick = () => { banner.style.display = 'none'; };
+}
 document.getElementById('tn-dl').addEventListener('click', () => {
-  if (tnBytes) download(tnBytes, nameSuffix('_notes'));
+  if (tnBytes) { download(tnBytes, nameSuffix('_notes')); showDonationBanner(); }
 });
 document.getElementById('tn-apply').addEventListener('click', () => {
   if (tnBytes) applyAsActive(tnBytes, 'Text note', 'tn-status', 'tn-apply');
@@ -1246,7 +1329,7 @@ const _TL = {
     'btn_dl': 'Download',
     'faq_free_q': 'Is this tool free? How is it funded?',
     'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
-    'tn_h2': 'Add text notes',
+    'tn_h2': 'Add text annotations to a PDF',
     'tn_desc': 'Click on the page preview to position a text annotation. Rotation is corrected automatically for rotated drawing sheets.',
     'tn_label_text': 'Text:',
     'tn_label_page': 'Page:',
@@ -1274,7 +1357,7 @@ const _TL = {
     'btn_dl': 'Descargar',
     'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
     'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
-    'tn_h2': 'Añadir notas de texto',
+    'tn_h2': 'Añade anotaciones de texto a un PDF',
     'tn_desc': 'Haz clic en la previsualización de la página para colocar una anotación de texto. La rotación se corrige automáticamente para láminas rotadas.',
     'tn_label_text': 'Texto:',
     'tn_label_page': 'Página:',
