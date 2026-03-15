@@ -27,8 +27,9 @@
   #topbar {
     background: var(--ink); color: var(--white);
     padding: 12px 28px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100;
   }
+  #topbar-right { display:flex; align-items:center; gap:14px; flex-shrink:0; }
   #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
   #file-indicator { font-size: 0.78rem; color: #aaa; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #file-indicator span { color: #fff; }
@@ -309,6 +310,31 @@
   }
   .file-input-wrap:hover .file-input-label { border-color: var(--ink); color: var(--ink); }
   .file-input-label .file-name { color: var(--ink); }
+
+  #lang-switcher { display:flex; gap:4px; flex-shrink:0; }
+  #lang-switcher button {
+    background:none; border:1px solid #444; color:#aaa;
+    padding:2px 7px; font-size:0.72rem; border-radius:3px;
+    cursor:pointer; font-family:inherit; transition:color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color:#fff; border-color:#fff; }
+  #lang-switcher button.active { color:#fff; border-color:#fff; }
+  .tp-faq { margin-top:24px; }
+  .tp-faq-item { border-top:1px solid var(--light); }
+  .tp-faq-item:last-child { border-bottom:1px solid var(--light); }
+  .tp-faq-q {
+    width:100%; background:none; border:none; text-align:left;
+    padding:12px 4px; font-size:0.85rem; font-weight:600; color:var(--ink);
+    cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .tp-faq-q:hover { color:var(--accent); }
+  .tp-faq-q .faq-arrow { font-size:0.72rem; color:var(--mid); transition:transform .2s; flex-shrink:0; }
+  .tp-faq-q.open .faq-arrow { transform:rotate(180deg); }
+  .tp-faq-a { display:none; padding:0 4px 14px; font-size:0.82rem; line-height:1.62; color:var(--mid); }
+  .tp-faq-a.open { display:block; }
+  .tp-faq-a strong { color:var(--ink); }
+  .tp-faq-a code { background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.80rem; }
+
 </style>
 </head>
 <body>
@@ -316,8 +342,16 @@
 <!-- TOP BAR -->
 <div id="topbar">
   <h1><a href="index.html" style="color:inherit;text-decoration:none;">▣ SCALEBAR PDF TOOLS</a></h1>
-  <div id="file-indicator">No file loaded</div>
-  <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+  <div id="topbar-right">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+      <div id="file-indicator" style="max-width:220px;" data-i18n-placeholder="no_file">No file loaded</div>
+      <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+    </div>
+    <div id="lang-switcher">
+      <button id="lang-en" onclick="setLang('en')">EN</button>
+      <button id="lang-es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
@@ -510,9 +544,8 @@
 
 <!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
 <div id="view-tool" class="view active">
-  <div style="max-width:860px; margin:0 auto; padding:32px 20px;">
-    <button id="back-btn" onclick="window.location.href='index.html'">← Home</button>
-    <div id="working-banner"><span>✓</span><span id="working-banner-text">Working on modified file</span></div>
+  <div>
+    <div id="working-banner"><span>✓</span><span id="working-banner-text" data-i18n="banner_working">Working on modified file</span></div>
 
     <div class="tool-panel active" id="panel-ocr">
       <div class="panel-box">
@@ -520,20 +553,18 @@
         <button type="button" id="tool-choose-btn"
           onclick="document.getElementById('tool-choose-file').click()"
           style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
-          Choose PDF
+          <span data-i18n="btn_choose_pdf">Choose PDF</span>
         </button>
         <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;">
         <span id="tool-choose-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
       </div>
-        <h2>Scanned PDF to searchable text</h2>
+        <h2 data-i18n="ocr_h2">Scanned PDF to searchable text</h2>
         <p style="font-size:0.82rem; color:var(--mid); margin-bottom:16px;">
-          Runs OCR on each page and produces a searchable PDF — the original scanned image is
-          preserved with an invisible text layer so the text can be selected, copied and searched.
-          Tesseract OCR engine (~10 MB) runs entirely in your browser.
+          <span data-i18n="ocr_desc">Runs OCR on each page and produces a searchable PDF — the original scanned image is preserved with an invisible text layer so the text can be selected, copied and searched. Tesseract OCR engine (~10 MB) runs entirely in your browser.</span>
         </p>
         <div class="row">
           <div>
-            <label>Document language:</label>
+            <label data-i18n="ocr_label_lang">Document language:</label>
             <select id="ocr-lang">
               <option value="eng">English</option>
               <option value="spa">Spanish / Español</option>
@@ -550,16 +581,16 @@
             </select>
           </div>
           <div>
-            <label>Render quality (DPI):</label>
+            <label data-i18n="ocr_label_dpi">Render quality (DPI):</label>
             <select id="ocr-dpi">
-              <option value="150">150 DPI — fast</option>
-              <option value="200" selected>200 DPI — balanced (recommended)</option>
-              <option value="300">300 DPI — best accuracy, slower</option>
+              <option value="150" data-i18n="ocr_dpi_150">150 DPI — fast</option>
+              <option value="200" selected data-i18n="ocr_dpi_200">200 DPI — balanced (recommended)</option>
+              <option value="300" data-i18n="ocr_dpi_300">300 DPI — best accuracy, slower</option>
             </select>
           </div>
         </div>
         <p style="font-size:0.78rem; color:var(--mid); margin:8px 0 14px;">
-          Budget ~5–15 seconds per page depending on device.
+          <span data-i18n="ocr_note">Budget ~5–15 seconds per page depending on device.</span>
         </p>
         <div id="ocr-page-progress" style="display:none; background:var(--bg); border:1px solid var(--light);
              border-radius:var(--radius); padding:12px 14px; margin-bottom:12px; font-size:0.8rem;">
@@ -569,13 +600,20 @@
           </div>
         </div>
         <div style="margin-top:8px;">
-          <button class="btn btn-primary" id="ocr-btn">Run OCR</button>
-          <button class="btn btn-dl" id="ocr-dl" disabled>⬇ Download searchable PDF</button>
-          <button class="btn btn-apply" id="ocr-apply" disabled>↩ Keep working with this version</button>
+          <button class="btn btn-primary" id="ocr-btn" data-i18n="ocr_btn">Run OCR</button>
+          <button class="btn btn-dl" id="ocr-dl" disabled>⬇ <span data-i18n="ocr_dl">Download searchable PDF</span></button>
+          <button class="btn btn-apply" id="ocr-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
         </div>
         <div class="status" id="ocr-status"></div>
       </div>
     </div>
+      <div class="tp-faq">
+      <div class="tp-faq-item">
+        <button class="tp-faq-q" onclick="toggleTpFaq(this)"><span data-i18n="faq_free_q"></span><span class="faq-arrow">▼</span></button>
+        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
+      </div>
+      </div>
+
     <div id="other-tools-section">
       <h3>Other tools</h3>
       <div class="other-tools-strip" id="other-tools-strip"></div>
@@ -993,6 +1031,71 @@ function _updateChooseBtn(name){
   const btn=document.getElementById('tool-choose-btn'),span=document.getElementById('tool-choose-name');
   if(btn) btn.textContent='✓ PDF loaded'; if(span) span.textContent=name;
 }
+
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: { no_file: 'No file loaded',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'banner_working': 'Working on modified file',
+    'btn_dl_pdf': 'Download PDF',
+    'btn_keep': 'Keep working with this version',
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'ocr_h2': 'Scanned PDF to searchable text',
+    'ocr_desc': 'Runs OCR on each page and produces a searchable PDF — the original scanned image is preserved with an invisible text layer so the text can be selected, copied and searched. Tesseract OCR engine (~10 MB) runs entirely in your browser.',
+    'ocr_label_lang': 'Document language:',
+    'ocr_label_dpi': 'Render quality (DPI):',
+    'ocr_dpi_150': '150 DPI — fast',
+    'ocr_dpi_200': '200 DPI — balanced (recommended)',
+    'ocr_dpi_300': '300 DPI — best accuracy, slower',
+    'ocr_note': 'Budget ~5–15 seconds per page depending on device.',
+    'ocr_btn': 'Run OCR',
+    'ocr_dl': 'Download searchable PDF',
+  },
+  es: { no_file: 'Sin archivo cargado',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl_pdf': 'Descargar PDF',
+    'btn_keep': 'Seguir trabajando con esta versión',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'ocr_h2': 'PDF escaneado a texto buscable',
+    'ocr_desc': 'Ejecuta OCR en cada página y produce un PDF buscable — la imagen escaneada original se conserva con una capa de texto invisible para que el texto pueda seleccionarse, copiarse y buscarse. El motor Tesseract OCR (~10 MB) se ejecuta completamente en tu navegador.',
+    'ocr_label_lang': 'Idioma del documento:',
+    'ocr_label_dpi': 'Calidad de renderizado (DPI):',
+    'ocr_dpi_150': '150 DPI — rápido',
+    'ocr_dpi_200': '200 DPI — equilibrado (recomendado)',
+    'ocr_dpi_300': '300 DPI — máxima precisión, más lento',
+    'ocr_note': 'Estima ~5–15 segundos por página según el dispositivo.',
+    'ocr_btn': 'Ejecutar OCR',
+    'ocr_dl': 'Descargar PDF buscable',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
 </script>
 </body>
 </html>

@@ -27,8 +27,9 @@
   #topbar {
     background: var(--ink); color: var(--white);
     padding: 12px 28px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100;
   }
+  #topbar-right { display:flex; align-items:center; gap:14px; flex-shrink:0; }
   #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
   #file-indicator { font-size: 0.78rem; color: #aaa; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #file-indicator span { color: #fff; }
@@ -316,6 +317,36 @@
     border:2px solid transparent;transition:border-color 0.1s;}
   .vn-swatch:hover{border-color:#555;}
   .vn-swatch.active{border-color:#2563eb;box-shadow:0 0 0 1px #2563eb;}
+
+  #lang-switcher { display:flex; gap:4px; flex-shrink:0; }
+  #lang-switcher button {
+    background:none; border:1px solid #444; color:#aaa;
+    padding:2px 7px; font-size:0.72rem; border-radius:3px;
+    cursor:pointer; font-family:inherit; transition:color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color:#fff; border-color:#fff; }
+  #lang-switcher button.active { color:#fff; border-color:#fff; }
+  .tp-faq { margin-top:24px; }
+  .tp-faq-item { border-top:1px solid var(--light); }
+  .tp-faq-item:last-child { border-bottom:1px solid var(--light); }
+  .tp-faq-q {
+    width:100%; background:none; border:none; text-align:left;
+    padding:12px 4px; font-size:0.85rem; font-weight:600; color:var(--ink);
+    cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .tp-faq-q:hover { color:var(--accent); }
+  .tp-faq-q .faq-arrow { font-size:0.72rem; color:var(--mid); transition:transform .2s; flex-shrink:0; }
+  .tp-faq-q.open .faq-arrow { transform:rotate(180deg); }
+  .tp-faq-a { display:none; padding:0 4px 14px; font-size:0.82rem; line-height:1.62; color:var(--mid); }
+  .tp-faq-a.open { display:block; }
+  .tp-faq-a strong { color:var(--ink); }
+
+
+  
+
+
+  
+
 </style>
 </head>
 <body>
@@ -323,8 +354,16 @@
 <!-- TOP BAR -->
 <div id="topbar">
   <h1><a href="index.html" style="color:inherit;text-decoration:none;">▣ SCALEBAR PDF TOOLS</a></h1>
-  <div id="file-indicator">No file loaded</div>
-  <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+  <div id="topbar-right">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+      <div id="file-indicator" style="max-width:220px;" data-i18n-placeholder="no_file">No file loaded</div>
+      <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+    </div>
+    <div id="lang-switcher">
+      <button id="lang-en" onclick="setLang('en')">EN</button>
+      <button id="lang-es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
@@ -517,12 +556,10 @@
 
 <!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
 <div id="view-tool" class="view">
-  <div style="max-width:860px; margin:0 auto; padding:32px 20px;">
-    <button id="back-btn" onclick="window.location.href='index.html'">← Home</button>
 
     <div id="working-banner">
       <span>✓</span>
-      <span id="working-banner-text">Working on modified file</span>
+      <span id="working-banner-text" data-i18n="banner_working">Working on modified file</span>
     </div>
 
     <!-- ── 1. COMPRESS (Ghostscript-WASM) ── -->
@@ -620,102 +657,105 @@
     <!-- ── 3. WATERMARK TEXT ── -->
     <div class="tool-panel" id="panel-watermark-text">
       <div class="panel-box">
-        <h2>Text watermark</h2>
-        <label>Watermark text:</label>
-        <input type="text" id="wt-text" placeholder="e.g. CONFIDENTIAL — Arch. Studio Johnson">
+        <h2 data-i18n="wt_h2">Text watermark</h2>
+        <label data-i18n="wt_label_text">Watermark text:</label>
+        <input type="text" id="wt-text" placeholder="" data-i18n-placeholder="wt_placeholder">
         <div class="row">
           <div>
-            <label>Font size (pt):</label>
+            <label data-i18n="wt_label_size">Font size (pt):</label>
             <input type="number" id="wt-size" value="48" min="10" max="150">
           </div>
           <div>
-            <label>Opacity (0.05–1):</label>
+            <label data-i18n="wt_label_opacity">Opacity (0.05–1):</label>
             <input type="number" id="wt-opacity" value="0.15" min="0.05" max="1" step="0.05">
           </div>
           <div>
-            <label>Color (hex):</label>
+            <label data-i18n="wt_label_color">Color (hex):</label>
             <input type="text" id="wt-color" value="#000000">
           </div>
         </div>
         <div class="row">
           <div>
-            <label>Position:</label>
+            <label data-i18n="wt_label_pos">Position:</label>
             <select id="wt-pos">
-              <option value="center">Center (diagonal)</option>
-              <option value="br">Bottom right</option>
-              <option value="tl">Top left</option>
+              <option value="center" data-i18n="wt_pos_center">Center (diagonal)</option>
+              <option value="br" data-i18n="wt_pos_br">Bottom right</option>
+              <option value="tl" data-i18n="wt_pos_tl">Top left</option>
             </select>
           </div>
           <div>
-            <label>Apply to:</label>
+            <label data-i18n="wt_label_pages">Apply to:</label>
             <select id="wt-pages">
-              <option value="all">All pages</option>
-              <option value="first">First page only</option>
+              <option value="all" data-i18n="wt_pages_all">All pages</option>
+              <option value="first" data-i18n="wt_pages_first">First page only</option>
             </select>
           </div>
         </div>
         <div style="margin-top:10px;">
-          <button class="btn btn-primary" id="wt-btn">Apply &amp; download ZIP</button>
+          <button class="btn btn-primary" id="wt-btn" data-i18n="wt_btn">Apply &amp; download ZIP</button>
         </div>
         <div class="status" id="wt-status"></div>
       </div>
     </div>
+      </div>
+
 
     <!-- ── 4. WATERMARK LOGO ── -->
     <div class="tool-panel" id="panel-watermark-logo">
       <div class="panel-box">
-        <h2>Logo watermark</h2>
+        <h2 data-i18n="wl_h2">Logo watermark</h2>
         <p style="font-size:0.82rem; color:var(--mid); margin-bottom:14px;">
-          The logo is automatically converted to grayscale before embedding. Select an image of your logo.
+          <span data-i18n="wl_desc">The logo is automatically converted to grayscale before embedding. Select an image of your logo.</span>
         </p>
-        <label>Image file (PNG, JPG):</label>
+        <label data-i18n="wl_label_img">Image file (PNG, JPG):</label>
         <div class="file-input-wrap">
           <input type="file" id="wl-img" accept="image/*"
             onchange="document.getElementById('wl-file-name').textContent = this.files[0]?.name || ''">
           <div class="file-input-label">
-            <span>📁 Choose image…</span>
+            <span data-i18n="wl_choose_img">📁 Choose image…</span>
             <span class="file-name" id="wl-file-name"></span>
           </div>
         </div>
         <div class="row">
           <div>
-            <label>Opacity (0.05–1):</label>
+            <label data-i18n="wl_label_opacity">Opacity (0.05–1):</label>
             <input type="number" id="wl-opacity" value="0.18" min="0.05" max="1" step="0.05">
           </div>
           <div>
-            <label>Scale (% of page width):</label>
+            <label data-i18n="wl_label_scale">Scale (% of page width):</label>
             <input type="number" id="wl-scale" value="40" min="5" max="100">
           </div>
           <div>
-            <label>Rotation (degrees):</label>
+            <label data-i18n="wl_label_rotation">Rotation (degrees):</label>
             <input type="number" id="wl-rotation" value="0" min="-180" max="180" step="5">
           </div>
         </div>
         <div class="row">
           <div>
-            <label>Position:</label>
+            <label data-i18n="wl_label_pos">Position:</label>
             <select id="wl-pos">
-              <option value="center">Center</option>
-              <option value="br">Bottom right</option>
-              <option value="tl">Top left</option>
-              <option value="tr">Top right</option>
-              <option value="bl">Bottom left</option>
+              <option value="center" data-i18n="wl_pos_center">Center</option>
+              <option value="br" data-i18n="wl_pos_br">Bottom right</option>
+              <option value="tl" data-i18n="wl_pos_tl">Top left</option>
+              <option value="tr" data-i18n="wl_pos_tr">Top right</option>
+              <option value="bl" data-i18n="wl_pos_bl">Bottom left</option>
             </select>
           </div>
           <div>
-            <label>Apply to:</label>
+            <label data-i18n="wl_label_pages">Apply to:</label>
             <select id="wl-pages">
-              <option value="all">All pages</option>
-              <option value="first">First page only</option>
+              <option value="all" data-i18n="wl_pages_all">All pages</option>
+              <option value="first" data-i18n="wl_pages_first">First page only</option>
             </select>
           </div>
         </div>
         <div>
-          <button class="btn btn-primary" id="wl-btn">Apply logo &amp; download ZIP</button>
+          <button class="btn btn-primary" id="wl-btn" data-i18n="wl_btn">Apply logo &amp; download ZIP</button>
         </div>
         <div class="status" id="wl-status"></div>
       </div>
     </div>
+
 
     <!-- ── 5. RESIZE TO STANDARD FORMAT ── -->
     <div class="tool-panel" id="panel-crop">
@@ -818,10 +858,10 @@
             </select>
           </div>
           <div>
-            <label>Apply to:</label>
+            <label data-i18n="vn_label_pages">Apply to:</label>
             <select id="sb-pages">
-              <option value="all">All pages</option>
-              <option value="first">First page only</option>
+              <option value="all" data-i18n="vn_pages_all">All pages</option>
+              <option value="first" data-i18n="vn_pages_first">First page only</option>
             </select>
           </div>
         </div>
@@ -1329,77 +1369,77 @@
         <button type="button" id="tool-choose-btn"
           onclick="document.getElementById('tool-choose-file').click()"
           style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
-          Choose PDF
+          <span data-i18n="btn_choose_pdf">Choose PDF</span>
         </button>
         <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;">
         <span id="tool-choose-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
       </div>
-        <h2>Title block (viñeta)</h2>
+        <h2 data-i18n="vn_h2">Title block (viñeta)</h2>
         <p style="font-size:0.82rem;color:var(--mid);margin-bottom:16px;">
-          Adds an architectural title block to the bottom-right corner. Width adapts to page format, height adjusts automatically to content. Empty fields are left blank.
+          <span data-i18n="vn_desc">Adds an architectural title block to the bottom-right corner. Width adapts to page format, height adjusts automatically to content. Empty fields are left blank.</span>
         </p>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0;">
           <div>
-            <label>Project name:</label>
+            <label data-i18n="vn_label_project">Project name:</label>
             <input type="text" id="vn-project" placeholder="e.g. Mountain View Residence">
           </div>
           <div>
-            <label>Site:</label>
+            <label data-i18n="vn_label_site">Site:</label>
             <input type="text" id="vn-address" placeholder="e.g. 742 Evergreen Terrace, Springfield">
           </div>
           <div style="grid-column:1/-1;">
-            <label>Drawing content <span style="color:var(--mid);font-weight:normal;">(one item per line — auto-uppercased)</span>:</label>
+            <label><span data-i18n="vn_label_content">Drawing content</span> <span style="color:var(--mid);font-weight:normal;" data-i18n="vn_content_hint">(one item per line — auto-uppercased)</span>:</label>
             <textarea id="vn-content" rows="3" placeholder="e.g. Ground Floor Plan&#10;Stair Detail&#10;Section A-A"
               style="width:100%;font-family:inherit;font-size:0.85rem;padding:6px 8px;border:1px solid #ccc;border-radius:var(--radius);resize:vertical;"></textarea>
           </div>
           <div>
-            <label>Type:</label>
+            <label data-i18n="vn_label_type">Type:</label>
             <input type="text" id="vn-type" placeholder="e.g. ARCH / ELEC / STRUCT">
           </div>
           <div>
-            <label>Plan number:</label>
+            <label data-i18n="vn_label_number">Plan number:</label>
             <input type="text" id="vn-number" placeholder="e.g. 01">
           </div>
           <div>
-            <label>Scale:</label>
+            <label data-i18n="vn_label_scale">Scale:</label>
             <input type="text" id="vn-scale" placeholder="e.g. 1:100">
           </div>
           <div>
-            <label>Date:</label>
+            <label data-i18n="vn_label_date">Date:</label>
             <input type="text" id="vn-date" placeholder="e.g. March 2026">
           </div>
           <div>
-            <label>Client name:</label>
+            <label data-i18n="vn_label_client">Client name:</label>
             <input type="text" id="vn-client" placeholder="e.g. John Smith">
           </div>
           <div>
-            <label>Designer name:</label>
+            <label data-i18n="vn_label_designer">Designer name:</label>
             <input type="text" id="vn-designer" placeholder="e.g. Jane Doe, Architect">
           </div>
           <div>
-            <label>North arrow rotation (°) <span style="color:var(--mid);font-weight:normal;">0° = up, clockwise</span>:</label>
+            <label><span data-i18n="vn_label_north">North arrow rotation (°)</span> <span style="color:var(--mid);font-weight:normal;" data-i18n="vn_north_hint">0° = up, clockwise</span>:</label>
             <input type="number" id="vn-north" placeholder="0" min="0" max="360" step="1"
               style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
           </div>
           <div>
-            <label>Project No.:</label>
+            <label data-i18n="vn_label_projno">Project No.:</label>
             <input type="text" id="vn-projno" placeholder="e.g. 2024-047">
           </div>
           <div style="grid-column:1/-1;">
-            <label>Logo <span style="color:var(--mid);font-weight:normal;">(optional — shown in grayscale at top of title block)</span>:</label>
+            <label><span data-i18n="vn_label_logo">Logo</span> <span style="color:var(--mid);font-weight:normal;" data-i18n="vn_logo_hint">(optional — shown in grayscale at top of title block)</span>:</label>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <button type="button"
                 onclick="document.getElementById('vn-logo-file').click()"
                 style="background:#f0f0ec;border:1px solid #ccc;padding:4px 12px;border-radius:var(--radius);font-family:inherit;font-size:0.82rem;cursor:pointer;">
-                Choose image…
+                <span data-i18n="vn_choose_img">Choose image…</span>
               </button>
               <input type="file" id="vn-logo-file" accept="image/*" style="display:none;">
-              <span id="vn-logo-name" style="font-size:0.80rem;color:var(--mid);">No image selected</span>
+              <span id="vn-logo-name" style="font-size:0.80rem;color:var(--mid);" data-i18n="vn_logo_none">No image selected</span>
               <button type="button" id="vn-logo-clear"
                 onclick="vnClearLogo()"
                 style="display:none;background:none;border:none;color:var(--err);cursor:pointer;font-family:inherit;font-size:0.80rem;padding:0;">
-                ✕ Remove
+                <span data-i18n="vn_logo_remove">✕ Remove</span>
               </button>
             </div>
           </div>
@@ -1414,9 +1454,9 @@
             </select>
           </div>
           <div>
-            <label>Page size override:</label>
+            <label data-i18n="vn_label_pagesize">Page size override:</label>
             <select id="vn-pagesize">
-              <option value="auto">Auto-detect</option>
+              <option value="auto" data-i18n="vn_size_auto">Auto-detect</option>
               <option value="A4">A4</option>
               <option value="A3">A3</option>
               <option value="A2">A2</option>
@@ -1425,15 +1465,15 @@
             </select>
           </div>
           <div>
-            <label>Size:</label>
+            <label data-i18n="vn_label_size">Size:</label>
             <select id="vn-size">
-              <option value="small">Small</option>
-              <option value="normal" selected>Normal</option>
-              <option value="large">Large</option>
+              <option value="small" data-i18n="vn_size_small">Small</option>
+              <option value="normal" selected data-i18n="vn_size_normal">Normal</option>
+              <option value="large" data-i18n="vn_size_large">Large</option>
             </select>
           </div>
           <div>
-            <label>Plan ID colour:</label>
+            <label data-i18n="vn_label_plancolor">Plan ID colour:</label>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <input type="color" id="vn-plancolor" value="#1a1a1a"
                 style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
@@ -1443,13 +1483,20 @@
         </div>
 
         <div style="margin-top:14px;">
-          <button class="btn btn-primary" id="vn-btn">Add title block</button>
-          <button class="btn btn-dl"    id="vn-dl"    disabled>⬇ Download PDF</button>
-          <button class="btn btn-apply" id="vn-apply" disabled>↩ Keep working with this version</button>
+          <button class="btn btn-primary" id="vn-btn" data-i18n="vn_btn">Add title block</button>
+          <button class="btn btn-dl" id="vn-dl" disabled>⬇ <span data-i18n="btn_dl_pdf">Download PDF</span></button>
+          <button class="btn btn-apply" id="vn-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
         </div>
         <div class="status" id="vn-status"></div>
+      <div class="tp-faq">
+      <div class="tp-faq-item">
+        <button class="tp-faq-q" onclick="toggleTpFaq(this)"><span data-i18n="faq_free_q"></span><span class="faq-arrow">▼</span></button>
+        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
+      </div>
+      </div>
       </div>
     </div>
+
 
     <!-- ── 13. PAGE GRID ── -->
     <div class="tool-panel" id="panel-grid">
@@ -1695,8 +1742,6 @@
       <h3>OTHER TOOLS — same file</h3>
       <div class="other-tools-strip" id="other-tools-strip"></div>
     </div>
-  </div>
-</div>
 
 <!-- ── PATCH FULLSCREEN EDITOR ── -->
 <div id="patch-fullscreen">
@@ -4171,6 +4216,115 @@ function vnClearLogo() {
   document.getElementById('vn-logo-name').textContent = 'No image selected';
   document.getElementById('vn-logo-clear').style.display = 'none';
 }
+
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: { no_file: 'No file loaded',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'btn_choose_pdfs': 'Choose PDF(s)',
+    'banner_working': 'Working on modified file',
+    'btn_dl_pdf': 'Download PDF',
+    'btn_keep': 'Keep working with this version',
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'vn_h2': 'Title block (viñeta)',
+    'vn_desc': 'Adds an architectural title block to the bottom-right corner. Width adapts to page format, height adjusts automatically to content. Empty fields are left blank.',
+    'vn_label_project': 'Project name:',
+    'vn_label_site': 'Site:',
+    'vn_label_content': 'Drawing content',
+    'vn_content_hint': '(one item per line — auto-uppercased)',
+    'vn_label_type': 'Type:',
+    'vn_label_number': 'Plan number:',
+    'vn_label_scale': 'Scale:',
+    'vn_label_date': 'Date:',
+    'vn_label_client': 'Client name:',
+    'vn_label_designer': 'Designer name:',
+    'vn_label_north': 'North arrow rotation (°)',
+    'vn_north_hint': '0° = up, clockwise',
+    'vn_label_projno': 'Project No.:',
+    'vn_label_logo': 'Logo',
+    'vn_logo_hint': '(optional — shown in grayscale at top of title block)',
+    'vn_choose_img': 'Choose image…',
+    'vn_logo_none': 'No image selected',
+    'vn_logo_remove': '✕ Remove',
+    'vn_label_pages': 'Apply to:',
+    'vn_pages_all': 'All pages',
+    'vn_pages_first': 'First page only',
+    'vn_label_pagesize': 'Page size override:',
+    'vn_size_auto': 'Auto-detect',
+    'vn_label_size': 'Size:',
+    'vn_size_small': 'Small',
+    'vn_size_normal': 'Normal',
+    'vn_size_large': 'Large',
+    'vn_label_plancolor': 'Plan ID colour:',
+    'vn_btn': 'Add title block',
+  },
+  es: { no_file: 'Sin archivo cargado',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'btn_choose_pdfs': 'Elegir PDF(s)',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl_pdf': 'Descargar PDF',
+    'btn_keep': 'Seguir trabajando con esta versión',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'vn_h2': 'Viñeta (carátula)',
+    'vn_desc': 'Añade una viñeta arquitectónica en la esquina inferior derecha. El ancho se adapta al formato de la página y el alto se ajusta automáticamente al contenido. Los campos vacíos se omiten.',
+    'vn_label_project': 'Nombre del proyecto:',
+    'vn_label_site': 'Ubicación:',
+    'vn_label_content': 'Contenido del plano',
+    'vn_content_hint': '(un ítem por línea — se convierte a mayúsculas)',
+    'vn_label_type': 'Tipo:',
+    'vn_label_number': 'Número de plano:',
+    'vn_label_scale': 'Escala:',
+    'vn_label_date': 'Fecha:',
+    'vn_label_client': 'Nombre del cliente:',
+    'vn_label_designer': 'Nombre del proyectista:',
+    'vn_label_north': 'Rotación flecha norte (°)',
+    'vn_north_hint': '0° = arriba, sentido horario',
+    'vn_label_projno': 'N.º de proyecto:',
+    'vn_label_logo': 'Logo',
+    'vn_logo_hint': '(opcional — se muestra en escala de grises en la parte superior)',
+    'vn_choose_img': 'Elegir imagen…',
+    'vn_logo_none': 'Sin imagen seleccionada',
+    'vn_logo_remove': '✕ Quitar',
+    'vn_label_pages': 'Aplicar a:',
+    'vn_pages_all': 'Todas las páginas',
+    'vn_pages_first': 'Solo primera página',
+    'vn_label_pagesize': 'Forzar tamaño de página:',
+    'vn_size_auto': 'Autodetectar',
+    'vn_label_size': 'Tamaño:',
+    'vn_size_small': 'Pequeño',
+    'vn_size_normal': 'Normal',
+    'vn_size_large': 'Grande',
+    'vn_label_plancolor': 'Color del ID de plano:',
+    'vn_btn': 'Añadir viñeta',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
 </script>
 </body>
 </html>

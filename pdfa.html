@@ -27,8 +27,9 @@
   #topbar {
     background: var(--ink); color: var(--white);
     padding: 12px 28px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100;
   }
+  #topbar-right { display:flex; align-items:center; gap:14px; flex-shrink:0; }
   #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
   #file-indicator { font-size: 0.78rem; color: #aaa; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #file-indicator span { color: #fff; }
@@ -309,6 +310,31 @@
   }
   .file-input-wrap:hover .file-input-label { border-color: var(--ink); color: var(--ink); }
   .file-input-label .file-name { color: var(--ink); }
+
+  #lang-switcher { display:flex; gap:4px; flex-shrink:0; }
+  #lang-switcher button {
+    background:none; border:1px solid #444; color:#aaa;
+    padding:2px 7px; font-size:0.72rem; border-radius:3px;
+    cursor:pointer; font-family:inherit; transition:color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color:#fff; border-color:#fff; }
+  #lang-switcher button.active { color:#fff; border-color:#fff; }
+  .tp-faq { margin-top:24px; }
+  .tp-faq-item { border-top:1px solid var(--light); }
+  .tp-faq-item:last-child { border-bottom:1px solid var(--light); }
+  .tp-faq-q {
+    width:100%; background:none; border:none; text-align:left;
+    padding:12px 4px; font-size:0.85rem; font-weight:600; color:var(--ink);
+    cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .tp-faq-q:hover { color:var(--accent); }
+  .tp-faq-q .faq-arrow { font-size:0.72rem; color:var(--mid); transition:transform .2s; flex-shrink:0; }
+  .tp-faq-q.open .faq-arrow { transform:rotate(180deg); }
+  .tp-faq-a { display:none; padding:0 4px 14px; font-size:0.82rem; line-height:1.62; color:var(--mid); }
+  .tp-faq-a.open { display:block; }
+  .tp-faq-a strong { color:var(--ink); }
+  .tp-faq-a code { background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.80rem; }
+
 </style>
 </head>
 <body>
@@ -316,8 +342,16 @@
 <!-- TOP BAR -->
 <div id="topbar">
   <h1><a href="index.html" style="color:inherit;text-decoration:none;">▣ SCALEBAR PDF TOOLS</a></h1>
-  <div id="file-indicator">No file loaded</div>
-  <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+  <div id="topbar-right">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+      <div id="file-indicator" style="max-width:220px;" data-i18n-placeholder="no_file">No file loaded</div>
+      <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+    </div>
+    <div id="lang-switcher">
+      <button id="lang-en" onclick="setLang('en')">EN</button>
+      <button id="lang-es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
@@ -510,9 +544,8 @@
 
 <!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
 <div id="view-tool" class="view active">
-  <div style="max-width:860px; margin:0 auto; padding:32px 20px;">
-    <button id="back-btn" onclick="window.location.href='index.html'">← Home</button>
-    <div id="working-banner"><span>✓</span><span id="working-banner-text">Working on modified file</span></div>
+  <div>
+    <div id="working-banner"><span>✓</span><span id="working-banner-text" data-i18n="banner_working">Working on modified file</span></div>
 
     <div class="tool-panel active" id="panel-pdfa">
       <div class="panel-box">
@@ -520,48 +553,54 @@
         <button type="button" id="tool-choose-btn"
           onclick="document.getElementById('tool-choose-file').click()"
           style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
-          Choose PDF
+          <span data-i18n="btn_choose_pdf">Choose PDF</span>
         </button>
         <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;">
         <span id="tool-choose-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
       </div>
-        <h2>PDF to PDF/A</h2>
+        <h2 data-i18n="pa_h2">PDF to PDF/A</h2>
         <p style="font-size:0.82rem; color:var(--mid); margin-bottom:16px;">
-          Converts to PDF/A — the ISO archiving standard that embeds all fonts and color profiles.
-          Uses Ghostscript WebAssembly (~30 MB, cached after first load).
+          <span data-i18n="pa_desc">Converts to PDF/A — the ISO archiving standard that embeds all fonts and color profiles. Uses Ghostscript WebAssembly (~30 MB, cached after first load).</span>
         </p>
-        <label>PDF/A version:</label>
+        <label data-i18n="pa_label_ver">PDF/A version:</label>
         <div class="preset-grid" id="pdfa-preset-grid">
           <div class="preset-btn active" data-pdfa="1b">
-            <span class="preset-name">PDF/A-1b</span>
-            <span class="preset-desc">ISO 19005-1<br>widest compatibility</span>
+            <span class="preset-name" data-i18n="pa_1b_name">PDF/A-1b</span>
+            <span class="preset-desc" data-i18n="pa_1b_desc">ISO 19005-1 / widest compatibility</span>
           </div>
           <div class="preset-btn" data-pdfa="2b">
-            <span class="preset-name">PDF/A-2b</span>
-            <span class="preset-desc">ISO 19005-2<br>supports transparency</span>
+            <span class="preset-name" data-i18n="pa_2b_name">PDF/A-2b</span>
+            <span class="preset-desc" data-i18n="pa_2b_desc">ISO 19005-2 / supports transparency</span>
           </div>
           <div class="preset-btn" data-pdfa="3b">
-            <span class="preset-name">PDF/A-3b</span>
-            <span class="preset-desc">ISO 19005-3<br>allows attachments</span>
+            <span class="preset-name" data-i18n="pa_3b_name">PDF/A-3b</span>
+            <span class="preset-desc" data-i18n="pa_3b_desc">ISO 19005-3 / allows attachments</span>
           </div>
         </div>
         <div style="margin-top:4px; margin-bottom:14px;">
           <label style="display:flex; align-items:center; gap:8px; font-size:0.82rem; cursor:pointer;">
             <input type="checkbox" id="pdfa-downsample" style="width:auto; margin:0;">
-            Also reduce image DPI (eBook 150 DPI) to limit output size
+            <span data-i18n="pa_downsample">Also reduce image DPI (eBook 150 DPI) to limit output size</span>
           </label>
         </div>
         <div class="progress-bar-wrap" id="pdfa-progress-wrap">
           <div class="progress-bar" id="pdfa-progress-bar"></div>
         </div>
         <div style="margin-top:8px;">
-          <button class="btn btn-primary" id="pdfa-btn">Convert to PDF/A</button>
-          <button class="btn btn-dl" id="pdfa-dl" disabled>⬇ Download PDF/A</button>
-          <button class="btn btn-apply" id="pdfa-apply" disabled>↩ Keep working with this version</button>
+          <button class="btn btn-primary" id="pdfa-btn" data-i18n="pa_btn">Convert to PDF/A</button>
+          <button class="btn btn-dl" id="pdfa-dl" disabled>⬇ <span data-i18n="pa_dl">Download PDF/A</span></button>
+          <button class="btn btn-apply" id="pdfa-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
         </div>
         <div class="status" id="pdfa-status"></div>
       </div>
     </div>
+      <div class="tp-faq">
+      <div class="tp-faq-item">
+        <button class="tp-faq-q" onclick="toggleTpFaq(this)"><span data-i18n="faq_free_q"></span><span class="faq-arrow">▼</span></button>
+        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
+      </div>
+      </div>
+
     <div id="other-tools-section">
       <h3>Other tools</h3>
       <div class="other-tools-strip" id="other-tools-strip"></div>
@@ -944,6 +983,75 @@ function _updateChooseBtn(name){
   const btn=document.getElementById('tool-choose-btn'),span=document.getElementById('tool-choose-name');
   if(btn) btn.textContent='✓ PDF loaded'; if(span) span.textContent=name;
 }
+
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: { no_file: 'No file loaded',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'banner_working': 'Working on modified file',
+    'btn_dl_pdf': 'Download PDF',
+    'btn_keep': 'Keep working with this version',
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'pa_h2': 'PDF to PDF/A',
+    'pa_desc': 'Converts to PDF/A — the ISO archiving standard that embeds all fonts and color profiles. Uses Ghostscript WebAssembly (~30 MB, cached after first load).',
+    'pa_label_ver': 'PDF/A version:',
+    'pa_1b_name': 'PDF/A-1b',
+    'pa_1b_desc': 'ISO 19005-1 / widest compatibility',
+    'pa_2b_name': 'PDF/A-2b',
+    'pa_2b_desc': 'ISO 19005-2 / supports transparency',
+    'pa_3b_name': 'PDF/A-3b',
+    'pa_3b_desc': 'ISO 19005-3 / allows attachments',
+    'pa_downsample': 'Also reduce image DPI (eBook 150 DPI) to limit output size',
+    'pa_btn': 'Convert to PDF/A',
+    'pa_dl': 'Download PDF/A',
+  },
+  es: { no_file: 'Sin archivo cargado',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl_pdf': 'Descargar PDF',
+    'btn_keep': 'Seguir trabajando con esta versión',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'pa_h2': 'PDF a PDF/A',
+    'pa_desc': 'Convierte a PDF/A — el estándar ISO de archivo que integra todas las fuentes y perfiles de color. Usa Ghostscript WebAssembly (~30 MB, en caché tras la primera carga).',
+    'pa_label_ver': 'Versión PDF/A:',
+    'pa_1b_name': 'PDF/A-1b',
+    'pa_1b_desc': 'ISO 19005-1 / máxima compatibilidad',
+    'pa_2b_name': 'PDF/A-2b',
+    'pa_2b_desc': 'ISO 19005-2 / admite transparencia',
+    'pa_3b_name': 'PDF/A-3b',
+    'pa_3b_desc': 'ISO 19005-3 / permite adjuntos',
+    'pa_downsample': 'También reducir DPI de imagen (eBook 150 DPI) para limitar el tamaño',
+    'pa_btn': 'Convertir a PDF/A',
+    'pa_dl': 'Descargar PDF/A',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
 </script>
 </body>
 </html>

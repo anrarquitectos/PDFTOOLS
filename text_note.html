@@ -27,8 +27,9 @@
   #topbar {
     background: var(--ink); color: var(--white);
     padding: 12px 28px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100;
   }
+  #topbar-right { display:flex; align-items:center; gap:14px; flex-shrink:0; }
   #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
   #file-indicator { font-size: 0.78rem; color: #aaa; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #file-indicator span { color: #fff; }
@@ -331,6 +332,31 @@
   .color-swatch:hover, .color-swatch.active { border-color: var(--ink); }
   .color-swatch.active { border-color: #2563eb; box-shadow: 0 0 0 1px #2563eb; }
 
+
+  #lang-switcher { display:flex; gap:4px; flex-shrink:0; }
+  #lang-switcher button {
+    background:none; border:1px solid #444; color:#aaa;
+    padding:2px 7px; font-size:0.72rem; border-radius:3px;
+    cursor:pointer; font-family:inherit; transition:color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color:#fff; border-color:#fff; }
+  #lang-switcher button.active { color:#fff; border-color:#fff; }
+  .tp-faq { margin-top:24px; }
+  .tp-faq-item { border-top:1px solid var(--light); }
+  .tp-faq-item:last-child { border-bottom:1px solid var(--light); }
+  .tp-faq-q {
+    width:100%; background:none; border:none; text-align:left;
+    padding:12px 4px; font-size:0.85rem; font-weight:600; color:var(--ink);
+    cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .tp-faq-q:hover { color:var(--accent); }
+  .tp-faq-q .faq-arrow { font-size:0.72rem; color:var(--mid); transition:transform .2s; flex-shrink:0; }
+  .tp-faq-q.open .faq-arrow { transform:rotate(180deg); }
+  .tp-faq-a { display:none; padding:0 4px 14px; font-size:0.82rem; line-height:1.62; color:var(--mid); }
+  .tp-faq-a.open { display:block; }
+  .tp-faq-a strong { color:var(--ink); }
+  .tp-faq-a code { background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.80rem; }
+
 </style>
 </head>
 <body>
@@ -338,8 +364,16 @@
 <!-- TOP BAR -->
 <div id="topbar">
   <h1><a href="index.html" style="color:inherit;text-decoration:none;">▣ SCALEBAR PDF TOOLS</a></h1>
-  <div id="file-indicator">No file loaded</div>
-  <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+  <div id="topbar-right">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+      <div id="file-indicator" style="max-width:220px;" data-i18n-placeholder="no_file">No file loaded</div>
+      <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+    </div>
+    <div id="lang-switcher">
+      <button id="lang-en" onclick="setLang('en')">EN</button>
+      <button id="lang-es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
@@ -532,9 +566,8 @@
 
 <!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
 <div id="view-tool" class="view active">
-  <div style="max-width:860px; margin:0 auto; padding:32px 20px;">
-    <button id="back-btn" onclick="window.location.href='index.html'">← Home</button>
-    <div id="working-banner"><span>✓</span><span id="working-banner-text">Working on modified file</span></div>
+  <div>
+    <div id="working-banner"><span>✓</span><span id="working-banner-text" data-i18n="banner_working">Working on modified file</span></div>
 
     <div class="tool-panel active" id="panel-text-note">
       <div class="panel-box">
@@ -542,32 +575,31 @@
         <button type="button" id="tool-choose-btn"
           onclick="document.getElementById('tool-choose-file').click()"
           style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
-          Choose PDF
+          <span data-i18n="btn_choose_pdf">Choose PDF</span>
         </button>
         <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;">
         <span id="tool-choose-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
       </div>
-        <h2>Add text notes</h2>
+        <h2 data-i18n="tn_h2">Add text notes</h2>
         <p style="font-size:0.82rem; color:var(--mid); margin-bottom:14px;">
-          Click on the page preview to position a text annotation.
-          Rotation is corrected automatically for rotated drawing sheets.
+          <span data-i18n="tn_desc">Click on the page preview to position a text annotation. Rotation is corrected automatically for rotated drawing sheets.</span>
         </p>
 
         <div class="row" style="align-items:flex-start; gap:16px;">
           <div style="flex:2; min-width:0;">
-            <label>Text:</label>
+            <label data-i18n="tn_label_text">Text:</label>
             <input type="text" id="tn-text" value="Note" style="width:100%;"
               placeholder="Note text">
           </div>
           <div>
-            <label>Page:</label>
+            <label data-i18n="tn_label_page">Page:</label>
             <select id="tn-page"></select>
           </div>
         </div>
 
         <div class="row" style="margin-top:10px;">
           <div>
-            <label>Font:</label>
+            <label data-i18n="tn_label_font">Font:</label>
             <select id="tn-font">
               <option value="Helvetica">Helvetica</option>
               <option value="HelveticaBold">Helvetica Bold</option>
@@ -580,15 +612,15 @@
             </select>
           </div>
           <div>
-            <label>Size (pt):</label>
+            <label data-i18n="tn_label_size">Size (pt):</label>
             <input type="number" id="tn-size" value="10" min="4" max="144" style="width:80px;">
           </div>
           <div>
-            <label>Color:</label>
+            <label data-i18n="tn_label_color">Color:</label>
             <div style="display:flex; align-items:center; gap:8px;">
               <input type="color" id="tn-color" value="#000000"
                 style="width:38px; height:28px; padding:2px; cursor:pointer; border:1px solid #ccc; border-radius:3px; background:#fff;">
-              <span style="font-size:0.77rem; color:var(--mid);">or pick:</span>
+              <span style="font-size:0.77rem; color:var(--mid);" data-i18n="tn_pick">or pick:</span>
             </div>
           </div>
         </div>
@@ -601,25 +633,25 @@
 
         <div class="row" style="margin-top:10px;">
           <div>
-            <label>H position (% of width):</label>
+            <label data-i18n="tn_label_x">H position (% of width):</label>
             <input type="range" id="tn-x" min="0" max="100" value="10"
               style="width:100%; margin:4px 0;">
             <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--mid);">
-              <span>Left</span><span id="tn-x-val">10%</span><span>Right</span></div>
+              <span data-i18n="tn_x_left">Left</span><span id="tn-x-val">10%</span><span data-i18n="tn_x_right">Right</span></div>
           </div>
           <div>
-            <label>V position (% of height):</label>
+            <label data-i18n="tn_label_y">V position (% of height):</label>
             <input type="range" id="tn-y" min="0" max="100" value="90"
               style="width:100%; margin:4px 0;">
             <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--mid);">
-              <span>Top</span><span id="tn-y-val">90%</span><span>Bottom</span></div>
+              <span data-i18n="tn_y_top">Top</span><span id="tn-y-val">90%</span><span data-i18n="tn_y_bottom">Bottom</span></div>
           </div>
         </div>
 
         <!-- Page preview with click-to-place -->
         <div style="margin-top:12px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-            <label style="margin:0;">Preview — click to place text:</label>
+            <label style="margin:0;" data-i18n="tn_preview_label">Preview — click to place text:</label>
             <span id="tn-pos-label" style="font-size:0.78rem; color:var(--mid);"></span>
           </div>
           <div class="tn-canvas-wrap" id="tn-canvas-wrap">
@@ -627,19 +659,26 @@
             <div class="tn-crosshair" id="tn-crosshair"></div>
             <div id="tn-canvas-placeholder"
               style="position:absolute;color:var(--mid);font-size:0.82rem;text-align:center;padding:20px;">
-              Load a PDF to see preview
+              <span data-i18n="tn_placeholder">Load a PDF to see preview</span>
             </div>
           </div>
         </div>
 
         <div style="margin-top:10px;">
-          <button class="btn btn-primary" id="tn-btn">Add text to PDF</button>
-          <button class="btn btn-dl" id="tn-dl" disabled>⬇ Download</button>
-          <button class="btn btn-apply" id="tn-apply" disabled>↩ Keep working with this version</button>
+          <button class="btn btn-primary" id="tn-btn" data-i18n="tn_btn">Add text to PDF</button>
+          <button class="btn btn-dl" id="tn-dl" disabled>⬇ <span data-i18n="tn_dl">Download</span></button>
+          <button class="btn btn-apply" id="tn-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
         </div>
         <div class="status" id="tn-status"></div>
       </div>
     </div>
+      <div class="tp-faq">
+      <div class="tp-faq-item">
+        <button class="tp-faq-q" onclick="toggleTpFaq(this)"><span data-i18n="faq_free_q"></span><span class="faq-arrow">▼</span></button>
+        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
+      </div>
+      </div>
+
     <div id="other-tools-section">
       <h3>Other tools</h3>
       <div class="other-tools-strip" id="other-tools-strip"></div>
@@ -1195,6 +1234,89 @@ function _updateChooseBtn(name){
   const btn=document.getElementById('tool-choose-btn'),span=document.getElementById('tool-choose-name');
   if(btn) btn.textContent='✓ PDF loaded'; if(span) span.textContent=name;
 }
+
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: { no_file: 'No file loaded',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'banner_working': 'Working on modified file',
+    'btn_dl_pdf': 'Download PDF',
+    'btn_keep': 'Keep working with this version',
+    'btn_dl': 'Download',
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'tn_h2': 'Add text notes',
+    'tn_desc': 'Click on the page preview to position a text annotation. Rotation is corrected automatically for rotated drawing sheets.',
+    'tn_label_text': 'Text:',
+    'tn_label_page': 'Page:',
+    'tn_label_font': 'Font:',
+    'tn_label_size': 'Size (pt):',
+    'tn_label_color': 'Color:',
+    'tn_pick': 'or pick:',
+    'tn_label_x': 'H position (% of width):',
+    'tn_label_y': 'V position (% of height):',
+    'tn_x_left': 'Left',
+    'tn_x_right': 'Right',
+    'tn_y_top': 'Top',
+    'tn_y_bottom': 'Bottom',
+    'tn_preview_label': 'Preview — click to place text:',
+    'tn_placeholder': 'Load a PDF to see preview',
+    'tn_btn': 'Add text to PDF',
+    'tn_dl': 'Download',
+  },
+  es: { no_file: 'Sin archivo cargado',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl_pdf': 'Descargar PDF',
+    'btn_keep': 'Seguir trabajando con esta versión',
+    'btn_dl': 'Descargar',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'tn_h2': 'Añadir notas de texto',
+    'tn_desc': 'Haz clic en la previsualización de la página para colocar una anotación de texto. La rotación se corrige automáticamente para láminas rotadas.',
+    'tn_label_text': 'Texto:',
+    'tn_label_page': 'Página:',
+    'tn_label_font': 'Fuente:',
+    'tn_label_size': 'Tamaño (pt):',
+    'tn_label_color': 'Color:',
+    'tn_pick': 'o elegir:',
+    'tn_label_x': 'Posición H (% del ancho):',
+    'tn_label_y': 'Posición V (% del alto):',
+    'tn_x_left': 'Izquierda',
+    'tn_x_right': 'Derecha',
+    'tn_y_top': 'Arriba',
+    'tn_y_bottom': 'Abajo',
+    'tn_preview_label': 'Vista previa — clic para colocar texto:',
+    'tn_placeholder': 'Carga un PDF para ver la previsualización',
+    'tn_btn': 'Añadir texto al PDF',
+    'tn_dl': 'Descargar',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
 </script>
 </body>
 </html>
