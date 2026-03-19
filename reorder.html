@@ -222,7 +222,36 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .page-thumb.drag-over { border-color: #0066cc; border-style: dashed; }
   .page-thumb canvas { display: block; pointer-events: none; }
   .page-thumb .thumb-label { font-size: 0.72rem; color: var(--mid); margin-top: 4px; }
-  .page-thumb .delete-cb { position: absolute; top: 4px; right: 4px; cursor: pointer; accent-color: var(--err); }
+  .page-thumb .delete-cb { display: none; }
+  .page-thumb .thumb-controls {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 5px; gap: 4px;
+  }
+  .thumb-btn {
+    background: none; border: 1px solid #ddd; border-radius: 3px;
+    cursor: pointer; font-size: 0.72rem; padding: 2px 5px; line-height: 1;
+    font-family: inherit; color: var(--mid); transition: background 0.12s, color 0.12s;
+  }
+  .thumb-btn:hover { background: var(--light); color: var(--ink); }
+  .thumb-btn.delete-btn:hover { background: #fee; border-color: var(--err); color: var(--err); }
+  .thumb-btn.rotate-btn { font-size: 0.9rem; padding: 2px 4px; }
+  .thumb-rotate-deg { display: none; }
+  .blank-page-btn-wrap {
+    display: flex; align-items: center; justify-content: center;
+    align-self: stretch; min-height: 80px;
+    flex-shrink: 0;
+  }
+  .blank-page-btn {
+    writing-mode: vertical-lr; text-orientation: mixed;
+    background: none; border: 1px dashed #ccc; border-radius: var(--radius);
+    color: var(--mid); font-size: 0.68rem; font-family: inherit;
+    cursor: pointer; padding: 8px 3px; height: 100%; min-height: 80px;
+    transition: border-color 0.12s, color 0.12s;
+  }
+  .blank-page-btn:hover { border-color: #2563eb; color: #2563eb; }
+  #ro-reverse-btn {
+    margin-left: 6px;
+  }
 
   /* ── OTHER TOOLS STRIP ── */
   #other-tools-section {
@@ -914,10 +943,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
         <h2 data-i18n="ro_h2">Reorder &amp; remove pages</h2>
         <p style="font-size:0.82rem; color:var(--mid); margin-bottom:10px;">
-          <span data-i18n="ro_desc">Drag thumbnails to reorder. Check the box on any page to mark it for removal.</span>
+          <span data-i18n="ro_desc">Drag thumbnails to reorder. Use ✕ to remove a page, ↻ to rotate it 90°. Add blank pages between pages or reverse the entire order.</span>
         </p>
         <div>
           <button class="btn" id="ro-render-btn" data-i18n="ro_load">Load thumbnails</button>
+          <button class="btn" id="ro-reverse-btn" disabled title="Reverse page order">⇅ Reverse order</button>
           <button class="btn btn-primary" id="ro-btn" disabled data-i18n="ro_apply_changes">Apply changes</button>
           <button class="btn btn-dl" id="ro-dl" disabled>⬇ <span data-i18n="btn_dl_pdf">Download PDF</span></button>
           <button class="btn btn-apply" id="ro-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
@@ -2456,20 +2486,45 @@ document.getElementById('ro-render-btn').addEventListener('click', async () => {
       await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
       const thumb = document.createElement('div');
       thumb.className = 'page-thumb'; thumb.dataset.index = i - 1; thumb.draggable = true;
-      const cb = document.createElement('input');
-      cb.type = 'checkbox'; cb.className = 'delete-cb'; cb.title = 'Remove this page';
-      cb.addEventListener('change', () => {
-        thumb.style.opacity = cb.checked ? '0.3' : '1';
-        thumb.style.borderColor = cb.checked ? 'var(--err)' : '';
-      });
+      thumb.dataset.rotation = '0';
       const lbl = document.createElement('div');
       lbl.className = 'thumb-label'; lbl.textContent = `p. ${i}`;
-      thumb.appendChild(canvas); thumb.appendChild(cb); thumb.appendChild(lbl);
+      // Controls row: rotate + delete
+      const controls = document.createElement('div');
+      controls.className = 'thumb-controls';
+      const rotBtn = document.createElement('button');
+      rotBtn.className = 'thumb-btn rotate-btn'; rotBtn.textContent = '↻';
+      rotBtn.title = 'Rotate 90°'; rotBtn.type = 'button';
+      rotBtn.addEventListener('click', e => { e.stopPropagation(); rotatePage(thumb, canvas); });
+      const delBtn = document.createElement('button');
+      delBtn.className = 'thumb-btn delete-btn'; delBtn.textContent = '✕';
+      delBtn.title = 'Remove this page'; delBtn.type = 'button';
+      delBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const removed = thumb.dataset.removed === 'true';
+        thumb.dataset.removed = removed ? 'false' : 'true';
+        thumb.style.opacity = removed ? '1' : '0.3';
+        thumb.style.borderColor = removed ? '' : 'var(--err)';
+        delBtn.style.color = removed ? '' : 'var(--err)';
+      });
+      controls.appendChild(rotBtn); controls.appendChild(lbl); controls.appendChild(delBtn);
+      thumb.appendChild(canvas); thumb.appendChild(controls);
+      // Add blank page button after each thumb
+      const blankWrap = document.createElement('div');
+      blankWrap.className = 'blank-page-btn-wrap';
+      const blankBtn = document.createElement('button');
+      blankBtn.className = 'blank-page-btn'; blankBtn.type = 'button';
+      blankBtn.textContent = '+ blank';
+      blankBtn.title = 'Insert blank page here';
+      blankBtn.addEventListener('click', () => roAddBlankAfter(blankWrap));
+      blankWrap.appendChild(blankBtn);
       grid.appendChild(thumb);
+      grid.appendChild(blankWrap);
     }
     initDragDrop(grid);
-    status('ro-status', `${pdfDoc.numPages} pages loaded. Drag to reorder, check to remove.`, 'ok');
+    status('ro-status', `${pdfDoc.numPages} pages loaded. Drag to reorder.`, 'ok');
     document.getElementById('ro-btn').disabled = false;
+    document.getElementById('ro-reverse-btn').disabled = false;
   } catch(e) { status('ro-status', 'Error: ' + e.message, 'err'); }
 });
 
@@ -2501,6 +2556,82 @@ function initDragDrop(grid) {
   });
 }
 
+
+function rotatePage(thumb, canvas) {
+  const cur = parseInt(thumb.dataset.rotation || '0');
+  const next = (cur + 90) % 360;
+  thumb.dataset.rotation = next;
+  canvas.style.transform = `rotate(${next}deg)`;
+  // Swap canvas display width/height for 90/270
+  if (next === 90 || next === 270) {
+    canvas.style.width = canvas.height + 'px';
+    canvas.style.height = canvas.width + 'px';
+  } else {
+    canvas.style.width = '';
+    canvas.style.height = '';
+  }
+}
+
+function roAddBlankAfter(blankWrap) {
+  const grid = document.getElementById('reorder-grid');
+  const blank = document.createElement('div');
+  blank.className = 'page-thumb';
+  blank.dataset.index = 'blank';
+  blank.dataset.rotation = '0';
+  blank.draggable = true;
+  // White canvas placeholder
+  const bc = document.createElement('canvas');
+  bc.width = 60; bc.height = 85;
+  const bctx = bc.getContext('2d');
+  bctx.fillStyle = '#fff';
+  bctx.fillRect(0,0,60,85);
+  bctx.strokeStyle = '#ddd';
+  bctx.strokeRect(0,0,60,85);
+  const blbl = document.createElement('div');
+  blbl.className = 'thumb-label'; blbl.textContent = 'blank';
+  const bcontrols = document.createElement('div');
+  bcontrols.className = 'thumb-controls';
+  const bRotBtn = document.createElement('button');
+  bRotBtn.className = 'thumb-btn rotate-btn'; bRotBtn.textContent = '↻';
+  bRotBtn.type = 'button'; bRotBtn.style.visibility = 'hidden';
+  const bDelBtn = document.createElement('button');
+  bDelBtn.className = 'thumb-btn delete-btn'; bDelBtn.textContent = '✕';
+  bDelBtn.type = 'button';
+  bDelBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    const removed = blank.dataset.removed === 'true';
+    blank.dataset.removed = removed ? 'false' : 'true';
+    blank.style.opacity = removed ? '1' : '0.3';
+    blank.style.borderColor = removed ? '' : 'var(--err)';
+  });
+  bcontrols.appendChild(bRotBtn); bcontrols.appendChild(blbl); bcontrols.appendChild(bDelBtn);
+  blank.appendChild(bc); blank.appendChild(bcontrols);
+  // Insert new blank+blankwrap after the clicked blankWrap
+  const newBlankWrap = document.createElement('div');
+  newBlankWrap.className = 'blank-page-btn-wrap';
+  const newBlankBtn = document.createElement('button');
+  newBlankBtn.className = 'blank-page-btn'; newBlankBtn.type = 'button';
+  newBlankBtn.textContent = '+ blank';
+  newBlankBtn.addEventListener('click', () => roAddBlankAfter(newBlankWrap));
+  newBlankWrap.appendChild(newBlankBtn);
+  grid.insertBefore(newBlankWrap, blankWrap.nextSibling);
+  grid.insertBefore(blank, newBlankWrap);
+}
+
+document.getElementById('ro-reverse-btn').addEventListener('click', () => {
+  const grid = document.getElementById('reorder-grid');
+  const thumbs = [...grid.querySelectorAll('.page-thumb')];
+  const blanks = [...grid.querySelectorAll('.blank-page-btn-wrap')];
+  // Remove all, re-insert in reverse order
+  [...grid.children].forEach(el => grid.removeChild(el));
+  thumbs.reverse();
+  blanks.reverse();
+  thumbs.forEach((t, i) => {
+    grid.appendChild(t);
+    if (blanks[i]) grid.appendChild(blanks[i]);
+  });
+});
+
 document.getElementById('ro-btn').addEventListener('click', async () => {
   if (!currentBuffer) return;
   status('ro-status', 'Rebuilding PDF…', 'run');
@@ -2508,14 +2639,28 @@ document.getElementById('ro-btn').addEventListener('click', async () => {
     const src = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
     const out = await PDFLib.PDFDocument.create();
     const thumbs = [...document.getElementById('reorder-grid').querySelectorAll('.page-thumb')];
-    const selected = thumbs.filter(t => !t.querySelector('.delete-cb').checked);
+    const selected = thumbs.filter(t => t.dataset.removed !== 'true');
     if (selected.length === 0) { status('ro-status', 'You must keep at least one page.', 'err'); return; }
-    const indices = selected.map(t => parseInt(t.dataset.index));
-    const copied  = await out.copyPages(src, indices);
-    copied.forEach(p => out.addPage(p));
+    for (const t of selected) {
+      const idx = t.dataset.index;
+      if (idx === 'blank') {
+        // blank page — add empty page with same size as first real page
+        const firstReal = selected.find(x => x.dataset.index !== 'blank');
+        const refIdx = firstReal ? parseInt(firstReal.dataset.index) : 0;
+        const [refPage] = await out.copyPages(src, [refIdx]);
+        const { width, height } = refPage.getSize();
+        out.addPage([width, height]);
+      } else {
+        const [page] = await out.copyPages(src, [parseInt(idx)]);
+        const rot = parseInt(t.dataset.rotation || '0');
+        if (rot !== 0) page.setRotation(PDFLib.degrees((page.getRotation().angle + rot) % 360));
+        out.addPage(page);
+      }
+    }
     reorderBytes = await out.save({ useObjectStreams: true });
-    const removed = thumbs.length - selected.length;
-    status('ro-status', `PDF rebuilt: ${selected.length} page(s)${removed > 0 ? `, ${removed} removed` : ''}.`, 'ok');
+    const removed = thumbs.filter(t => t.dataset.removed === 'true').length;
+    const blanks = selected.filter(t => t.dataset.index === 'blank').length;
+    status('ro-status', `PDF rebuilt: ${selected.length} page(s)${removed > 0 ? `, ${removed} removed` : ''}${blanks > 0 ? `, ${blanks} blank` : ''}.`, 'ok');
     document.getElementById('ro-dl').disabled = false;
     document.getElementById('ro-apply').disabled = false;
     showDonationBanner();
@@ -4217,6 +4362,9 @@ function cpInit() {
   if (window.EyeDropper) {
     document.getElementById('cp-eyedropper').classList.add('supported');
   }
+  // Pre-apply first palette color if one was saved in this session
+  const _saved = cpLoad();
+  if (_saved.length > 0) cpActiveColor = _saved[0];
   cpSetActive(cpActiveColor, false);
   cpRenderSwatches();
 
@@ -4322,6 +4470,11 @@ openTool = function(id) {
   _cpOrigOpenTool(id);
   document.getElementById('color-palette-wrap').classList.add('visible');
   cpTargetInputId = null;
+  // Apply saved palette color to this tool's color inputs
+  const _pal = cpLoad();
+  if (_pal.length > 0) {
+    setTimeout(() => cpApplyColor(_pal[0]), 0);
+  }
 };
 
 document.addEventListener('DOMContentLoaded', cpInit);
