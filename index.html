@@ -370,7 +370,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
     <!-- ── GUIDES ── -->
-    <section style="margin-top:56px; max-width:720px; margin-left:auto; margin-right:auto;">
+    <section style="margin-top:48px;">
       <h3 style="font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:20px; letter-spacing:0.01em;">
         <span data-i18n="guides_title">Guides</span>
       </h3>
@@ -417,7 +417,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
     <!-- ── FAQ ── -->
-    <section style="margin-top:56px; max-width:720px; margin-left:auto; margin-right:auto;">
+    <section style="margin-top:48px;">
       <h3 style="font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:24px; letter-spacing:0.01em;">
         <span data-i18n="faq_title">Frequently asked questions</span>
       </h3>
@@ -1558,8 +1558,18 @@ const TOOLS = [
   <line x1='17' y1='18' x2='17' y2='24' stroke='currentColor' stroke-width='0.8'/>
 </svg>`, name:'Patch / Redact',         desc:'Draw a white polygon to cover content — with optional permanent flattening.' },
   { id:'watermark-text', icon:'✒', name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
-  { id:'watermark-logo', icon:'🔖', name:'Logo watermark',         desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
-  { id:'crop',           icon:'⊡', name:'Resize to format',       desc:'Scale pages to A0–A4, Letter or Legal with auto or forced orientation.' },
+  { id:'watermark-logo', icon:`<svg xmlns='http://www.w3.org/2000/svg' width='22' height='26' viewBox='0 0 22 26'>
+  <path d='M2 1 L16 1 L20 5 L20 25 L2 25 Z' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
+  <path d='M16 1 L16 5 L20 5' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
+  <rect x='5' y='10' width='12' height='8' rx='2.5' fill='none' stroke='currentColor' stroke-width='1.1'/>
+  <line x1='4' y1='7' x2='14' y2='7' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
+  <line x1='4' y1='21' x2='14' y2='21' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
+</svg>`, name:'Logo watermark',         desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
+  { id:'crop',           icon:`<svg xmlns='http://www.w3.org/2000/svg' width='22' height='26' viewBox='0 0 22 26'>
+  <path d='M2 1 L16 1 L20 5 L20 25 L2 25 Z' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
+  <path d='M16 1 L16 5 L20 5' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
+  <text x='11' y='18' font-size='10' fill='currentColor' text-anchor='middle' font-family='monospace' font-weight='bold'>A4</text>
+</svg>`, name:'Resize to format',       desc:'Scale pages to A0–A4, Letter or Legal with auto or forced orientation.' },
   { id:'reorder',        icon:'⇅', name:'Reorder & remove',       desc:'Drag pages to rearrange them and remove any you don\'t need.' },
   { id:'split',          icon:'✂', name:'Split PDF',              desc:'Select break points between pages and export each section separately.' },
   { id:'merge',          icon:'⊕', name:'Merge PDFs',             desc:'Upload multiple PDFs, rearrange them and combine into one document.' },
