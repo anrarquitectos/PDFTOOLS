@@ -4313,6 +4313,9 @@ function cpInit() {
   if (window.EyeDropper) {
     document.getElementById('cp-eyedropper').classList.add('supported');
   }
+  // Pre-apply first palette color if one was saved in this session
+  const _saved = cpLoad();
+  if (_saved.length > 0) cpActiveColor = _saved[0];
   cpSetActive(cpActiveColor, false);
   cpRenderSwatches();
 
@@ -4418,6 +4421,11 @@ openTool = function(id) {
   _cpOrigOpenTool(id);
   document.getElementById('color-palette-wrap').classList.add('visible');
   cpTargetInputId = null;
+  // Apply saved palette color to this tool's color inputs
+  const _pal = cpLoad();
+  if (_pal.length > 0) {
+    setTimeout(() => cpApplyColor(_pal[0]), 0);
+  }
 };
 
 document.addEventListener('DOMContentLoaded', cpInit);
