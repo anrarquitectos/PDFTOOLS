@@ -1409,8 +1409,14 @@ function cpInit() {
   if (window.EyeDropper) {
     document.getElementById('cp-eyedropper').classList.add('supported');
   }
+  // Pre-apply first palette color if one was saved in this session
+  const _saved = cpLoad();
+  if (_saved.length > 0) cpActiveColor = _saved[0];
   cpSetActive(cpActiveColor, false);
   cpRenderSwatches();
+  // Apply saved color to already-open tool panel (linewidth opens before cpInit)
+  const _pal = cpLoad();
+  if (_pal.length > 0) setTimeout(() => cpApplyColor(_pal[0]), 50);
 
   // Watch all known color inputs for changes
   const colorIds = ['sb-color','sbf-color','grid-color','pn-color','rc-color',
@@ -1514,6 +1520,11 @@ openTool = function(id) {
   _cpOrigOpenTool(id);
   document.getElementById('color-palette-wrap').classList.add('visible');
   cpTargetInputId = null;
+  // Apply saved palette color to this tool's color inputs
+  const _pal = cpLoad();
+  if (_pal.length > 0) {
+    setTimeout(() => cpApplyColor(_pal[0]), 0);
+  }
 };
 
 document.addEventListener('DOMContentLoaded', cpInit);
