@@ -225,6 +225,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .page-thumb.dragging { opacity: 0.4; cursor: grabbing; }
   .page-thumb.drag-over { border-color: #0066cc; border-style: dashed; }
   .page-thumb canvas { display: block; pointer-events: none; }
+  .thumb-canvas-wrap {
+    position: relative; overflow: visible;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .thumb-canvas-wrap canvas {
+    transform-origin: center center;
+    transition: transform 0.25s;
+  }
   .page-thumb .thumb-label { font-size: 0.72rem; color: var(--mid); margin-top: 4px; }
   .page-thumb .delete-cb { display: none; }
   .page-thumb .thumb-controls {
@@ -2511,7 +2519,12 @@ document.getElementById('ro-render-btn').addEventListener('click', async () => {
         delBtn.style.color = removed ? '' : 'var(--err)';
       });
       controls.appendChild(rotBtn); controls.appendChild(lbl); controls.appendChild(delBtn);
-      thumb.appendChild(canvas); thumb.appendChild(controls);
+      const cWrap = document.createElement('div');
+      cWrap.className = 'thumb-canvas-wrap';
+      cWrap.style.width  = canvas.width  + 'px';
+      cWrap.style.height = canvas.height + 'px';
+      cWrap.appendChild(canvas);
+      thumb.appendChild(cWrap); thumb.appendChild(controls);
       // Add blank page button after each thumb
       const blankWrap = document.createElement('div');
       blankWrap.className = 'blank-page-btn-wrap';
@@ -2567,14 +2580,17 @@ function rotatePage(thumb, canvas) {
   const cur = parseInt(thumb.dataset.rotation || '0');
   const next = (cur + 90) % 360;
   thumb.dataset.rotation = next;
+  const w = canvas.width;   // natural pixel width
+  const h = canvas.height;  // natural pixel height
+  const wrap = canvas.parentElement;
   canvas.style.transform = `rotate(${next}deg)`;
-  // Swap canvas display width/height for 90/270
   if (next === 90 || next === 270) {
-    canvas.style.width = canvas.height + 'px';
-    canvas.style.height = canvas.width + 'px';
+    // Rotated: displayed footprint swaps w↔h
+    wrap.style.width  = h + 'px';
+    wrap.style.height = w + 'px';
   } else {
-    canvas.style.width = '';
-    canvas.style.height = '';
+    wrap.style.width  = w + 'px';
+    wrap.style.height = h + 'px';
   }
 }
 
