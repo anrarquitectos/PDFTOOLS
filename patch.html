@@ -382,6 +382,53 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     background:none; border:none; font-family:inherit;
     font-size:0.75rem; color:var(--mid); cursor:pointer; text-decoration:underline;
   }
+
+  /* ── COLOR PALETTE ── */
+  #color-palette-wrap {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 4px 8px;
+    flex-shrink: 0;
+  }
+  #color-palette-wrap.visible { display: flex; }
+  #color-palette-swatches { display: flex; gap: 4px; align-items: center; }
+  .cp-swatch {
+    width: 18px; height: 18px; border-radius: 3px; cursor: pointer;
+    border: 1.5px solid rgba(0,0,0,0.15);
+    transition: transform 0.1s, box-shadow 0.1s;
+    flex-shrink: 0;
+  }
+  .cp-swatch:hover { transform: scale(1.18); box-shadow: 0 2px 5px rgba(0,0,0,0.25); }
+  #cp-active-wrap {
+    display: flex; align-items: center; gap: 5px;
+  }
+  #cp-active-shape {
+    width: 28px; height: 18px;
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: box-shadow 0.1s;
+    flex-shrink: 0;
+  }
+  #cp-active-shape:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+  #cp-eyedropper {
+    background: none; border: none; cursor: pointer;
+    font-size: 13px; color: #888; padding: 0 2px;
+    display: none;
+    transition: color 0.1s;
+  }
+  #cp-eyedropper:hover { color: #333; }
+  #cp-eyedropper.supported { display: block; }
+  #cp-hidden-input {
+    position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+  }
+  .cp-sep {
+    width: 1px; height: 14px; background: rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
 </style>
   <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -402,6 +449,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" style="max-width:220px;" data-i18n-placeholder="no_file">No file loaded</div>
       <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+    </div>
+    <div id="color-palette-wrap">
+      <div id="cp-active-wrap">
+        <div id="cp-active-shape" title="Click to pick color" onclick="cpOpenPicker()"></div>
+        <button id="cp-eyedropper" title="Pick color from screen" onclick="cpEyeDropper()">⊕</button>
+      </div>
+      <div class="cp-sep"></div>
+      <div id="color-palette-swatches"></div>
+      <input type="color" id="cp-hidden-input" onchange="cpOnPick(this.value)">
     </div>
     <div id="lang-switcher">
       <button id="lang-en" onclick="setLang('en')">EN</button>
@@ -4185,6 +4241,128 @@ function toggleTpFaq(btn) {
   if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
 }
 document.addEventListener('DOMContentLoaded', applyToolI18n);
+
+
+// ─── COLOR PALETTE ──────────────────────────────────────────────────────────
+const CP_KEY = 'sb_color_palette';
+const CP_MAX = 7;
+let cpActiveColor = '#1a1a1a';
+let cpTargetInputId = null; // which color input is currently active
+
+function cpInit() {
+  // Show EyeDropper button if supported
+  if (window.EyeDropper) {
+    document.getElementById('cp-eyedropper').classList.add('supported');
+  }
+  cpSetActive(cpActiveColor, false);
+  cpRenderSwatches();
+
+  // Watch all known color inputs for changes
+  const colorIds = ['sb-color','sbf-color','grid-color','pn-color','rc-color',
+                    'tn-color','vn-plancolor','wt-color'];
+  colorIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', e => cpOnToolColorChange(e.target.value));
+    el.addEventListener('input',  e => cpOnToolColorChange(e.target.value));
+    el.addEventListener('focus',  () => { cpTargetInputId = id; });
+  });
+
+  // Show palette when a tool is open
+  document.addEventListener('toolOpened', () => {
+    document.getElementById('color-palette-wrap').classList.add('visible');
+  });
+}
+
+function cpOnToolColorChange(hex) {
+  if (!hex || hex.length < 4) return;
+  cpSetActive(hex, true);
+}
+
+function cpSetActive(hex, save) {
+  cpActiveColor = hex;
+  const shape = document.getElementById('cp-active-shape');
+  if (shape) shape.style.background = hex;
+  if (save) cpSave(hex);
+}
+
+function cpSave(hex) {
+  let palette = cpLoad();
+  palette = palette.filter(c => c.toLowerCase() !== hex.toLowerCase());
+  palette.unshift(hex);
+  if (palette.length > CP_MAX) palette = palette.slice(0, CP_MAX);
+  sessionStorage.setItem(CP_KEY, JSON.stringify(palette));
+  cpRenderSwatches();
+}
+
+function cpLoad() {
+  try { return JSON.parse(sessionStorage.getItem(CP_KEY)) || []; }
+  catch { return []; }
+}
+
+function cpRenderSwatches() {
+  const container = document.getElementById('color-palette-swatches');
+  if (!container) return;
+  const palette = cpLoad();
+  container.innerHTML = '';
+  palette.forEach(hex => {
+    const sw = document.createElement('div');
+    sw.className = 'cp-swatch';
+    sw.style.background = hex;
+    sw.title = hex;
+    sw.onclick = () => cpApplyColor(hex);
+    container.appendChild(sw);
+  });
+}
+
+function cpApplyColor(hex) {
+  cpSetActive(hex, false);
+  // Apply to active tool color input if known
+  if (cpTargetInputId) {
+    const el = document.getElementById(cpTargetInputId);
+    if (el) { el.value = hex; el.dispatchEvent(new Event('input')); }
+    return;
+  }
+  // Fallback: apply to all visible color inputs in active panel
+  const activePanel = document.querySelector('.tool-panel.active');
+  if (!activePanel) return;
+  activePanel.querySelectorAll('input[type="color"]').forEach(inp => {
+    inp.value = hex; inp.dispatchEvent(new Event('input'));
+  });
+  // Also wt-color (text input)
+  const wt = activePanel.querySelector('#wt-color');
+  if (wt) { wt.value = hex; wt.dispatchEvent(new Event('input')); }
+}
+
+function cpOpenPicker() {
+  const inp = document.getElementById('cp-hidden-input');
+  inp.value = cpActiveColor;
+  inp.click();
+}
+
+function cpOnPick(hex) {
+  cpSetActive(hex, true);
+  cpApplyColor(hex);
+}
+
+async function cpEyeDropper() {
+  try {
+    const eyeDropper = new EyeDropper();
+    const result = await eyeDropper.open();
+    cpOnPick(result.sRGBHex);
+  } catch(e) { /* user cancelled */ }
+}
+
+// Hook into openTool to show palette and detect active color input
+const _cpOrigOpenTool = openTool;
+openTool = function(id) {
+  _cpOrigOpenTool(id);
+  document.getElementById('color-palette-wrap').classList.add('visible');
+  cpTargetInputId = null;
+};
+
+document.addEventListener('DOMContentLoaded', cpInit);
+
 </script>
 
 <footer style="text-align:center;padding:24px 20px;font-size:0.75rem;color:var(--mid);border-top:1px solid var(--light);margin-top:40px;">
