@@ -224,12 +224,98 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+
+  .article-author {
+    font-size: 0.78rem; color: var(--mid); margin: 8px 0 0;
+    font-style: normal;
+  }
+  .article-author a { color: var(--mid); text-decoration: underline; }
+  .geo-qa {
+    margin: 2.5rem 0 0;
+    padding: 1.5rem 1.75rem;
+    background: #f8f8f6;
+    border-left: 3px solid #1a1a1a;
+    border-radius: 0 4px 4px 0;
+  }
+  .geo-qa h3 {
+    font-size: 1rem; font-weight: 700; margin: 0 0 0.75rem;
+    color: var(--dark);
+  }
+  .geo-qa p { font-size: 0.88rem; line-height: 1.7; margin: 0; color: var(--dark); }
 </style>
   <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HowTo",
+      "name": "How to add an architectural title block to a PDF",
+      "description": "Add a professional architectural title block (viñeta) to PDF drawings directly in the browser — including project name, plan number, scale, signatures, north arrow and logo.",
+      "url": "https://scalebarpdf.com/how-to-add-title-block-to-pdf.html",
+      "author": {
+        "@type": "Person",
+        "name": "Nicolás Araya",
+        "url": "https://www.linkedin.com/in/06nicolasaraya"
+      },
+      "step": [
+    {
+        "@type": "HowToStep",
+        "name": "Open the Title Block tool",
+        "text": "Go to scalebarpdf.com and open the Title Block tool. Click Choose PDF to load your drawing or drawing set."
+    },
+    {
+        "@type": "HowToStep",
+        "name": "Fill in the project fields",
+        "text": "Enter the project name, site address, drawing content (one item per line), plan type and number, scale, date, client and designer names. Empty fields are automatically omitted."
+    },
+    {
+        "@type": "HowToStep",
+        "name": "Add optional elements",
+        "text": "Upload a studio logo (any image format, automatically converted to grayscale), set the north arrow rotation in degrees, and enter a project number."
+    },
+    {
+        "@type": "HowToStep",
+        "name": "Apply and download",
+        "text": "Click Add title block. The block is drawn as native vector PDF content anchored to the bottom-right corner, correctly scaled to the detected paper format."
+    }
+]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I add an architectural title block to a PDF?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "1. Open the <a href='vineta.html'>Title Block tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF</strong> and load your drawing. 3. Fill in the project fields: name, site, drawing content, plan type and number, scale, date, signatures. 4. Optionally upload a logo and set the north arrow rotation. 5. Choose the page size override if needed (auto-detect works for standard ISO formats). 6. Click <strong>Add title block</strong>. The block is drawn as native PDF vector content anchored to the bottom-right corner."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "headline": "How to add an architectural title block to a PDF",
+      "url": "https://scalebarpdf.com/how-to-add-title-block-to-pdf.html",
+      "author": {
+        "@type": "Person",
+        "name": "Nicolás Araya",
+        "url": "https://www.linkedin.com/in/06nicolasaraya"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Scalebar PDF Tools",
+        "url": "https://scalebarpdf.com"
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -258,6 +344,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE HEADER -->
   <header class="article-header">
     <div class="article-meta" data-i18n="article_meta">TUTORIAL — TITLE BLOCK · PDF WORKFLOW</div>
+    <p class="article-author">By <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
     <h2 data-i18n="article_title">How to add a custom architectural title block to your PDF plans</h2>
     <p class="lede" data-i18n="article_lede">Most PDF tools let you add a text box. An architectural title block is a different thing: a structured panel with project data, signatures, a north arrow and a plan ID — all correctly laid out and scaled to your sheet format. This tutorial shows how to generate one directly in your browser.</p>
   </header>

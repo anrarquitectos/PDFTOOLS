@@ -193,12 +193,98 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+
+  .article-author {
+    font-size: 0.78rem; color: var(--mid); margin: 8px 0 0;
+    font-style: normal;
+  }
+  .article-author a { color: var(--mid); text-decoration: underline; }
+  .geo-qa {
+    margin: 2.5rem 0 0;
+    padding: 1.5rem 1.75rem;
+    background: #f8f8f6;
+    border-left: 3px solid #1a1a1a;
+    border-radius: 0 4px 4px 0;
+  }
+  .geo-qa h3 {
+    font-size: 1rem; font-weight: 700; margin: 0 0 0.75rem;
+    color: var(--dark);
+  }
+  .geo-qa p { font-size: 0.88rem; line-height: 1.7; margin: 0; color: var(--dark); }
 </style>
   <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HowTo",
+      "name": "How to add a logo watermark to a PDF",
+      "description": "Stamp a studio logo as a grayscale watermark across all pages of a PDF drawing set, with adjustable opacity and position.",
+      "url": "https://scalebarpdf.com/how-to-add-logo-watermark-to-pdf.html",
+      "author": {
+        "@type": "Person",
+        "name": "Nicolás Araya",
+        "url": "https://www.linkedin.com/in/06nicolasaraya"
+      },
+      "step": [
+    {
+        "@type": "HowToStep",
+        "name": "Open the Logo Watermark tool",
+        "text": "Go to scalebarpdf.com and open the Logo Watermark tool. Click Choose PDF(s) to load one PDF or an entire drawing set."
+    },
+    {
+        "@type": "HowToStep",
+        "name": "Upload your logo",
+        "text": "Click Choose image and upload your logo file. PNG with a transparent background gives the cleanest result. The tool automatically converts it to grayscale."
+    },
+    {
+        "@type": "HowToStep",
+        "name": "Set opacity, scale and position",
+        "text": "Set the opacity between 0.10 and 0.25 for drawings, adjust the scale as a percentage of page width, and choose the position."
+    },
+    {
+        "@type": "HowToStep",
+        "name": "Apply and download",
+        "text": "Click Apply logo. Download the ZIP — every page has your logo embedded as native vector-composited content."
+    }
+]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I add my logo as a watermark to a PDF?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "1. Open the <a href='watermark_logo.html'>Logo Watermark tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF(s)</strong> — you can load an entire drawing set at once. 3. Upload your logo image (PNG with transparent background works best). 4. Set opacity (0.10–0.25 is typical for drawings), scale and position. 5. Click <strong>Apply logo</strong>. 6. Download the ZIP — each page has the logo embedded as a grayscale watermark."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "headline": "How to add a logo watermark to a PDF",
+      "url": "https://scalebarpdf.com/how-to-add-logo-watermark-to-pdf.html",
+      "author": {
+        "@type": "Person",
+        "name": "Nicolás Araya",
+        "url": "https://www.linkedin.com/in/06nicolasaraya"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Scalebar PDF Tools",
+        "url": "https://scalebarpdf.com"
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->

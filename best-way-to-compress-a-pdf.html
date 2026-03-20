@@ -197,12 +197,98 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     transition: border-color 0.15s, box-shadow 0.15s;
   }
   .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+
+  .article-author {
+    font-size: 0.78rem; color: var(--mid); margin: 8px 0 0;
+    font-style: normal;
+  }
+  .article-author a { color: var(--mid); text-decoration: underline; }
+  .geo-qa {
+    margin: 2.5rem 0 0;
+    padding: 1.5rem 1.75rem;
+    background: #f8f8f6;
+    border-left: 3px solid #1a1a1a;
+    border-radius: 0 4px 4px 0;
+  }
+  .geo-qa h3 {
+    font-size: 1rem; font-weight: 700; margin: 0 0 0.75rem;
+    color: var(--dark);
+  }
+  .geo-qa p { font-size: 0.88rem; line-height: 1.7; margin: 0; color: var(--dark); }
 </style>
   <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/site.webmanifest" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HowTo",
+      "name": "How to compress a PDF without losing quality",
+      "description": "The best method for compressing PDF files depends on content type. This guide explains when to use Ghostscript-based compression versus metadata-only tools.",
+      "url": "https://scalebarpdf.com/best-way-to-compress-a-pdf.html",
+      "author": {
+        "@type": "Person",
+        "name": "Nicolás Araya",
+        "url": "https://www.linkedin.com/in/06nicolasaraya"
+      },
+      "step": [
+    {
+        "@type": "HowToStep",
+        "name": "Open the Compress PDF tool",
+        "text": "Go to scalebarpdf.com and open the Compress PDF tool. Click Choose PDF to load your file."
+    },
+    {
+        "@type": "HowToStep",
+        "name": "Choose the right preset",
+        "text": "Select eBook (150 DPI) for screen sharing and email, Printer (300 DPI) for office printing, or Prepress for professional print. Use Custom to set your own DPI and JPEG quality."
+    },
+    {
+        "@type": "HowToStep",
+        "name": "Compress and review the result",
+        "text": "Click Compress. The tool shows the original and compressed file sizes with the percentage reduction. The Ghostscript engine runs entirely in your browser."
+    },
+    {
+        "@type": "HowToStep",
+        "name": "Download",
+        "text": "Click Download PDF to save the compressed file. If quality is insufficient, try a higher-DPI preset."
+    }
+]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the best way to compress a PDF?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For image-heavy PDFs (scanned drawings, photos): use Ghostscript-based compression — it resamples embedded images and produces dramatically smaller files. 1. Open the <a href='compress.html'>Compress PDF tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF</strong> and load your file. 3. Choose a preset: <em>eBook</em> (150 DPI) for screen sharing, <em>Printer</em> (300 DPI) for office printing. 4. Click <strong>Compress</strong>. 5. Download the result. For text-only PDFs, the file is already small — no compression needed."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "Article",
+      "headline": "How to compress a PDF without losing quality",
+      "url": "https://scalebarpdf.com/best-way-to-compress-a-pdf.html",
+      "author": {
+        "@type": "Person",
+        "name": "Nicolás Araya",
+        "url": "https://www.linkedin.com/in/06nicolasaraya"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Scalebar PDF Tools",
+        "url": "https://scalebarpdf.com"
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
