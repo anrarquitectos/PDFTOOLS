@@ -693,7 +693,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span id="pn2-file-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
       </div>
         <h2 data-i18n="pn2_h2">Add page numbers to a PDF</h2>
-        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:16px;" data-i18n="pn2_desc">Adds a page number to each page as native PDF vector text. Choose format, position, font size, colour and starting number.</p>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:16px;" data-i18n="pn2_desc">Adds a page number to each page as native PDF vector text. Supports Bates numbering with custom prefix and zero-padding. Choose format, position, font size, colour and starting number.</p>
         <div class="row">
           <div>
             <label data-i18n="pn2_label_format">Format:</label>
@@ -703,6 +703,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <option value="p_n">p. 1  p. 2 …</option>
               <option value="page_n">Page 1  Page 2 …</option>
               <option value="dash">— 1 —  — 2 — …</option>
+              <option value="zero4">0001  0002  0003 …</option>
               <option value="roman">i  ii  iii …</option>
               <option value="alpha">a  b  c …</option>
             </select>
@@ -740,7 +741,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
           </div>
           <div>
-            <label data-i18n="pn2_label_opacity">Opacity:</label>
+            <label data-i18n="pn2_label_opacity">Opacity (0–1):</label>
             <input type="number" id="pn2-opacity" value="1" min="0.1" max="1" step="0.05">
           </div>
         </div>
@@ -761,11 +762,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
           <div>
             <label data-i18n="pn2_label_pages">Apply to:</label>
-            <select id="pn2-pages">
-              <option value="all">All pages</option>
-              <option value="odd">Odd pages only</option>
-              <option value="even">Even pages only</option>
-              <option value="range">Page range</option>
+            <select id="pn2-pages" data-i18n-select="pn2-pages-opts">
+              <option value="all"   data-i18n="pn2_pages_all">All pages</option>
+              <option value="odd"   data-i18n="pn2_pages_odd">Odd pages only</option>
+              <option value="even"  data-i18n="pn2_pages_even">Even pages only</option>
+              <option value="range" data-i18n="pn2_pages_range">Page range</option>
             </select>
           </div>
         </div>
@@ -2228,7 +2229,7 @@ document.getElementById('pn2-pages').addEventListener('change', function() {
 });
 function toRoman(n){const vals=[1000,900,500,400,100,90,50,40,10,9,5,4,1],syms=['m','cm','d','cd','c','xc','l','xl','x','ix','v','iv','i'];let r='';vals.forEach((v,i)=>{while(n>=v){r+=syms[i];n-=v;}});return r;}
 function toAlpha(n){let r='';n=n-1;do{r=String.fromCharCode(97+(n%26))+r;n=Math.floor(n/26)-1;}while(n>=0);return r;}
-function fmtNum(fmt,cur,total,start){const d=cur+start-1;switch(fmt){case 'n':return String(d);case 'n_N':return d+' / '+total;case 'p_n':return 'p. '+d;case 'page_n':return 'Page '+d;case 'dash':return '— '+d+' —';case 'roman':return toRoman(d);case 'alpha':return toAlpha(d);default:return String(d);}}
+function fmtNum(fmt,cur,total,start){const d=cur+start-1;switch(fmt){case 'n':return String(d);case 'n_N':return d+' / '+total;case 'p_n':return 'p. '+d;case 'page_n':return 'Page '+d;case 'dash':return '— '+d+' —';case 'roman':return toRoman(d);case 'zero4':return String(d).padStart(4,'0');case 'alpha':return toAlpha(d);default:return String(d);}}
 document.getElementById('pn2-btn').addEventListener('click', async () => {
   if (!currentBuffer){status('pn2-status',_T.no_file||'No file loaded.','err');return;}
   status('pn2-status','Adding page numbers…','run');
@@ -4234,14 +4235,14 @@ const _TL = {
     'btn_dl_pdf': 'Download PDF',
     'btn_keep': 'Keep working with this version',
     'pn2_h2': 'Add page numbers to a PDF',
-    'pn2_desc': 'Adds a page number to each page as native PDF vector text. Choose format, position, font size, colour and starting number.',
+    'pn2_desc': 'Adds a page number to each page as native PDF vector text. Supports Bates numbering with custom prefix and zero-padding. Choose format, position, font size, colour and starting number.',
     'pn2_label_format': 'Format:',
     'pn2_label_start': 'Start at number:',
     'pn2_label_pos': 'Position:',
     'pn2_label_margin': 'Margin from edge (mm):',
     'pn2_label_size': 'Font size (pt):',
     'pn2_label_color': 'Colour:',
-    'pn2_label_opacity': 'Opacity:',
+    'pn2_label_opacity': 'Opacity (0–1):',
     'pn2_label_prefix': 'Prefix (optional):',
     'pn2_label_suffix': 'Suffix (optional):',
     'pn2_label_skip': 'Skip pages (e.g. 1,2):',
@@ -4285,14 +4286,14 @@ const _TL = {
     'btn_dl_pdf': 'Descargar PDF',
     'btn_keep': 'Seguir trabajando con esta versión',
     'pn2_h2': 'Añade números de página a un PDF',
-    'pn2_desc': 'Añade un número de página como texto vectorial nativo. Elige formato, posición, tamaño, color y número inicial.',
+    'pn2_desc': 'Añade un número de página como texto vectorial nativo. Compatible con numeración Bates mediante prefijo y relleno de ceros. Elige formato, posición, tamaño, color y número inicial.',
     'pn2_label_format': 'Formato:',
     'pn2_label_start': 'Empezar en el número:',
     'pn2_label_pos': 'Posición:',
     'pn2_label_margin': 'Margen desde el borde (mm):',
     'pn2_label_size': 'Tamaño de fuente (pt):',
     'pn2_label_color': 'Color:',
-    'pn2_label_opacity': 'Opacidad:',
+    'pn2_label_opacity': 'Opacidad (0–1):',
     'pn2_label_prefix': 'Prefijo (opcional):',
     'pn2_label_suffix': 'Sufijo (opcional):',
     'pn2_label_skip': 'Omitir páginas (ej. 1,2):',

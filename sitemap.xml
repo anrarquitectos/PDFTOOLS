@@ -25,6 +25,11 @@
   <url><loc>https://scalebarpdf.com/linewidth.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://scalebarpdf.com/text_note.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
+  <url><loc>https://scalebarpdf.com/page_numbers.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://scalebarpdf.com/rotate_pages.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://scalebarpdf.com/extract_pages.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://scalebarpdf.com/add_image.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+
   <!-- Tutorials -->
   <url><loc>https://scalebarpdf.com/how-to-add-scale-bar-to-pdf.html</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>
   <url><loc>https://scalebarpdf.com/how-to-add-logo-watermark-to-pdf.html</loc><changefreq>yearly</changefreq><priority>0.7</priority></url>

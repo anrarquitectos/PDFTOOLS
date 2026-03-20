@@ -10,8 +10,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scalebar PDF Tools — Free browser-based PDF tools</title>
-<meta name="description" content="Free browser-based PDF tools for architects and technical professionals. Compress drawings, add scale bars and title blocks, watermark, merge, split and more — no upload, no account, 100% local processing.">
+<title>Rotate All Pages in a PDF — Scalebar PDF Tools</title>
 <style>
   :root {
     --bg: #f8f8f6;
@@ -35,8 +34,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #topbar {
     background: var(--ink); color: var(--white);
     padding: 12px 28px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 100;
   }
+  #topbar-right { display:flex; align-items:center; gap:14px; flex-shrink:0; }
   #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
   #file-indicator { font-size: 0.78rem; color: #aaa; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   #file-indicator span { color: #fff; }
@@ -52,9 +52,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .view.active { display: block; }
 
   /* ── HOME ── */
-  #view-home { max-width: 860px; margin: 0 auto; padding: 18px 20px 40px; }
+  #view-home { max-width: 860px; margin: 0 auto; padding: 40px 20px; }
 
-  .home-header { margin-bottom: 20px; }
+  .home-header { margin-bottom: 32px; }
   .home-header h2 { font-size: 1.35rem; font-weight: normal; letter-spacing: 0.04em; margin-bottom: 8px; }
   .home-header p { font-size: 0.85rem; color: var(--mid); line-height: 1.6; max-width: 600px; }
   .home-header .privacy-badge {
@@ -64,65 +64,67 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     font-size: 0.75rem; color: var(--mid);
   }
 
-  /* ── TOOLS GRID ── */
+  #drop-zone {
+    border: 2px dashed #bbb; background: var(--white);
+    border-radius: var(--radius); padding: 48px 24px;
+    text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 32px; position: relative; overflow: hidden;
+  }
+  #drop-zone.dragover { border-color: var(--ink); background: #f0f0ee; }
+  #drop-zone h3 { font-size: 1rem; font-weight: normal; margin-bottom: 6px; }
+  #drop-zone p { color: var(--mid); font-size: 0.83rem; }
+  #file-input-hidden { display: none; }
+
+  /* Check animation */
+  #drop-check {
+    display: none; position: absolute; inset: 0;
+    background: var(--white); align-items: center; justify-content: center;
+    flex-direction: column; gap: 10px;
+  }
+  #drop-check.show { display: flex; animation: fadeCheck 1.6s ease forwards; }
+  @keyframes fadeCheck { 0%{opacity:0} 20%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
+  #drop-check .check-circle {
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid var(--ok); display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; color: var(--ok); animation: scaleIn 0.3s ease;
+  }
+  @keyframes scaleIn { from{transform:scale(0.5);opacity:0} to{transform:scale(1);opacity:1} }
+  #drop-check p { font-size: 0.85rem; color: var(--ok); }
+
+  /* ── TOOLS CAROUSEL ── */
+  .tools-carousel-wrap { position: relative; margin-bottom: 4px; }
+  .tools-carousel-wrap .scroll-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: var(--white); border: 1px solid #ccc; border-radius: 50%;
+    width: 30px; height: 30px; cursor: pointer; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 2; transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .tools-carousel-wrap .scroll-btn:hover { border-color: var(--ink); box-shadow: 1px 1px 0 var(--ink); }
+  .tools-carousel-wrap .scroll-btn.left  { left: -15px; }
+  .tools-carousel-wrap .scroll-btn.right { right: -15px; }
   .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 4px;
+    display: flex; gap: 12px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
+    scroll-behavior: smooth; padding-bottom: 6px;
+    /* hide scrollbar visually but keep functional */
+    scrollbar-width: none;
   }
-  @media (max-width: 600px) {
-    .tools-grid { grid-template-columns: repeat(2, 1fr); }
-    .tools-peek-wrap { max-height: calc(120px + 10px + 120px + 10px + 80px); }
-  }
+  .tools-grid::-webkit-scrollbar { display: none; }
   .tool-card {
     background: var(--white); border: 1px solid var(--light);
-    border-radius: var(--radius); padding: 18px; cursor: pointer;
+    border-radius: var(--radius); padding: 16px; cursor: pointer;
     transition: border-color 0.15s, box-shadow 0.15s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+    /* exactly 6 cards visible in 820px container: (820 - 5*12) / 6 = 126.7px */
+    min-width: 185px; max-width: 185px;
+    scroll-snap-align: start; flex-shrink: 0;
   }
-  .tool-card:hover { border-color: var(--ink); box-shadow: 0 4px 12px rgba(0,0,0,0.13); }
-  .tool-card .icon { font-size: 1.5rem; margin-bottom: 9px; display:flex; align-items:center; }
-  .tool-card .icon svg { width:28px; height:28px; }
-  .tool-card h3 { font-size: 0.86rem; margin-bottom: 4px; line-height: 1.3; }
-  .tool-card p { font-size: 0.74rem; color: var(--mid); line-height: 1.4; }
-
-  /* Peek row: half-height overflow reveals row 2 */
-  .tools-peek-wrap {
-    overflow: hidden;
-    /* show row 1 (card ~110px) + most of row 2 (~155px) */
-    max-height: calc(110px + 12px + 155px);
-    transition: max-height 0.4s ease;
-    margin-bottom: 0;
-  }
-  .tools-peek-wrap.expanded {
-    max-height: 2000px;
-  }
-  /* fade at bottom when collapsed */
-  .tools-peek-outer {
-    position: relative;
-    margin-bottom: 4px;
-  }
-  .tools-peek-fade {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 48px;
-    background: linear-gradient(to bottom, transparent, var(--bg));
-    pointer-events: none;
-    transition: opacity 0.3s;
-  }
-  .tools-peek-outer.expanded .tools-peek-fade { opacity: 0; }
-
-  /* More tools button */
-  #more-tools-btn {
-    display: flex; align-items: center; gap: 7px; margin: 14px auto 0;
-    background: none; border: 1px solid #bbb; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.92rem; color: var(--mid);
-    padding: 9px 28px; cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  #more-tools-btn:hover { border-color: var(--ink); color: var(--ink); }
-  #more-tools-btn .chevron { transition: transform 0.3s; font-size: 0.65rem; }
-  #more-tools-btn.open .chevron { transform: rotate(180deg); }
+  .tool-card:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .tool-card .icon { font-size: 1.4rem; margin-bottom: 8px; }
+  .tool-card h3 { font-size: 0.82rem; margin-bottom: 4px; line-height: 1.3; }
+  .tool-card p { font-size: 0.72rem; color: var(--mid); line-height: 1.35; }
 
   /* ── TOOL VIEW ── */
   #view-tool { max-width: 860px; margin: 0 auto; padding: 32px 20px; }
@@ -205,9 +207,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   /* ── PAGE REORDER ── */
   #reorder-grid {
-    display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px;
+    display: flex; flex-wrap: wrap; gap: 0; margin-top: 14px;
     padding: 14px; background: var(--bg); border: 1px solid var(--light);
     border-radius: var(--radius); min-height: 100px;
+    align-items: stretch;
+  }
+  .page-thumb-pair {
+    display: flex; align-items: stretch; gap: 6px; margin: 6px;
   }
   .page-thumb {
     position: relative; cursor: grab; user-select: none;
@@ -219,8 +225,44 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .page-thumb.dragging { opacity: 0.4; cursor: grabbing; }
   .page-thumb.drag-over { border-color: #0066cc; border-style: dashed; }
   .page-thumb canvas { display: block; pointer-events: none; }
+  .thumb-canvas-wrap {
+    position: relative; overflow: visible;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .thumb-canvas-wrap canvas {
+    transform-origin: center center;
+    transition: transform 0.25s;
+  }
   .page-thumb .thumb-label { font-size: 0.72rem; color: var(--mid); margin-top: 4px; }
-  .page-thumb .delete-cb { position: absolute; top: 4px; right: 4px; cursor: pointer; accent-color: var(--err); }
+  .page-thumb .delete-cb { display: none; }
+  .page-thumb .thumb-controls {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 5px; gap: 4px;
+  }
+  .thumb-btn {
+    background: none; border: 1px solid #ddd; border-radius: 3px;
+    cursor: pointer; font-size: 0.72rem; padding: 2px 5px; line-height: 1;
+    font-family: inherit; color: var(--mid); transition: background 0.12s, color 0.12s;
+  }
+  .thumb-btn:hover { background: var(--light); color: var(--ink); }
+  .thumb-btn.delete-btn:hover { background: #fee; border-color: var(--err); color: var(--err); }
+  .thumb-btn.rotate-btn { font-size: 0.9rem; padding: 2px 4px; }
+  .thumb-rotate-deg { display: none; }
+  .blank-page-btn-wrap {
+    display: flex; align-items: stretch; justify-content: center;
+    flex-shrink: 0;
+  }
+  .blank-page-btn {
+    writing-mode: vertical-lr; text-orientation: mixed;
+    background: none; border: 1px dashed #ccc; border-radius: var(--radius);
+    color: var(--mid); font-size: 0.68rem; font-family: inherit;
+    cursor: pointer; padding: 8px 3px;
+    transition: border-color 0.12s, color 0.12s;
+  }
+  .blank-page-btn:hover { border-color: #2563eb; color: #2563eb; }
+  #ro-reverse-btn {
+    margin-left: 6px;
+  }
 
   /* ── OTHER TOOLS STRIP ── */
   #other-tools-section {
@@ -315,6 +357,118 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .file-input-wrap:hover .file-input-label { border-color: var(--ink); color: var(--ink); }
   .file-input-label .file-name { color: var(--ink); }
+
+  #lang-switcher { display:flex; gap:4px; flex-shrink:0; }
+  #lang-switcher button {
+    background:none; border:1px solid #444; color:#aaa;
+    padding:2px 7px; font-size:0.72rem; border-radius:3px;
+    cursor:pointer; font-family:inherit; transition:color 0.15s, border-color 0.15s;
+  }
+  #lang-switcher button:hover { color:#fff; border-color:#fff; }
+  #lang-switcher button.active { color:#fff; border-color:#fff; }
+  .tp-faq { margin-top:24px; }
+  .tp-faq-item { border-top:1px solid var(--light); }
+  .tp-faq-item:last-child { border-bottom:1px solid var(--light); }
+  .tp-faq-q {
+    width:100%; background:none; border:none; text-align:left;
+    padding:12px 4px; font-size:0.85rem; font-weight:600; color:var(--ink);
+    cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .tp-faq-q:hover { color:var(--accent); }
+  .tp-faq-q .faq-arrow { font-size:0.72rem; color:var(--mid); transition:transform .2s; flex-shrink:0; }
+  .tp-faq-q.open .faq-arrow { transform:rotate(180deg); }
+  .tp-faq-a { display:none; padding:0 4px 14px; font-size:0.82rem; line-height:1.62; color:var(--mid); }
+  .tp-faq-a.open { display:block; }
+  .tp-faq-a strong { color:var(--ink); }
+  .tp-faq-a code { background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.80rem; }
+
+
+  /* ── DONATION BANNER ── */
+  @keyframes heartIn {
+    0%   { transform: scale(0); opacity: 0; }
+    50%  { transform: scale(1.25); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes heartOut {
+    0%   { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.7); opacity: 0; }
+  }
+  @keyframes donationContentIn {
+    0%   { opacity: 0; transform: translateY(4px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes donationBannerIn {
+    0%   { opacity: 0; transform: translateY(-6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  #donation-banner {
+    display: none; background: var(--white);
+    border: 1px solid var(--light); border-radius: var(--radius);
+    padding: 18px 20px; margin-top: 14px;
+    animation: donationBannerIn 0.25s ease-out forwards;
+  }
+  #donation-heart-stage { display:flex; align-items:center; justify-content:center; height:52px; }
+  #donation-heart { font-size:32px; color:#FF5E5B; display:block;
+    animation: heartIn 0.45s cubic-bezier(.17,.67,.35,1.3) forwards; }
+  #donation-heart.out { animation: heartOut 0.3s ease-in forwards; }
+  #donation-content { display:none; animation: donationContentIn 0.35s ease-out forwards; }
+  #donation-kofi-btn {
+    display:inline-flex; align-items:center; gap:7px;
+    background:#FF5E5B; color:#fff; padding:7px 14px;
+    border-radius:var(--radius); font-family:inherit; font-size:0.8rem;
+    text-decoration:none; font-weight:600; border:none; cursor:pointer;
+  }
+  #donation-dismiss {
+    background:none; border:none; font-family:inherit;
+    font-size:0.75rem; color:var(--mid); cursor:pointer; text-decoration:underline;
+  }
+
+  /* ── COLOR PALETTE ── */
+  #color-palette-wrap {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    border-radius: 6px;
+    padding: 4px 8px;
+    flex-shrink: 0;
+  }
+  #color-palette-wrap.visible { display: flex; }
+  #color-palette-swatches { display: flex; gap: 4px; align-items: center; }
+  .cp-swatch {
+    width: 18px; height: 18px; border-radius: 3px; cursor: pointer;
+    border: 1.5px solid rgba(0,0,0,0.15);
+    transition: transform 0.1s, box-shadow 0.1s;
+    flex-shrink: 0;
+  }
+  .cp-swatch:hover { transform: scale(1.18); box-shadow: 0 2px 5px rgba(0,0,0,0.25); }
+  #cp-active-wrap {
+    display: flex; align-items: center; gap: 5px;
+  }
+  #cp-active-shape {
+    width: 28px; height: 18px;
+    clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: box-shadow 0.1s;
+    flex-shrink: 0;
+  }
+  #cp-active-shape:hover { box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+  #cp-eyedropper {
+    background: none; border: none; cursor: pointer;
+    font-size: 13px; color: #888; padding: 0 2px;
+    display: none;
+    transition: color 0.1s;
+  }
+  #cp-eyedropper:hover { color: #333; }
+  #cp-eyedropper.supported { display: block; }
+  #cp-hidden-input {
+    position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+  }
+  .cp-sep {
+    width: 1px; height: 14px; background: rgba(0,0,0,0.15);
+    flex-shrink: 0;
+  }
 </style>
   <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -331,37 +485,58 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- TOP BAR -->
 <div id="topbar">
   <h1><a href="index.html" style="color:inherit;text-decoration:none;">▣ SCALEBAR PDF TOOLS</a></h1>
-  <div id="file-indicator" style="display:none"></div>
-  <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
-  <div id="lang-switcher" style="display:flex;gap:4px;margin-left:12px;">
-    <button onclick="setLang('en')" style="background:none;border:1px solid #444;color:#aaa;padding:2px 7px;font-size:0.72rem;border-radius:3px;cursor:pointer;font-family:inherit;" id="lang-en">EN</button>
-    <button onclick="setLang('es')" style="background:none;border:1px solid #444;color:#aaa;padding:2px 7px;font-size:0.72rem;border-radius:3px;cursor:pointer;font-family:inherit;" id="lang-es">ES</button>
+  <div id="topbar-right">
+    <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+      <div id="file-indicator" style="max-width:220px;" data-i18n-placeholder="no_file">No file loaded</div>
+      <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+    </div>
+    <div id="color-palette-wrap">
+      <div id="cp-active-wrap">
+        <div id="cp-active-shape" title="Click to pick color" onclick="cpOpenPicker()"></div>
+        <button id="cp-eyedropper" title="Pick color from screen" onclick="cpEyeDropper()">⊕</button>
+      </div>
+      <div class="cp-sep"></div>
+      <div id="color-palette-swatches"></div>
+      <input type="color" id="cp-hidden-input" onchange="cpOnPick(this.value)">
+    </div>
+    <div id="lang-switcher">
+      <button id="lang-en" onclick="setLang('en')">EN</button>
+      <button id="lang-es" onclick="setLang('es')">ES</button>
+    </div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
-<div id="view-home" class="view active">
+<div id="view-home" class="view" style="display:none!important">
   <div style="max-width:860px; margin:0 auto; padding:40px 20px;">
 
     <div class="home-header">
-      <h2 data-i18n="tagline">Scalebar PDF Tools — 100% free</h2>
-      <p data-i18n="hero_desc">For architects and professionals who need to work with documents efficiently and confidentially. Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.</p>
+      <h2>Scalebar PDF Tools — 100% free</h2>
+      <p>For architects and professionals who need to work with documents efficiently and confidentially.
+         Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.</p>
       <div class="privacy-badge">
-        <span data-i18n="privacy_badge">Your files never leave your browser — 100% local processing</span>
+        Your files never leave your browser — 100% local processing
       </div>
     </div>
 
-    <p style="font-size:0.8rem; color:var(--mid); margin-bottom:12px;" data-i18n="choose_tool">Choose a tool:</p>
-    <div class="tools-peek-outer" id="tools-peek-outer">
-      <div class="tools-peek-wrap" id="tools-peek-wrap">
-        <div class="tools-grid" id="home-tools-grid"></div>
+    <div id="drop-zone" onclick="document.getElementById('file-input-hidden').click()">
+      <div id="drop-zone-content">
+        <div style="font-size:2.2rem; margin-bottom:10px;">⬆</div>
+        <h3>Upload a PDF file</h3>
+        <p>Click here or drag and drop a file</p>
       </div>
-      <div class="tools-peek-fade" id="tools-peek-fade"></div>
+      <div id="drop-check">
+        <div class="check-circle">✓</div>
+        <p id="drop-check-name">File loaded</p>
+      </div>
     </div>
-    <div style="text-align:center;">
-      <button id="more-tools-btn" onclick="toggleMoreTools()">
-        <span id="more-tools-label" data-i18n="more_tools">More tools</span> <span class="chevron">▼</span>
-      </button>
+    <input type="file" id="file-input-hidden" accept="application/pdf">
+
+    <p style="font-size:0.8rem; color:var(--mid); margin-bottom:12px;">Or choose a tool directly:</p>
+    <div class="tools-carousel-wrap">
+      <button class="scroll-btn left" onclick="scrollGrid(-1)">‹</button>
+      <div class="tools-grid" id="home-tools-grid"></div>
+      <button class="scroll-btn right" onclick="scrollGrid(1)">›</button>
     </div>
 
     <!-- Carbon Ads — replace comment with Carbon script tag once approved -->
@@ -373,57 +548,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
 
-    <!-- ── GUIDES ── -->
-    <section style="margin-top:48px;">
-      <h3 style="font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:20px; letter-spacing:0.01em;">
-        <span data-i18n="guides_title">Guides</span>
-      </h3>
-      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; align-items:stretch;">
-
-        <a href="how-to-add-scale-bar-to-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
-          <div style="border:1px solid var(--light); border-radius:var(--radius); padding:16px 18px; transition:border-color .15s; background:#fff; width:100%;"
-               onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.10)'" onmouseout="this.style.borderColor='var(--light)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.07)'" style="box-shadow:0 2px 6px rgba(0,0,0,0.07);">
-            <div style="font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--mid); text-transform:uppercase; margin-bottom:6px;" data-i18n="g1_cat">Scale bar</div>
-            <div style="font-size:0.92rem; font-weight:600; color:var(--dark); margin-bottom:6px; line-height:1.3;" data-i18n="g1_title">How to add a scale bar to a PDF</div>
-            <div style="font-size:0.80rem; color:var(--mid); line-height:1.5;" data-i18n="g1_desc">Automatically sized for your drawing scale and paper format. No CAD software required.</div>
-          </div>
-        </a>
-
-        <a href="how-to-add-logo-watermark-to-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
-          <div style="border:1px solid var(--light); border-radius:var(--radius); padding:16px 18px; transition:border-color .15s; background:#fff; width:100%;"
-               onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.10)'" onmouseout="this.style.borderColor='var(--light)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.07)'" style="box-shadow:0 2px 6px rgba(0,0,0,0.07);">
-            <div style="font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--mid); text-transform:uppercase; margin-bottom:6px;" data-i18n="g2_cat">Logo watermark</div>
-            <div style="font-size:0.92rem; font-weight:600; color:var(--dark); margin-bottom:6px; line-height:1.3;" data-i18n="g2_title">How to add your logo as a watermark to all your plans</div>
-            <div style="font-size:0.80rem; color:var(--mid); line-height:1.5;" data-i18n="g2_desc">Stamp your studio logo across an entire set of PDFs in one step.</div>
-          </div>
-        </a>
-
-        <a href="best-way-to-compress-a-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
-          <div style="border:1px solid var(--light); border-radius:var(--radius); padding:16px 18px; transition:border-color .15s; background:#fff; width:100%;"
-               onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.10)'" onmouseout="this.style.borderColor='var(--light)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.07)'" style="box-shadow:0 2px 6px rgba(0,0,0,0.07);">
-            <div style="font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--mid); text-transform:uppercase; margin-bottom:6px;" data-i18n="g3_cat">Compression</div>
-            <div style="font-size:0.92rem; font-weight:600; color:var(--dark); margin-bottom:6px; line-height:1.3;" data-i18n="g3_title">The best way to compress a PDF</div>
-            <div style="font-size:0.80rem; color:var(--mid); line-height:1.5;" data-i18n="g3_desc">What actually reduces file size, when each method is appropriate, and why.</div>
-          </div>
-        </a>
-
-        <a href="how-to-add-title-block-to-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
-          <div style="border:1px solid var(--light); border-radius:var(--radius); padding:16px 18px; transition:border-color .15s; background:#fff; width:100%;"
-               onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.10)'" onmouseout="this.style.borderColor='var(--light)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.07)'" style="box-shadow:0 2px 6px rgba(0,0,0,0.07);">
-            <div style="font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--mid); text-transform:uppercase; margin-bottom:6px;" data-i18n="g4_cat">Title block</div>
-            <div style="font-size:0.92rem; font-weight:600; color:var(--dark); margin-bottom:6px; line-height:1.3;" data-i18n="g4_title">How to add a custom architectural title block to your PDF plans</div>
-            <div style="font-size:0.80rem; color:var(--mid); line-height:1.5;" data-i18n="g4_desc">Project name, scale, signatures, north arrow and plan ID — generated directly in your browser.</div>
-          </div>
-        </a>
-
-      </div>
-    </section>
-
-
     <!-- ── FAQ ── -->
-    <section style="margin-top:48px;">
+    <section style="margin-top:56px; max-width:720px; margin-left:auto; margin-right:auto;">
       <h3 style="font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:24px; letter-spacing:0.01em;">
-        <span data-i18n="faq_title">Frequently asked questions</span>
+        Frequently asked questions
       </h3>
 
       <style>
@@ -449,100 +577,103 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq1_q">Can anyone else access my files?</span>
+          Can anyone else access my files?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq1_a">
+        <div class="faq-a">
           No — nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq2_q">Which browsers are supported?</span>
+          Which browsers are supported?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq2_a">
+        <div class="faq-a">
           Any modern Chromium-based browser (Chrome 90+, Edge 90+, Brave) or Firefox 90+ works well. Safari 16+ on macOS and iOS is also supported for most tools. For the <strong>Compress</strong> tool, which uses a Ghostscript WebAssembly engine, a recent Chromium browser gives the best results. If Ghostscript fails to load, the tool automatically falls back to a lighter pdf-lib compression.
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq3_q">Are there file size limits?</span>
+          Are there file size limits?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq3_a">
+        <div class="faq-a">
           There are no server-imposed limits because everything runs locally. Practical limits depend on your device's RAM. Files up to ~150 MB are handled without issues on most modern computers. Very large files (scanned plans at 300 dpi, for example) may be slow on low-memory devices. If a tool runs out of memory the browser will show an error message — you can try reducing the file first with the <strong>Compress</strong> tool.
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq4_q">Can I work on multiple tools in sequence without re-uploading?</span>
+          Can I work on multiple tools in sequence without re-uploading?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq4_a">
+        <div class="faq-a">
           Yes, this is the intended workflow. After any operation completes, click <strong>↩ Keep working with this version</strong> to promote the result as the active file. Every subsequent tool will work on that modified version. A green banner at the top of the tool panel tracks your modification history so you always know which version you are working on.
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq5_q">How does the Compress tool work?</span>
+          How does the Compress tool work?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq5_a">
+        <div class="faq-a">
           It uses Ghostscript compiled to WebAssembly, running entirely in your browser. You can choose from four presets — <em>Screen</em> (72 dpi, smallest), <em>eBook</em> (150 dpi), <em>Printer</em> (300 dpi), and <em>Prepress</em> (high quality) — or switch to <strong>Custom</strong> mode to set your own DPI and JPEG quality. The presets map directly to Ghostscript's <code>-dPDFSETTINGS</code> options. If the WASM engine fails to initialise (for example, in some older browsers) the tool falls back to a metadata-strip compression using pdf-lib.
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq6_q">How does the graphic scale bar work? How is the bar length calculated?</span>
+          How does the graphic scale bar work? How is the bar length calculated?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq6_a">
-          You enter the drawing scale (e.g. <code>1:100</code>) and the tool automatically selects a "nice" bar length — a round number of metres or feet that represents roughly 20% of the page width at that scale. For example, on an A1 sheet at 1:100 the bar will be 10 m or 15 m, not 12.37 m. The bar is always drawn in PDF coordinate space with full rotation compensation so it appears correctly even on pages that have a 90°, 180° or 270° rotation flag. You can fine-tune the exact position with the X/Y offset controls (in % of page width/height).<br><br>Five visual styles are available: <em>Classic</em> (alternating filled/empty), <em>Hatch</em> (hatched dark segments), <em>Staggered</em> (bars alternate above/below a centre line), <em>Dots</em> (thin line with dots at each division), and <em>Ticks</em> (thin line with vertical ticks only). Any colour can be applied to all bar elements at once.
+        <div class="faq-a">
+          You enter the drawing scale (e.g. <code>1:100</code>) and the tool automatically selects a "nice" bar length — a round number of metres or feet that represents roughly 20% of the page width at that scale. For example, on an A1 sheet at 1:100 the bar will be 10 m or 15 m, not 12.37 m. The bar is always drawn in PDF coordinate space with full rotation compensation so it appears correctly even on pages that have a 90°, 180° or 270° rotation flag. You can fine-tune the exact position with the X/Y offset controls (in % of page width/height).
+          <br><br>
+          Five visual styles are available: <em>Classic</em> (alternating filled/empty), <em>Hatch</em> (hatched dark segments), <em>Staggered</em> (bars alternate above/below a centre line), <em>Dots</em> (thin line with dots at each division), and <em>Ticks</em> (thin line with vertical ticks only). Any colour can be applied to all bar elements at once.
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq7_q">What is the Title Block (Viñeta) tool?</span>
+          What is the Title Block (Viñeta) tool?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq7_a">
+        <div class="faq-a">
           It adds an architectural title block to the bottom-right corner of your pages. The block width scales with the ISO paper format (A4 → 36 mm, A0 → 77 mm) and the height adjusts dynamically to fit all content without overflow. Fields include Project name, Site address, Drawing content (multi-line), Plan type and number, Scale, Date, Client signature, Designer signature, a north arrow (rotatable by degree input), and Project No. All text is automatically uppercased. Long field values wrap to multiple lines, and names in the signature area shrink automatically to fit their column.
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq8_q">What is the difference between Patch/Redact modes?</span>
+          What is the difference between Patch/Redact modes?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq8_a">
-          <strong>White layer</strong> draws a filled white polygon directly on the page content stream. The original content is covered visually but remains in the file — it can potentially be recovered by someone with the right tools. Use this when you want a reversible, lightweight cover (e.g. to overwrite before printing).<br><br><strong>Flatten page</strong> rasterizes the entire page to a bitmap at the chosen DPI and reconstructs it as a single image, permanently destroying all underlying vector content and text within the patch. This is the correct choice when you need to irreversibly redact sensitive information before sharing a file.
+        <div class="faq-a">
+          <strong>White layer</strong> draws a filled white polygon directly on the page content stream. The original content is covered visually but remains in the file — it can potentially be recovered by someone with the right tools. Use this when you want a reversible, lightweight cover (e.g. to overwrite before printing).<br><br>
+          <strong>Flatten page</strong> rasterizes the entire page to a bitmap at the chosen DPI and reconstructs it as a single image, permanently destroying all underlying vector content and text within the patch. This is the correct choice when you need to irreversibly redact sensitive information before sharing a file.
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq9_q">Can I reorder pages and then split the result?</span>
+          Can I reorder pages and then split the result?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq9_a">
+        <div class="faq-a">
           Yes. Use <strong>Reorder &amp; Remove Pages</strong> to drag pages into the order you want and remove any you don't need, then click <strong>↩ Keep working with this version</strong>. After that, open the <strong>Split PDF</strong> tool — it will show the reordered pages and let you click the gaps where you want to split.
         </div>
       </div>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq10_q">Is this tool free? How is it funded?</span>
+          Is this tool free? How is it funded?
           <span class="faq-arrow">▼</span>
         </button>
-        <div class="faq-a" data-i18n-html="faq10_a">
+        <div class="faq-a">
           All tools are free with no account required and no file limits. Scalebar PDF Tools is the only browser-based suite specifically built for architects — combining general PDF utilities with tools unique to architectural practice, such as metric and imperial graphic scale bars with multiple styles, ISO-format title blocks with north arrows and signature fields, and a coordinate-aware patch/redact tool that handles rotated drawing sheets correctly. The site is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served exclusively to technical and design audiences (no tracking pixels, no retargeting). If you find the tools useful, you can also leave a one-time tip via the support button. Neither is required to use any feature.
         </div>
       </div>
@@ -565,12 +696,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
 <div id="view-tool" class="view">
-  <div style="max-width:860px; margin:0 auto; padding:32px 20px;">
-    <button id="back-btn" onclick="window.location.href='index.html'">← Home</button>
+  <div>
 
     <div id="working-banner">
       <span>✓</span>
-      <span id="working-banner-text">Working on modified file</span>
+      <span id="working-banner-text" data-i18n="banner_working">Working on modified file</span>
     </div>
 
     <!-- ── 1. COMPRESS (Ghostscript-WASM) ── -->
@@ -666,7 +796,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
     <!-- ── 3. WATERMARK TEXT ── -->
-    <div class="tool-panel" id="panel-wm-text">
+    <div class="tool-panel" id="panel-watermark-text">
       <div class="panel-box">
         <h2>Text watermark</h2>
         <label>Watermark text:</label>
@@ -702,17 +832,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </select>
           </div>
         </div>
-        <div>
-          <button class="btn btn-primary" id="wt-btn">Apply</button>
-          <button class="btn btn-dl" id="wt-dl" disabled>⬇ Download PDF</button>
-          <button class="btn btn-apply" id="wt-apply" disabled>↩ Keep working with this version</button>
+        <div style="margin-top:10px;">
+          <button class="btn btn-primary" id="wt-btn">Apply &amp; download ZIP</button>
         </div>
         <div class="status" id="wt-status"></div>
       </div>
     </div>
 
     <!-- ── 4. WATERMARK LOGO ── -->
-    <div class="tool-panel" id="panel-wm-logo">
+    <div class="tool-panel" id="panel-watermark-logo">
       <div class="panel-box">
         <h2>Logo watermark</h2>
         <p style="font-size:0.82rem; color:var(--mid); margin-bottom:14px;">
@@ -761,9 +889,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
         <div>
-          <button class="btn btn-primary" id="wl-btn">Apply logo</button>
-          <button class="btn btn-dl" id="wl-dl" disabled>⬇ Download PDF</button>
-          <button class="btn btn-apply" id="wl-apply" disabled>↩ Keep working with this version</button>
+          <button class="btn btn-primary" id="wl-btn">Apply logo &amp; download ZIP</button>
         </div>
         <div class="status" id="wl-status"></div>
       </div>
@@ -814,21 +940,67 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
 
-    <!-- ── 6. REORDER & REMOVE ── -->
-    <div class="tool-panel" id="panel-reorder">
+    <!-- ROTATE PAGES PANEL -->
+    <div class="tool-panel" id="panel-rotate-pages">
       <div class="panel-box">
-        <h2>Reorder & remove pages</h2>
-        <p style="font-size:0.82rem; color:var(--mid); margin-bottom:10px;">
-          Drag thumbnails to reorder. Check the box on any page to mark it for removal.
-        </p>
-        <div>
-          <button class="btn" id="ro-render-btn">Load thumbnails</button>
-          <button class="btn btn-primary" id="ro-btn" disabled>Apply changes</button>
-          <button class="btn btn-dl" id="ro-dl" disabled>⬇ Download PDF</button>
-          <button class="btn btn-apply" id="ro-apply" disabled>↩ Keep working with this version</button>
+      <div id="tool-choose-wrap" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <button type="button" id="tool-choose-btn"
+          onclick="document.getElementById('tool-choose-file').click()"
+          style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
+          <span data-i18n="btn_choose_pdf">Choose PDF</span>
+        </button>
+        <input type="file" id="tool-choose-file" accept="application/pdf" style="display:none;">
+        <span id="tool-choose-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
+      </div>
+        <h2 data-i18n="rp_h2">Rotate PDF pages</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:16px;" data-i18n="rp_desc">Rotate all pages or a range — 90°, 180° or 270°. Applied as a native PDF transform, not a rasterization.</p>
+        <div class="row">
+          <div>
+            <label data-i18n="rp_label_angle">Rotation:</label>
+            <select id="rp-angle">
+              <option value="90"  data-i18n="rp_90cw">90° clockwise</option>
+              <option value="270" data-i18n="rp_90ccw">90° counter-clockwise</option>
+              <option value="180" data-i18n="rp_180">180°</option>
+            </select>
+          </div>
+          <div>
+            <label data-i18n="rp_label_pages">Apply to:</label>
+            <select id="rp-pages">
+              <option value="all"   data-i18n="rp_pages_all">All pages</option>
+              <option value="odd"   data-i18n="rp_pages_odd">Odd pages only</option>
+              <option value="even"  data-i18n="rp_pages_even">Even pages only</option>
+              <option value="range" data-i18n="rp_pages_range">Page range</option>
+            </select>
+          </div>
         </div>
-        <div class="status" id="ro-status"></div>
-        <div id="reorder-grid"></div>
+        <div id="rp-range-wrap" style="display:none;" class="row">
+          <div><label data-i18n="rp_label_from">From page:</label><input type="number" id="rp-from" value="1" min="1"></div>
+          <div><label data-i18n="rp_label_to">To page:</label><input type="number" id="rp-to" value="1" min="1"></div>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" id="rp-btn" data-i18n="rp_btn">Rotate pages</button>
+          <button class="btn btn-dl" id="rp-dl" disabled>⬇ <span data-i18n="btn_dl_pdf">Download PDF</span></button>
+          <button class="btn btn-apply" id="rp-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
+        </div>
+        <div class="status" id="rp-status"></div>
+        <div id="donation-banner">
+          <div id="donation-heart-stage"><span id="donation-heart">&#9829;</span></div>
+          <div id="donation-content">
+            <p style="font-size:0.82rem;font-weight:600;margin:0 0 5px;color:var(--ink);" data-i18n="donation_title">File ready — tools like this take time to build.</p>
+            <p style="font-size:0.78rem;color:var(--mid);margin:0 0 12px;line-height:1.6;" data-i18n="donation_desc">If Scalebar PDF Tools saved you some work today, a small tip goes a long way.</p>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <a id="donation-kofi-btn" href="https://ko-fi.com/scalebarpdftools" target="_blank">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682-.028-1.682-.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.015-2.059 2.015z"/></svg>
+                <span data-i18n="donation_btn">Support on Ko-fi</span>
+              </a>
+              <button id="donation-dismiss" data-i18n="donation_dismiss">no thanks</button>
+            </div>
+          </div>
+        </div>
+        <div class="tp-faq"><div class="tp-faq-item">
+          <button class="tp-faq-q" onclick="toggleTpFaq(this)"><span data-i18n="faq_free_q"></span><span class="faq-arrow">▼</span></button>
+          <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
+        </div></div>
       </div>
     </div>
 
@@ -1461,6 +1633,245 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
 
+    <!-- ── 13. PAGE GRID ── -->
+    <div class="tool-panel" id="panel-grid">
+      <div class="panel-box">
+        <h2>Page grid</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Adds a reference grid to your drawing. In <strong>scale spacing</strong> mode,
+          specify the drawing scale and the real-world distance between grid lines — the paper
+          spacing is calculated automatically so the grid represents real dimensions correctly.
+          When drawn <em>below</em> existing content the grid is inserted at the start of the
+          page content stream, appearing under all CAD lines and fills.
+        </p>
+
+        <!-- Mode toggle -->
+        <div style="margin-bottom:14px;">
+          <label style="font-size:0.82rem;font-weight:600;display:block;margin-bottom:8px;">Grid spacing mode:</label>
+          <div style="display:flex;gap:0;border:1px solid #ccc;border-radius:var(--radius);overflow:hidden;width:fit-content;">
+            <button type="button" id="grid-mode-spacing" onclick="gridSetMode('spacing')"
+              style="padding:7px 18px;font-size:0.82rem;font-family:inherit;border:none;cursor:pointer;background:#1a1a1a;color:#fff;font-weight:600;">
+              Fixed spacing
+            </button>
+            <button type="button" id="grid-mode-divisions" onclick="gridSetMode('divisions')"
+              style="padding:7px 18px;font-size:0.82rem;font-family:inherit;border:none;cursor:pointer;background:#f8f8f6;color:#555;">
+              Divisions
+            </button>
+          </div>
+        </div>
+
+        <!-- Fixed spacing options -->
+        <div id="grid-spacing-opts">
+          <div class="row">
+            <div>
+              <label>Drawing scale:</label>
+              <select id="grid-scale" onchange="gridUpdateIntervals()">
+                <option value="20">1 : 20</option>
+                <option value="50">1 : 50</option>
+                <option value="100" selected>1 : 100</option>
+                <option value="200">1 : 200</option>
+                <option value="500">1 : 500</option>
+                <option value="1000">1 : 1000</option>
+              </select>
+            </div>
+            <div>
+              <label>Grid interval <span style="color:var(--mid);font-weight:normal;">(real-world distance)</span>:</label>
+              <select id="grid-interval">
+                <!-- populated by gridUpdateIntervals() -->
+              </select>
+            </div>
+          </div>
+          <div class="row" style="margin-top:4px;">
+            <div>
+              <label>Page border (mm) <span style="color:var(--mid);font-weight:normal;">grid starts here</span>:</label>
+              <input type="number" id="grid-border" value="10" min="0" max="100" step="1"
+                style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
+            </div>
+            <div>
+              <label>Paper spacing <span style="color:var(--mid);font-weight:normal;">(calculated)</span>:</label>
+              <input type="text" id="grid-computed-mm" readonly
+                style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;background:#f0f0ec;color:var(--mid);">
+            </div>
+          </div>
+        </div>
+
+        <!-- Division options -->
+        <div id="grid-div-opts" class="row" style="display:none;">
+          <div>
+            <label>Horizontal divisions <span style="color:var(--mid);font-weight:normal;">(2–100)</span>:</label>
+            <input type="number" id="grid-div-h" value="10" min="2" max="100" step="1"
+              style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
+          </div>
+          <div>
+            <label>Vertical divisions <span style="color:var(--mid);font-weight:normal;">(2–100)</span>:</label>
+            <input type="number" id="grid-div-v" value="10" min="2" max="100" step="1"
+              style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:4px;">
+          <div>
+            <label>Line colour:</label>
+            <input type="color" id="grid-color" value="#aaaaaa"
+              style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
+          </div>
+          <div>
+            <label>Line weight (pt):</label>
+            <input type="number" id="grid-lw" value="0.15" min="0.05" max="2" step="0.05"
+              style="width:100%;padding:5px 8px;border:1px solid #ccc;border-radius:var(--radius);font-size:0.85rem;">
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:4px;">
+          <div>
+            <label>Position:</label>
+            <select id="grid-position">
+              <option value="below">Below existing content</option>
+              <option value="above">Above existing content</option>
+            </select>
+          </div>
+          <div>
+            <label>Apply to:</label>
+            <select id="grid-pages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" id="grid-btn">Add grid</button>
+          <button class="btn btn-dl"    id="grid-dl"    disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="grid-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="grid-status"></div>
+      </div>
+    </div>
+
+
+    <!-- ── 14. PAGE NUMBERING ── -->
+    <div class="tool-panel" id="panel-plan-numbering">
+      <div class="panel-box">
+        <h2>Plan numbering</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Stamps a sequential plan number on each PDF. Works in batch: upload multiple PDFs and each receives its own number. Downloads as a ZIP.
+        </p>
+        <div class="row">
+          <div>
+            <label>Prefix:</label>
+            <input type="text" id="pn-prefix" value="A-" placeholder="e.g. A-, ARCH-, E-">
+          </div>
+          <div>
+            <label>Starting number:</label>
+            <input type="number" id="pn-start" value="1" min="0" max="9999" step="1">
+          </div>
+          <div>
+            <label>Padding digits:</label>
+            <input type="number" id="pn-pad" value="2" min="1" max="4" step="1" title="01, 001, 0001…">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Position:</label>
+            <select id="pn-pos">
+              <option value="br">Bottom right</option>
+              <option value="bl">Bottom left</option>
+              <option value="tr">Top right</option>
+              <option value="tl">Top left</option>
+            </select>
+          </div>
+          <div>
+            <label>Font size (pt):</label>
+            <input type="number" id="pn-size" value="18" min="6" max="72">
+          </div>
+          <div>
+            <label>Color:</label>
+            <input type="color" id="pn-color" value="#1a1a1a"
+              style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Apply to:</label>
+            <select id="pn-pages">
+              <option value="all">All pages of each PDF</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" id="pn-btn">Number plans &amp; download ZIP</button>
+        </div>
+        <div class="status" id="pn-status"></div>
+      </div>
+    </div>
+
+    <!-- ── 15. REVISION CLOUD ── -->
+    <div class="tool-panel" id="panel-revision-cloud">
+      <div class="panel-box">
+        <h2>Revision cloud</h2>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
+          Stamps a revision cloud with a numbered triangle marker on your PDF pages.
+          The cloud is placed at the chosen corner. Adjust size to cover the desired area.
+        </p>
+        <div class="row">
+          <div>
+            <label>Revision number / letter:</label>
+            <input type="text" id="rc-rev" value="1" placeholder="e.g. 1, A, REV-2" style="font-weight:600;">
+          </div>
+          <div>
+            <label>Corner:</label>
+            <select id="rc-corner">
+              <option value="bl">Bottom left</option>
+              <option value="br">Bottom right</option>
+              <option value="tl">Top left</option>
+              <option value="tr">Top right</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Cloud width (mm):</label>
+            <input type="number" id="rc-w" value="80" min="20" max="400" step="5">
+          </div>
+          <div>
+            <label>Cloud height (mm):</label>
+            <input type="number" id="rc-h" value="50" min="10" max="300" step="5">
+          </div>
+          <div>
+            <label>Arc radius (mm):</label>
+            <input type="number" id="rc-arc" value="4" min="2" max="12" step="1"
+              title="Size of each bump in the cloud outline">
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Margin from corner (mm):</label>
+            <input type="number" id="rc-margin" value="10" min="0" max="80" step="1">
+          </div>
+          <div>
+            <label>Line colour:</label>
+            <input type="color" id="rc-color" value="#cc0000"
+              style="height:34px;width:60px;padding:2px 4px;border:1px solid #ccc;border-radius:var(--radius);cursor:pointer;">
+          </div>
+          <div>
+            <label>Apply to:</label>
+            <select id="rc-pages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <button class="btn btn-primary" id="rc-btn">Add revision cloud</button>
+          <button class="btn btn-dl"    id="rc-dl"    disabled>⬇ Download PDF</button>
+          <button class="btn btn-apply" id="rc-apply" disabled>↩ Keep working with this version</button>
+        </div>
+        <div class="status" id="rc-status"></div>
+      </div>
+    </div>
+
     <!-- ── OTHER TOOLS STRIP ── -->
     <div id="other-tools-section">
       <h3>OTHER TOOLS — same file</h3>
@@ -1508,115 +1919,27 @@ pdfjsScript.onload = () => {
 
 // ─── TOOL DEFINITIONS ────────────────────────────────────────────────────
 const TOOLS = [
-  { id:'compress',       icon:'🗜', name:'Compress PDF',          desc:'Ghostscript-powered compression with full control over DPI and quality.' },
-  { id:'scalebar',       icon:`<svg xmlns='http://www.w3.org/2000/svg' width='38' height='20' viewBox='0 0 38 20'>
-  <line x1='4' y1='7' x2='34' y2='7' stroke='currentColor' stroke-width='0.8'/>
-  <rect x='4' y='8' width='7.5' height='5' fill='currentColor'/>
-  <rect x='11.5' y='8' width='7.5' height='5' fill='none' stroke='currentColor' stroke-width='0.8'/>
-  <rect x='19' y='8' width='7.5' height='5' fill='currentColor'/>
-  <rect x='26.5' y='8' width='7.5' height='5' fill='none' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='4' y1='7' x2='4' y2='5' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='19' y1='7' x2='19' y2='5' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='34' y1='7' x2='34' y2='5' stroke='currentColor' stroke-width='0.8'/>
-  <text x='4' y='4' font-size='3.8' fill='currentColor' text-anchor='middle' font-family='monospace'>0</text>
-  <text x='19' y='4' font-size='3.8' fill='currentColor' text-anchor='middle' font-family='monospace'>10</text>
-  <text x='34' y='4' font-size='3.8' fill='currentColor' text-anchor='middle' font-family='monospace'>20</text>
-  <text x='34' y='18' font-size='3.2' fill='currentColor' text-anchor='end' font-family='monospace'>m</text>
-</svg>`, name:'Scale bar (m)',          desc:'Add a metric graphic scale bar auto-sized by paper format and drawing scale.' },
-  { id:'scalebar-ft',    icon:`<svg xmlns='http://www.w3.org/2000/svg' width='38' height='20' viewBox='0 0 38 20'>
-  <line x1='4' y1='7' x2='34' y2='7' stroke='currentColor' stroke-width='0.8'/>
-  <rect x='4' y='8' width='7.5' height='5' fill='currentColor'/>
-  <rect x='11.5' y='8' width='7.5' height='5' fill='none' stroke='currentColor' stroke-width='0.8'/>
-  <rect x='19' y='8' width='7.5' height='5' fill='currentColor'/>
-  <rect x='26.5' y='8' width='7.5' height='5' fill='none' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='4' y1='7' x2='4' y2='5' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='19' y1='7' x2='19' y2='5' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='34' y1='7' x2='34' y2='5' stroke='currentColor' stroke-width='0.8'/>
-  <text x='4' y='4' font-size='3.8' fill='currentColor' text-anchor='middle' font-family='monospace'>0</text>
-  <text x='19' y='4' font-size='3.8' fill='currentColor' text-anchor='middle' font-family='monospace'>50</text>
-  <text x='34' y='4' font-size='3.8' fill='currentColor' text-anchor='middle' font-family='monospace'>100</text>
-  <text x='34' y='18' font-size='3.2' fill='currentColor' text-anchor='end' font-family='monospace'>ft</text>
-</svg>`, name:'Scale bar (ft)',         desc:'Add an imperial scale bar in feet, auto-sized by paper format and scale.' },
-  { id:'vineta',         icon:`<svg xmlns='http://www.w3.org/2000/svg' width='28' height='24' viewBox='0 0 28 24'>
-  <rect x='1' y='1' width='26' height='22' fill='none' stroke='currentColor' stroke-width='1.2'/>
-  <line x1='1' y1='7' x2='27' y2='7' stroke='currentColor' stroke-width='0.9'/>
-  <line x1='1' y1='13' x2='27' y2='13' stroke='currentColor' stroke-width='0.9'/>
-  <line x1='1' y1='17' x2='27' y2='17' stroke='currentColor' stroke-width='0.9'/>
-  <line x1='10' y1='13' x2='10' y2='23' stroke='currentColor' stroke-width='0.9'/>
-  <line x1='19' y1='13' x2='19' y2='23' stroke='currentColor' stroke-width='0.9'/>
-  <line x1='4' y1='3.5' x2='18' y2='3.5' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
-  <line x1='4' y1='9.5' x2='14' y2='9.5' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
-  <line x1='4' y1='11' x2='10' y2='11' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
-</svg>`, name:'Title block',            desc:'Architectural title block with project info, plan number, scale and signatures.' },
-  { id:'patch',          icon:`<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'>
-  <rect x='2' y='2' width='22' height='22' rx='4' fill='none' stroke='currentColor' stroke-width='1.2'/>
-  <rect x='8' y='8' width='10' height='10' rx='2' fill='none' stroke='currentColor' stroke-width='1'/>
-  <circle cx='13' cy='13' r='1.5' fill='currentColor'/>
-  <line x1='2' y1='9' x2='8' y2='9' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='2' y1='17' x2='8' y2='17' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='18' y1='9' x2='24' y2='9' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='18' y1='17' x2='24' y2='17' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='9' y1='2' x2='9' y2='8' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='17' y1='2' x2='17' y2='8' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='9' y1='18' x2='9' y2='24' stroke='currentColor' stroke-width='0.8'/>
-  <line x1='17' y1='18' x2='17' y2='24' stroke='currentColor' stroke-width='0.8'/>
-</svg>`, name:'Patch / Redact',         desc:'Draw a white polygon to cover content — with optional permanent flattening.' },
-  { id:'watermark-text', icon:'✒', name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
-  { id:'watermark-logo', icon:`<svg xmlns='http://www.w3.org/2000/svg' width='22' height='26' viewBox='0 0 22 26'>
-  <path d='M2 1 L16 1 L20 5 L20 25 L2 25 Z' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
-  <path d='M16 1 L16 5 L20 5' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
-  <rect x='5' y='10' width='12' height='8' rx='2.5' fill='none' stroke='currentColor' stroke-width='1.1'/>
-  <line x1='4' y1='7' x2='14' y2='7' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
-  <line x1='4' y1='21' x2='14' y2='21' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
-</svg>`, name:'Logo watermark',         desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
-  { id:'crop',           icon:`<svg xmlns='http://www.w3.org/2000/svg' width='22' height='26' viewBox='0 0 22 26'>
-  <path d='M2 1 L16 1 L20 5 L20 25 L2 25 Z' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
-  <path d='M16 1 L16 5 L20 5' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
-  <text x='11' y='18' font-size='10' fill='currentColor' text-anchor='middle' font-family='monospace' font-weight='bold'>A4</text>
-</svg>`, name:'Resize to format',       desc:'Scale pages to A0–A4, Letter or Legal with auto or forced orientation.' },
-  { id:'reorder',        icon:'⇅', name:'Reorder & remove',       desc:'Drag pages to rearrange them and remove any you don\'t need.' },
-  { id:'split',          icon:'✂', name:'Split PDF',              desc:'Select break points between pages and export each section separately.' },
-  { id:'merge',          icon:'⊕', name:'Merge PDFs',             desc:'Upload multiple PDFs, rearrange them and combine into one document.' },
-  { id:'convert',        icon:'🖼', name:'PDF to images',          desc:'Export each page as PNG or JPG at the resolution you need.' },
-  { id:'img2pdf',        icon:'🗒', name:'Images to PDF',          desc:'Convert JPG, PNG or WebP images into a single PDF document.' },
-  { id:'grid',           icon:'⊞', name:'Page grid',              desc:'Add a scale-aware reference grid to PDF pages for architectural drawings.' },
-  { id:'plan-numbering', icon:`<svg xmlns='http://www.w3.org/2000/svg' width='22' height='26' viewBox='0 0 22 26'>
-  <path d='M2 1 L15 1 L21 7 L21 25 L2 25 Z' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
-  <path d='M15 1 L15 7 L21 7' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
-  <path d='M15 1 L21 7' fill='var(--bg)' stroke='none'/>
-  <text x='16' y='23' font-size='5.5' fill='currentColor' text-anchor='middle' font-family='monospace' font-weight='bold'>01</text>
-</svg>`, name:'Plan numbering',         desc:'Stamp sequential plan numbers on multiple PDFs in one batch operation.' },
-  { id:'revision-cloud', icon:'☁', name:'Revision cloud',         desc:'Add an architectural revision cloud with numbered corner triangle marker.' },
-  { id:'pdfa',           icon:`<svg xmlns='http://www.w3.org/2000/svg' width='30' height='24' viewBox='0 0 30 24'>
-  <path d='M2 6 L2 21 L28 21 L28 6 L13 6 L11 3 L2 3 Z' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
-  <path d='M2 6 L28 6' stroke='currentColor' stroke-width='1.2'/>
-  <text x='15' y='16' font-size='5' fill='currentColor' text-anchor='middle' font-family='monospace' font-weight='bold'>A</text>
-</svg>`, name:'PDF to PDF/A',            desc:'Convert to the ISO archiving standard — fonts and color profiles fully embedded.' },
-  { id:'ocr',            icon:`<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'>
-  <circle cx='11' cy='11' r='8' fill='none' stroke='currentColor' stroke-width='1.4'/>
-  <circle cx='11' cy='11' r='5.5' fill='none' stroke='currentColor' stroke-width='0.5' opacity='0.3'/>
-  <line x1='7' y1='9' x2='15' y2='9' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
-  <line x1='7' y1='11' x2='15' y2='11' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
-  <line x1='7' y1='13' x2='14' y2='13' stroke='currentColor' stroke-width='0.7' opacity='0.5'/>
-  <line x1='17' y1='17' x2='24' y2='24' stroke='currentColor' stroke-width='2.2' stroke-linecap='round'/>
-</svg>`, name:'Scanned PDF to text',      desc:'Add a searchable text layer to scanned PDFs using OCR. Select language.' },
-  { id:'text-note',      icon:`<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'>
-  <path d='M2 1 L16 1 L20 5 L20 22 L2 22 Z' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
-  <path d='M16 1 L16 5 L20 5' fill='none' stroke='currentColor' stroke-width='1.2' stroke-linejoin='round'/>
-  <line x1='5' y1='9' x2='14' y2='9' stroke='currentColor' stroke-width='0.8' opacity='0.6'/>
-  <line x1='5' y1='12' x2='14' y2='12' stroke='currentColor' stroke-width='0.8' opacity='0.6'/>
-  <line x1='5' y1='15' x2='10' y2='15' stroke='currentColor' stroke-width='0.8' opacity='0.6'/>
-  <g transform='rotate(35 19 19)'>
-    <rect x='17' y='14' width='4' height='9' rx='0.8' fill='none' stroke='currentColor' stroke-width='1'/>
-    <polygon points='17,23 21,23 19,26' fill='currentColor'/>
-    <line x1='17' y1='17' x2='21' y2='17' stroke='currentColor' stroke-width='0.7'/>
-  </g>
-</svg>`, name:'Add text notes',           desc:'Click to place text annotations on any page. Detects PDF vector colors automatically.' },
-  { id:'linewidth',      icon:'─', name:'Line thickness by range',  desc:'Scan and replace line widths in vectorial PDFs by value range. Shows histogram.' },
-  { id:'page-numbers',   icon:'#', name:'Add page numbers',          desc:'Add sequential page numbers to any PDF. Choose format, position, font, colour and starting number.' },
-  { id:'rotate-pages',   icon:'↻', name:'Rotate pages',              desc:'Rotate all PDF pages — 90°, 180° or 270°. Apply to all pages or a specific range.' },
-  { id:'extract-pages',  icon:'⎘', name:'Extract pages',             desc:'Extract specific pages by number or range. Download as a single PDF or one file per page (ZIP).' },
-  { id:'add-image',      icon:`<svg xmlns='http://www.w3.org/2000/svg' width='26' height='26' viewBox='0 0 26 26'><rect x='2' y='1' width='16' height='21' rx='2' fill='none' stroke='currentColor' stroke-width='1.5'/><rect x='10' y='7' width='13' height='11' rx='1.5' fill='white' stroke='currentColor' stroke-width='1.3'/><text x='16.5' y='14.8' font-size='4.5' font-family='monospace' font-weight='bold' fill='currentColor' text-anchor='middle'>PNG</text></svg>`, name:'Add image to PDF', desc:'Place a PNG or JPG onto PDF pages. Preview live, drag to position, set size and rotation.' },
+  { id:'compress',        file:'compress.html',        icon:'🗜', name:'Compress PDF',           desc:'Ghostscript-powered compression with full control over DPI and quality.' },
+  { id:'vineta',          file:'vineta.html',           icon:'📋', name:'Title block',             desc:'Architectural title block with project name, plan number, scale, signatures and north arrow.' },
+  { id:'patch',           file:'patch.html',            icon:'⬜', name:'Patch / Redact',          desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
+  { id:'scalebar',        file:'scalebar.html',         icon:'📏', name:'Scale bar (m)',            desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
+  { id:'scalebar-ft',     file:'scalebar_ft.html',      icon:'📐', name:'Scale bar (ft)',           desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
+  { id:'watermark-logo',  file:'watermark_logo.html',   icon:'🔖', name:'Logo watermark',          desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
+  { id:'watermark-text',  file:'watermark_text.html',   icon:'✒',  name:'Text watermark',          desc:'Add semi-transparent text across pages — customizable size, color and position.' },
+  { id:'crop',            file:'crop.html',             icon:'📋', name:'Resize to format',        desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
+  { id:'reorder',         file:'reorder.html',          icon:'⇅',  name:'Reorder & remove pages',  desc:'Drag pages to rearrange them and remove any you don\'t need.' },
+  { id:'split',           file:'split.html',            icon:'✂',  name:'Split PDF',               desc:'Select break points between pages and export each section as a separate PDF.' },
+  { id:'merge',           file:'merge.html',            icon:'⊕',  name:'Merge PDFs',              desc:'Upload multiple PDFs, rearrange them and combine into one.', noFile: true },
+  { id:'convert',         file:'convert.html',          icon:'🖼', name:'Convert to images',       desc:'Export each page as PNG or JPG at the resolution you need.' },
+  { id:'img2pdf',         file:'imagetopdf.html',       icon:'🗒', name:'Image to PDF',            desc:'Convert one or more images (JPG, PNG) into a PDF document.', noFile: true },
+  { id:'plan-numbering',  file:'plan_numbering.html',   icon:'🔢', name:'Plan numbering',          desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
+  { id:'revision-cloud',  file:'revision_cloud.html',   icon:'☁',  name:'Revision cloud',          desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
+  { id:'grid',            file:'grid.html',             icon:'#',  name:'Page grid',               desc:'Add a reference grid to PDF pages — specify spacing or number of divisions.' },
+  { id:'ocr',             file:'ocr.html',              icon:'🔍', name:'OCR — searchable PDF',    desc:'Run optical character recognition to make scanned PDFs searchable and selectable.' },
+  { id:'pdfa',            file:'pdfa.html',             icon:'📄', name:'Convert to PDF/A',        desc:'Convert any PDF to PDF/A-1b for long-term archiving and compliance.' },
+  { id:'linewidth',       file:'linewidth.html',        icon:'✏',  name:'Line weight',             desc:'Globally scale all line widths in a PDF — thicker or thinner in one step.' },
+  { id:'rotate-pages',    file:'rotate_pages.html',     icon:'↻',  name:'Rotate pages', desc:'Rotate PDF pages 90°, 180° or 270°. Apply to all or a range.' },
+  { id:'text-note',       file:'text_note.html',        icon:'💬', name:'Text note',               desc:'Add a plain-text annotation box to any page — font, size, color and position.' },
 ];
 
 // ─── STATE ───────────────────────────────────────────────────────────────
@@ -1626,232 +1949,24 @@ let activeToolId = null;
 let modificationHistory = [];
 let gsInstance = null; // Ghostscript WASM singleton
 
-
-// ─── I18N ─────────────────────────────────────────────────────────────────
-const TRANSLATIONS = {
-  en: {
-    tagline:       'Scalebar PDF Tools — 100% free',
-    hero_desc:     'For architects and professionals who need to edit files efficiently and confidentially. Compress your PDF, add graphic scale bars and architectural title blocks, resize and number pages, add watermarks, find text with OCR and more.',
-    privacy_badge: 'No upload · No account · No file size limit',
-    choose_tool:   'Choose a tool:',
-    more_tools:    'More tools',
-    less_tools:    'Less tools',
-    faq_title:     'Frequently asked questions',
-    // Tool names
-    'compress':       'Compress PDF',
-    'scalebar':       'Scale bar (m)',
-    'scalebar-ft':    'Scale bar (ft)',
-    'vineta':         'Title block',
-    'patch':          'Patch / Redact',
-    'watermark-text': 'Text watermark',
-    'watermark-logo': 'Logo watermark',
-    'crop':           'Resize to format',
-    'reorder':        'Reorder & remove',
-    'split':          'Split PDF',
-    'merge':          'Merge PDFs',
-    'convert':        'PDF to images',
-    'img2pdf':        'Images to PDF',
-    'grid':           'Page grid',
-    'plan-numbering': 'Plan numbering',
-    'revision-cloud': 'Revision cloud',
-    'pdfa': 'PDF to PDF/A',
-    'ocr': 'Scanned PDF to text',
-    // Tool descriptions
-    'd_compress':       'Ghostscript-powered compression with full control over DPI and quality.',
-    'd_scalebar':       'Add a metric graphic scale bar auto-sized by paper format and drawing scale.',
-    'd_scalebar-ft':    'Add an imperial scale bar in feet, auto-sized by paper format and scale.',
-    'd_vineta':         'Architectural title block with project info, plan number, scale and signatures.',
-    'd_patch':          'Draw a white polygon to cover content — with optional permanent flattening.',
-    'd_watermark-text': 'Add semi-transparent text across pages — customizable size, color and position.',
-    'd_watermark-logo': 'Embed your studio logo in grayscale with adjustable opacity and rotation.',
-    'd_crop':           'Scale pages to A0–A4, Letter or Legal with auto or forced orientation.',
-    'd_reorder':        'Drag pages to rearrange them and remove any you don\'t need.',
-    'd_split':          'Select break points between pages and export each section separately.',
-    'd_merge':          'Upload multiple PDFs, rearrange them and combine into one document.',
-    'd_convert':        'Export each page as PNG or JPG at the resolution you need.',
-    'd_img2pdf':        'Convert JPG, PNG or WebP images into a single PDF document.',
-    'd_grid':           'Add a scale-aware reference grid to PDF pages for architectural drawings.',
-    'd_plan-numbering': 'Stamp sequential plan numbers on multiple PDFs in one batch operation.',
-    'd_revision-cloud': 'Add an architectural revision cloud with numbered corner triangle marker.',
-    'd_pdfa': 'Convert to the ISO archiving standard — fonts and color profiles fully embedded.',
-    'd_ocr': 'Add a searchable text layer to scanned PDFs using OCR. Select language.',
-    'text-note': 'Add text notes',
-    'd_text-note': 'Click to place text annotations on any page. Detects PDF vector colors automatically.',
-    'linewidth': 'Line thickness by range',
-    'page-numbers': 'Add page numbers',
-    'd_page-numbers': 'Add sequential page numbers to any PDF. Choose format, position, font, colour and starting number.',
-    'rotate-pages': 'Rotate pages',
-    'd_rotate-pages': 'Rotate all PDF pages 90°, 180° or 270°. Apply to all or a range.',
-    'extract-pages': 'Extract pages',
-    'd_extract-pages': 'Extract specific pages by number or range. Single PDF or one file per page.',
-    'add-image': 'Add image to PDF',
-    'd_add-image': 'Place a PNG or JPG onto PDF pages. Preview position live, drag to reposition.',
-    'd_linewidth': 'Scan and replace line widths in vectorial PDFs by value range. Shows histogram.',
-    // Guides section
-    guides_title: 'Guides',
-    g1_cat: 'Scale bar',          g1_title: 'How to add a scale bar to a PDF',                               g1_desc: 'Automatically sized for your drawing scale and paper format. No CAD software required.',
-    g2_cat: 'Logo watermark',     g2_title: 'How to add your logo as a watermark to all your plans',          g2_desc: 'Stamp your studio logo across an entire set of PDFs in one step.',
-    g3_cat: 'Compression',        g3_title: 'The best way to compress a PDF',                                 g3_desc: 'What actually reduces file size, when each method is appropriate, and why.',
-    g4_cat: 'Title block',        g4_title: 'How to add a custom architectural title block to your PDF plans',g4_desc: 'Project name, scale, signatures, north arrow and plan ID — generated directly in your browser.',
-    // FAQ questions
-    faq1_q: 'Can anyone else access my files?',
-    faq2_q: 'Which browsers are supported?',
-    faq3_q: 'Are there file size limits?',
-    faq4_q: 'Can I work on multiple tools in sequence without re-uploading?',
-    faq5_q: 'How does the Compress tool work?',
-    faq6_q: 'How does the graphic scale bar work? How is the bar length calculated?',
-    faq7_q: 'What is the Title Block (Viñeta) tool?',
-    faq8_q: 'What is the difference between Patch/Redact modes?',
-    faq9_q: 'Can I reorder pages and then split the result?',
-    faq10_q: 'Is this tool free? How is it funded?',
-    // FAQ answers (HTML allowed)
-    faq1_a: 'No — nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.',
-    faq2_a: 'Any modern Chromium-based browser (Chrome 90+, Edge 90+, Brave) or Firefox 90+ works well. Safari 16+ on macOS and iOS is also supported for most tools. For the <strong>Compress</strong> tool, which uses a Ghostscript WebAssembly engine, a recent Chromium browser gives the best results. If Ghostscript fails to load, the tool automatically falls back to a lighter pdf-lib compression.',
-    faq3_a: "There are no server-imposed limits because everything runs locally. Practical limits depend on your device's RAM. Files up to ~150 MB are handled without issues on most modern computers. Very large files (scanned plans at 300 dpi, for example) may be slow on low-memory devices. If a tool runs out of memory the browser will show an error message — you can try reducing the file first with the <strong>Compress</strong> tool.",
-    faq4_a: 'Yes, this is the intended workflow. After any operation completes, click <strong>↩ Keep working with this version</strong> to promote the result as the active file. Every subsequent tool will work on that modified version. A green banner at the top of the tool panel tracks your modification history so you always know which version you are working on.',
-    faq5_a: "It uses Ghostscript compiled to WebAssembly, running entirely in your browser. You can choose from four presets — <em>Screen</em> (72 dpi, smallest), <em>eBook</em> (150 dpi), <em>Printer</em> (300 dpi), and <em>Prepress</em> (high quality) — or switch to <strong>Custom</strong> mode to set your own DPI and JPEG quality. The presets map directly to Ghostscript's <code>-dPDFSETTINGS</code> options. If the WASM engine fails to initialise (for example, in some older browsers) the tool falls back to a metadata-strip compression using pdf-lib.",
-    faq6_a: 'You enter the drawing scale (e.g. <code>1:100</code>) and the tool automatically selects a "nice" bar length — a round number of metres or feet that represents roughly 20% of the page width at that scale. For example, on an A1 sheet at 1:100 the bar will be 10 m or 15 m, not 12.37 m. The bar is always drawn in PDF coordinate space with full rotation compensation so it appears correctly even on pages that have a 90°, 180° or 270° rotation flag.<br><br>Five visual styles are available: <em>Classic</em> (alternating filled/empty), <em>Hatch</em> (hatched dark segments), <em>Staggered</em> (bars alternate above/below a centre line), <em>Dots</em> (thin line with dots at each division), and <em>Ticks</em> (thin line with vertical ticks only). Any colour can be applied to all bar elements at once.',
-    faq7_a: 'It adds an architectural title block to the bottom-right corner of your pages. The block width scales with the ISO paper format (A4 → 36 mm, A0 → 77 mm) and the height adjusts dynamically to fit all content without overflow. Fields include Project name, Site address, Drawing content (multi-line), Plan type and number, Scale, Date, Client signature, Designer signature, a north arrow (rotatable by degree input), and Project No. All text is automatically uppercased.',
-    faq8_a: '<strong>White layer</strong> draws a filled white polygon directly on the page content stream. The original content is covered visually but remains in the file — it can potentially be recovered by someone with the right tools. Use this when you want a reversible, lightweight cover (e.g. to overwrite before printing).<br><br><strong>Flatten page</strong> rasterizes the entire page to a bitmap at the chosen DPI and reconstructs it as a single image, permanently destroying all underlying vector content and text within the patch. This is the correct choice when you need to irreversibly redact sensitive information before sharing a file.',
-    faq9_a: 'Yes. Use <strong>Reorder &amp; Remove Pages</strong> to drag pages into the order you want and remove any you don\'t need, then click <strong>↩ Keep working with this version</strong>. After that, open the <strong>Split PDF</strong> tool — it will show the reordered pages and let you click the gaps where you want to split.',
-    faq10_a: 'All tools are free with no account required and no file limits. Scalebar PDF Tools is the only browser-based suite specifically built for architects — combining general PDF utilities with tools unique to architectural practice, such as metric and imperial graphic scale bars with multiple styles, ISO-format title blocks with north arrows and signature fields, and a coordinate-aware patch/redact tool that handles rotated drawing sheets correctly. The site is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served exclusively to technical and design audiences (no tracking pixels, no retargeting). If you find the tools useful, you can also leave a one-time tip via the support button. Neither is required to use any feature.',
-  },
-  es: {
-    tagline:       'Scalebar — Herramientas de edición PDF 100% gratis',
-    hero_desc:     'Para arquitectos y profesionales que necesitan editar archivos de forma eficiente y confidencial. Comprime tu PDF para que pese menos, añade escalas gráficas y viñetas arquitectónicas, cambia el tamaño de páginas y numéralas, fusiona varios archivos, añade marcas de agua y más.',
-    privacy_badge: 'Sin subir archivos · Sin cuenta · Sin límite de tamaño',
-    choose_tool:   'Elige una herramienta:',
-    more_tools:    'Más herramientas',
-    less_tools:    'Menos herramientas',
-    faq_title:     'Preguntas frecuentes',
-    // Tool names
-    'compress':       'Comprimir PDF',
-    'scalebar':       'Escala gráfica (m)',
-    'scalebar-ft':    'Escala gráfica (ft)',
-    'vineta':         'Viñeta / Carátula',
-    'patch':          'Parche / Censurar',
-    'watermark-text': 'Marca de agua texto',
-    'watermark-logo': 'Marca de agua logo',
-    'crop':           'Cambiar formato',
-    'reorder':        'Reordenar páginas',
-    'split':          'Dividir PDF',
-    'merge':          'Unir PDFs',
-    'convert':        'PDF a imágenes',
-    'img2pdf':        'Imágenes a PDF',
-    'grid':           'Grilla de página',
-    'plan-numbering': 'Numeración de planos',
-    'revision-cloud': 'Nube de revisión',
-    'pdfa': 'PDF a PDF/A',
-    'ocr': 'PDF escaneado a texto',
-    // Tool descriptions
-    'd_compress':       'Compresión con Ghostscript — control total sobre DPI y calidad.',
-    'd_scalebar':       'Añade una escala gráfica métrica auto-dimensionada por formato y escala de dibujo.',
-    'd_scalebar-ft':    'Añade una escala gráfica en pies, auto-dimensionada por formato y escala.',
-    'd_vineta':         'Viñeta arquitectónica con nombre de proyecto, número de plano, escala y firmas.',
-    'd_patch':          'Dibuja un polígono blanco para cubrir contenido — con aplanado permanente opcional.',
-    'd_watermark-text': 'Añade texto semitransparente en páginas — tamaño, color y posición personalizables.',
-    'd_watermark-logo': 'Inserta tu logo de estudio en escala de grises con opacidad y rotación ajustables.',
-    'd_crop':           'Escala páginas a A0–A4, Letter o Legal con orientación automática o forzada.',
-    'd_reorder':        'Arrastra páginas para reorganizarlas y elimina las que no necesites.',
-    'd_split':          'Selecciona puntos de corte entre páginas y exporta cada sección por separado.',
-    'd_merge':          'Sube varios PDFs, reorganízalos y combínalos en un solo documento.',
-    'd_convert':        'Exporta cada página como PNG o JPG con la resolución que necesites.',
-    'd_img2pdf':        'Convierte imágenes JPG, PNG o WebP en un único documento PDF.',
-    'd_grid':           'Añade una grilla de referencia a escala en páginas PDF para planos arquitectónicos.',
-    'd_plan-numbering': 'Estampa números de plano correlativos en varios PDFs en una sola operación.',
-    'd_revision-cloud': 'Añade una nube de revisión arquitectónica con triángulo numerado en esquina.',
-    'd_pdfa': 'Convierte al estándar ISO de archivo — fuentes y perfiles de color completamente incrustados.',
-    'd_ocr': 'Añade una capa de texto buscable a PDFs escaneados mediante OCR. Selecciona el idioma.',
-    'text-note': 'Añadir notas de texto',
-    'd_text-note': 'Haz clic para colocar anotaciones de texto. Detecta automáticamente los colores vectoriales del PDF.',
-    'linewidth': 'Grosor de línea por rango',
-    'page-numbers': 'Numeración de páginas',
-    'd_page-numbers': 'Añade números de página a un PDF. Elige formato, posición, fuente, color y número inicial.',
-    'rotate-pages': 'Rotar páginas',
-    'd_rotate-pages': 'Rota todas las páginas del PDF 90°, 180° o 270°. Aplica a todas o a un rango.',
-    'extract-pages': 'Extraer páginas',
-    'd_extract-pages': 'Extrae páginas específicas por número o rango. Un PDF o un ZIP con un archivo por página.',
-    'add-image': 'Añadir imagen al PDF',
-    'd_add-image': 'Coloca un PNG o JPG en las páginas del PDF. Vista previa en vivo, arrastra para posicionar.',
-    'd_linewidth': 'Escanea y reemplaza grosores de línea en PDFs vectoriales por rango de valor.',
-    // Sección de guías
-    guides_title: 'Guías',
-    g1_cat: 'Escala gráfica',     g1_title: 'Cómo añadir una escala gráfica a un PDF',                                       g1_desc: 'Dimensionada automáticamente para tu escala de dibujo y formato de papel. Sin software CAD.',
-    g2_cat: 'Marca de agua logo', g2_title: 'Cómo añadir tu logo como marca de agua en todos tus planos',                    g2_desc: 'Estampa el logo de tu estudio en un conjunto completo de PDFs en un solo paso.',
-    g3_cat: 'Compresión',         g3_title: 'La mejor manera de comprimir un PDF',                                            g3_desc: 'Qué reduce realmente el tamaño del archivo, cuándo usar cada método y por qué.',
-    g4_cat: 'Viñeta',             g4_title: 'Cómo añadir una viñeta arquitectónica personalizada a tus planos en PDF',       g4_desc: 'Nombre del proyecto, escala, firmas, flecha de norte e ID de plano — generado en el navegador.',
-    // Preguntas FAQ
-    faq1_q: '¿Puede alguien más acceder a mis archivos?',
-    faq2_q: '¿Qué navegadores son compatibles?',
-    faq3_q: '¿Hay límites de tamaño de archivo?',
-    faq4_q: '¿Puedo usar varias herramientas seguidas sin volver a subir el archivo?',
-    faq5_q: '¿Cómo funciona la herramienta de compresión?',
-    faq6_q: '¿Cómo funciona la escala gráfica? ¿Cómo se calcula la longitud de la barra?',
-    faq7_q: '¿Qué es la herramienta de viñeta (Title Block)?',
-    faq8_q: '¿Cuál es la diferencia entre los modos Parche y Redactar?',
-    faq9_q: '¿Puedo reordenar páginas y luego dividir el resultado?',
-    faq10_q: '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    // Respuestas FAQ (HTML permitido)
-    faq1_a: 'No — nadie. Ni nosotros, ni ningún tercero. Cada operación se ejecuta completamente en tu navegador con JavaScript, de modo que tu PDF nunca sale de tu dispositivo desde el momento en que lo abres hasta que descargas el resultado. Esto no es solo una política de privacidad: el sitio no tiene ningún servidor backend, lo que hace técnicamente imposible que tus archivos sean transmitidos o vistos por otra persona.',
-    faq2_a: 'Cualquier navegador moderno basado en Chromium (Chrome 90+, Edge 90+, Brave) o Firefox 90+ funciona bien. Safari 16+ en macOS e iOS también es compatible con la mayoría de herramientas. Para la herramienta <strong>Comprimir</strong>, que usa un motor Ghostscript WebAssembly, un navegador Chromium reciente da los mejores resultados. Si Ghostscript no se carga, la herramienta recurre automáticamente a una compresión más ligera con pdf-lib.',
-    faq3_a: 'No hay límites impuestos por el servidor porque todo se ejecuta localmente. Los límites prácticos dependen de la RAM de tu dispositivo. Los archivos de hasta ~150 MB se manejan sin problemas en la mayoría de los ordenadores modernos. Los archivos muy grandes (planos escaneados a 300 ppp, por ejemplo) pueden ser lentos en dispositivos con poca memoria. Si una herramienta se queda sin memoria, el navegador mostrará un mensaje de error — puedes reducir primero el archivo con la herramienta <strong>Comprimir</strong>.',
-    faq4_a: 'Sí, este es el flujo de trabajo previsto. Después de que se complete cualquier operación, haz clic en <strong>↩ Seguir trabajando con esta versión</strong> para activar el resultado como archivo activo. Cada herramienta posterior trabajará sobre esa versión modificada. Un banner verde en la parte superior del panel de la herramienta registra tu historial de modificaciones para que siempre sepas sobre qué versión estás trabajando.',
-    faq5_a: 'Usa Ghostscript compilado a WebAssembly, ejecutándose completamente en tu navegador. Puedes elegir entre cuatro presets — <em>Screen</em> (72 ppp, más pequeño), <em>eBook</em> (150 ppp), <em>Printer</em> (300 ppp) y <em>Prepress</em> (alta calidad) — o cambiar al modo <strong>Custom</strong> para establecer tu propio DPI y calidad JPEG. Los presets corresponden directamente a las opciones <code>-dPDFSETTINGS</code> de Ghostscript. Si el motor WASM no se inicializa (por ejemplo, en algunos navegadores más antiguos), la herramienta recurre a una compresión de extracción de metadatos usando pdf-lib.',
-    faq6_a: 'Introduces la escala del dibujo (p. ej. <code>1:100</code>) y la herramienta selecciona automáticamente una longitud "redonda" — un número entero de metros o pies que representa aproximadamente el 20% del ancho de la página a esa escala. Por ejemplo, en una lámina A1 a 1:100 la barra será de 10 m o 15 m, nunca 12,37 m. La barra siempre se dibuja en el espacio de coordenadas PDF con compensación de rotación completa, por lo que aparece correctamente incluso en páginas con indicador de rotación de 90°, 180° o 270°.<br><br>Hay cinco estilos visuales disponibles: <em>Classic</em> (segmentos alternos lleno/vacío), <em>Hatch</em> (segmentos oscuros tramados), <em>Staggered</em> (barras alternadas arriba/abajo de una línea central), <em>Dots</em> (línea fina con puntos en cada división) y <em>Ticks</em> (línea fina con marcas verticales). Se puede aplicar cualquier color a todos los elementos de la barra.',
-    faq7_a: 'Añade una viñeta arquitectónica en la esquina inferior derecha de tus páginas. El ancho del bloque se ajusta al formato de papel ISO (A4 → 36 mm, A0 → 77 mm) y el alto se ajusta dinámicamente para contener todo el contenido sin desbordamiento. Los campos incluyen nombre del proyecto, dirección, contenido del plano (multilínea), tipo y número de plano, escala, fecha, firma del cliente, firma del proyectista, flecha de norte (rotable por grado) y N° de proyecto. Todo el texto se convierte automáticamente a mayúsculas.',
-    faq8_a: '<strong>Capa blanca</strong> dibuja un polígono blanco relleno directamente en el flujo de contenido de la página. El contenido original queda cubierto visualmente pero permanece en el archivo — potencialmente recuperable con las herramientas adecuadas. Úsalo cuando quieras una cobertura reversible y ligera (p. ej. para imprimir).<br><br><strong>Aplanar página</strong> rasteriza toda la página a un mapa de bits a la DPI elegida y la reconstruye como una sola imagen, destruyendo permanentemente todo el contenido vectorial y texto subyacente en el parche. Esta es la opción correcta cuando necesitas redactar información sensible de forma irreversible antes de compartir un archivo.',
-    faq9_a: 'Sí. Usa <strong>Reordenar y eliminar páginas</strong> para arrastrar las páginas al orden que quieras y eliminar las que no necesites, luego haz clic en <strong>↩ Seguir trabajando con esta versión</strong>. Después abre la herramienta <strong>Dividir PDF</strong> — mostrará las páginas reordenadas y te permitirá hacer clic en los puntos de corte donde quieras dividir.',
-    faq10_a: 'Todas las herramientas son gratuitas sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools es la única suite de navegador diseñada específicamente para arquitectos — combinando utilidades PDF generales con herramientas exclusivas de la práctica arquitectónica, como escalas gráficas métricas e imperiales con múltiples estilos, viñetas en formato ISO con flechas de norte y campos de firma, y una herramienta de parche/redacción compatible con láminas rotadas. El sitio se mantiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva — un único anuncio dirigido exclusivamente a audiencias técnicas y de diseño (sin píxeles de seguimiento, sin retargeting). Si las herramientas te resultan útiles, también puedes dejar un donativo único con el botón de apoyo. Ninguno es requisito para usar cualquier función.',
-  }
-};
-
-// Detect language: check localStorage override first, then browser
-const _langRaw = localStorage.getItem('sb_lang') || navigator.language || 'en';
-const _lang = _langRaw.slice(0, 2).toLowerCase();
-const T = TRANSLATIONS[_lang] || TRANSLATIONS['en'];
-
-// Apply static data-i18n text nodes (and data-i18n-html for HTML content)
-function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    if (T[key]) el.textContent = T[key];
-  });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    const key = el.dataset.i18nHtml;
-    if (T[key]) el.innerHTML = T[key];
-  });
-}
-
-// Language switcher (call from UI)
-function setLang(lang) {
-  localStorage.setItem('sb_lang', lang);
-  location.reload();
-}
 // ─── HOME GRID ───────────────────────────────────────────────────────────
-const _sm = {'compress':'compress','vineta':'vineta','patch':'patch','scalebar':'scalebar','scalebar-ft':'scalebar_ft','watermark-text':'watermark_text','watermark-logo':'watermark_logo','crop':'crop','reorder':'reorder','split':'split','merge':'merge','convert':'convert','img2pdf':'imagetopdf','grid':'grid','plan-numbering':'plan_numbering','revision-cloud':'revision_cloud','pdfa':'pdfa','ocr':'ocr','text-note':'text_note','linewidth':'linewidth','page-numbers':'page_numbers','rotate-pages':'rotate_pages','extract-pages':'extract_pages','add-image':'add_image'};
 const homeGrid = document.getElementById('home-tools-grid');
 TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  const name = T[t.id] || t.name;
-  const desc = T['d_' + t.id] || t.desc;
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${name}</h3><p>${desc}</p>`;
-  card.onclick = () => { const p = _sm[t.id]; if (p) window.location.href = p + '.html'; };
+  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  card.onclick = () => {
+    if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
+    else { openTool(t.id); }
+  };
   homeGrid.appendChild(card);
 });
-// Apply i18n to static elements
-document.addEventListener('DOMContentLoaded', applyI18n);
 let pendingTool = null;
 
-function toggleMoreTools() {
-  const wrap  = document.getElementById('tools-peek-wrap');
-  const outer = document.getElementById('tools-peek-outer');
-  const btn   = document.getElementById('more-tools-btn');
-  const label = document.getElementById('more-tools-label');
-  const open  = wrap.classList.toggle('expanded');
-  outer.classList.toggle('expanded', open);
-  btn.classList.toggle('open', open);
-  label.textContent = open ? (T.less_tools || 'Less tools') : (T.more_tools || 'More tools');
+function scrollGrid(dir) {
+  const grid = document.getElementById('home-tools-grid');
+  // Scroll by 3 card widths (127px + 12px gap = 139px × 3)
+  grid.scrollBy({ left: dir * 197 * 4, behavior: 'smooth' });
 }
 
 // ─── FILE LOADING ─────────────────────────────────────────────────────────
@@ -1880,6 +1995,7 @@ async function loadPDF(file) {
   currentFileName = file.name;
   modificationHistory = [];
   updateTopBar();
+  showDropCheck(file.name);
 }
 
 function updateTopBar() {
@@ -1891,16 +2007,28 @@ function updateTopBar() {
   persistFile();
 }
 
+function showDropCheck(name) {
+  const el = document.getElementById('drop-check');
+  document.getElementById('drop-check-name').textContent = name;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 1700);
+}
 
-
-// Highlight active language button
-document.addEventListener('DOMContentLoaded', () => {
-  const activeLang = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
-  const btnEl = document.getElementById('lang-' + activeLang);
-  if (btnEl) { btnEl.style.color = '#fff'; btnEl.style.borderColor = '#fff'; }
+document.getElementById('file-input-hidden').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  await loadPDF(file);
+  if (pendingTool) { openTool(pendingTool); pendingTool = null; }
+  e.target.value = '';
 });
 
-// Drop zone removed — cards navigate directly to tool pages
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', async e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') await loadPDF(file);
+});
 
 // ─── NAVIGATION ──────────────────────────────────────────────────────────
 function openTool(id) {
@@ -1955,7 +2083,7 @@ function buildOtherTools(currentId) {
     const btn = document.createElement('button');
     btn.className = 'other-btn';
     btn.textContent = `${t.icon} ${t.name}`;
-    btn.onclick = () => openTool(t.id);
+    btn.onclick = () => { window.location.href = t.file; };
     strip.appendChild(btn);
   });
 }
@@ -2198,37 +2326,55 @@ document.getElementById('cv-dl').addEventListener('click', async () => {
 });
 
 // ─── 3. TEXT WATERMARK ────────────────────────────────────────────────────
-let wtBytes = null;
 document.getElementById('wt-btn').addEventListener('click', async () => {
-  if (!currentBuffer) return;
+  const files = (document.getElementById('tool-choose-file') || document.getElementById('wt-files') || {files:[]}).files;
+  if (!files.length) { status('wt-status', 'Choose at least one PDF file.', 'err'); return; }
   const txt = document.getElementById('wt-text').value.trim();
-  if (!txt) { status('wt-status', 'Please enter watermark text.', 'err'); return; }
-  status('wt-status', 'Applying…', 'run');
+  if (!txt) { status('wt-status', 'Enter watermark text first.', 'err'); return; }
+  const sz  = parseInt(document.getElementById('wt-size').value) || 48;
+  const op  = parseFloat(document.getElementById('wt-opacity').value) || 0.15;
+  const { r, g, b } = hexToRgb(document.getElementById('wt-color').value || '#000000');
+  const pos    = document.getElementById('wt-pos').value;
+  const pgMode = document.getElementById('wt-pages').value;
+  status('wt-status', `Processing ${files.length} file(s)…`, 'run');
   try {
-    const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
-    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-    const sz = parseInt(document.getElementById('wt-size').value) || 48;
-    const op = parseFloat(document.getElementById('wt-opacity').value) || 0.15;
-    const { r, g, b } = hexToRgb(document.getElementById('wt-color').value || '#000000');
-    const pos = document.getElementById('wt-pos').value;
-    const pages = document.getElementById('wt-pages').value === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
-    const tw = font.widthOfTextAtSize(txt, sz);
-    pages.forEach(page => {
-      const { width, height } = page.getSize();
-      let x, y, rotate;
-      if (pos === 'center')    { x = (width - tw) / 2; y = height / 2; rotate = PDFLib.degrees(35); }
-      else if (pos === 'br')   { x = width - tw - 24;  y = 24;         rotate = PDFLib.degrees(0); }
-      else                     { x = 20;               y = height - sz - 20; rotate = PDFLib.degrees(0); }
-      page.drawText(txt, { x, y, size: sz, font, color: PDFLib.rgb(r,g,b), opacity: op, rotate });
-    });
-    wtBytes = await pdfDoc.save({ useObjectStreams: true });
-    status('wt-status', `Applied to ${pages.length} page(s).`, 'ok');
-    document.getElementById('wt-dl').disabled = false;
-    document.getElementById('wt-apply').disabled = false;
+    const zip = new JSZip();
+    for (const file of files) {
+      const buf    = await readFile(file);
+      const pdfDoc = await PDFLib.PDFDocument.load(buf.slice(0), { ignoreEncryption: true });
+      const font   = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+      const tw     = font.widthOfTextAtSize(txt, sz);
+      const pg     = pgMode === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+      pg.forEach(page => {
+        let rot = 0;
+        try { const rn = page.node.get(PDFLib.PDFName.of('Rotate')); if (rn) rot = ((rn.value()%360)+360)%360; } catch(_){}
+        const swapped = rot===90||rot===270;
+        const { width: rawW, height: rawH } = page.getSize();
+        const visW = swapped ? rawH : rawW;
+        const visH = swapped ? rawW : rawH;
+        function toPdf(vx,vy){ switch(rot){ case 0:return{x:vx,y:vy}; case 90:return{x:rawW-vy,y:vx}; case 180:return{x:rawW-vx,y:rawH-vy}; default:return{x:vy,y:rawH-vx}; } }
+        const textRot = PDFLib.degrees(rot);
+        let vx, vy, rotate;
+        const margin = 24;
+        if (pos === 'center') {
+          vx = (visW - tw) / 2; vy = visH / 2;
+          rotate = PDFLib.degrees(rot + 35);
+        } else if (pos === 'br') {
+          vx = visW - tw - margin; vy = margin; rotate = textRot;
+        } else { // tl
+          vx = margin; vy = visH - sz - margin; rotate = textRot;
+        }
+        const {x, y} = toPdf(vx, vy);
+        page.drawText(txt, { x, y, size: sz, font, color: PDFLib.rgb(r,g,b), opacity: op, rotate });
+      });
+      zip.file(file.name.replace(/\.pdf$/i,'_watermark.pdf'), await pdfDoc.save({ useObjectStreams:true }));
+    }
+    const blob = await zip.generateAsync({ type:'blob' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'watermarked.zip'; a.click();
+    status('wt-status', `Done — ${files.length} PDF(s) watermarked.`, 'ok');
   } catch(e) { status('wt-status', 'Error: ' + e.message, 'err'); }
 });
-document.getElementById('wt-dl').addEventListener('click', () => { if (wtBytes) download(wtBytes, nameSuffix('_watermark')); });
-document.getElementById('wt-apply').addEventListener('click', () => { if (wtBytes) applyAsActive(wtBytes, 'Text WM', 'wt-status', 'wt-apply'); });
 
 // ─── 4. LOGO WATERMARK ────────────────────────────────────────────────────
 function imageToGrayscalePNG(imgEl) {
@@ -2249,67 +2395,67 @@ function imageToGrayscalePNG(imgEl) {
   });
 }
 
-let wlBytes = null;
 document.getElementById('wl-btn').addEventListener('click', async () => {
-  if (!currentBuffer) return;
-  const imgFile = document.getElementById('wl-img').files[0];
-  if (!imgFile) { status('wl-status', 'Please upload a logo image.', 'err'); return; }
-  status('wl-status', 'Processing image…', 'run');
+  const pdfFiles = (document.getElementById('tool-choose-file') || document.getElementById('wl-pdf-files') || {files:[]}).files;
+  const imgFile  = document.getElementById('wl-img').files[0];
+  if (!pdfFiles.length) { status('wl-status', 'Choose at least one PDF file.', 'err'); return; }
+  if (!imgFile)          { status('wl-status', 'Please upload a logo image.', 'err'); return; }
+  const opacity  = parseFloat(document.getElementById('wl-opacity').value) || 0.18;
+  const scalePct = parseFloat(document.getElementById('wl-scale').value) || 40;
+  const rotDeg   = parseFloat(document.getElementById('wl-rotation').value) || 0;
+  const pos      = document.getElementById('wl-pos').value;
+  const pgMode   = document.getElementById('wl-pages').value;
+  status('wl-status', `Processing ${pdfFiles.length} file(s)…`, 'run');
   try {
     const imgUrl = URL.createObjectURL(imgFile);
-    const imgEl = new Image();
+    const imgEl  = new Image();
     await new Promise((res, rej) => { imgEl.onload = res; imgEl.onerror = rej; imgEl.src = imgUrl; });
     const grayBuf = await imageToGrayscalePNG(imgEl);
     URL.revokeObjectURL(imgUrl);
-
-    const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
-    const embeddedImg = await pdfDoc.embedPng(grayBuf);
-    const opacity  = parseFloat(document.getElementById('wl-opacity').value) || 0.18;
-    const scalePct = parseFloat(document.getElementById('wl-scale').value) || 40;
-    const rotDeg   = parseFloat(document.getElementById('wl-rotation').value) || 0;
-    const pos      = document.getElementById('wl-pos').value;
-    const pages    = document.getElementById('wl-pages').value === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
-
-    // Precompute rotation math for center-pivot
-    const rad = rotDeg * Math.PI / 180;
-    const cos = Math.cos(rad);
-    const sin = Math.sin(rad);
-
-    pages.forEach(page => {
-      const { width, height } = page.getSize();
-      const imgW = width * (scalePct / 100);
-      const imgH = (embeddedImg.height / embeddedImg.width) * imgW;
+    const imgRotRad = rotDeg * Math.PI / 180;
+    const imgCos = Math.cos(imgRotRad), imgSin = Math.sin(imgRotRad);
+    const zip = new JSZip();
+    for (const file of pdfFiles) {
+      const buf    = await readFile(file);
+      const pdfDoc = await PDFLib.PDFDocument.load(buf.slice(0), { ignoreEncryption: true });
+      const emb    = await pdfDoc.embedPng(grayBuf);
+      const pg     = pgMode === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
       const margin = 24;
-
-      // Desired center of the logo on the page (unrotated position)
-      let cx, cy;
-      if (pos === 'center')    { cx = width / 2;               cy = height / 2; }
-      else if (pos === 'br')   { cx = width - imgW/2 - margin; cy = imgH/2 + margin; }
-      else if (pos === 'tl')   { cx = imgW/2 + margin;         cy = height - imgH/2 - margin; }
-      else if (pos === 'tr')   { cx = width - imgW/2 - margin; cy = height - imgH/2 - margin; }
-      else                     { cx = imgW/2 + margin;         cy = imgH/2 + margin; }
-
-      // pdf-lib rotates around bottom-left corner.
-      // To rotate around center (cx,cy), adjust the bottom-left anchor point.
-      const adjX = cx - (imgW/2) * cos + (imgH/2) * sin;
-      const adjY = cy - (imgW/2) * sin - (imgH/2) * cos;
-
-      page.drawImage(embeddedImg, {
-        x: adjX, y: adjY,
-        width: imgW, height: imgH,
-        opacity,
-        rotate: PDFLib.degrees(rotDeg)
+      pg.forEach(page => {
+        let rot = 0;
+        try { const rn = page.node.get(PDFLib.PDFName.of('Rotate')); if (rn) rot = ((rn.value()%360)+360)%360; } catch(_){}
+        const swapped = rot===90||rot===270;
+        const { width: rawW, height: rawH } = page.getSize();
+        const visW = swapped ? rawH : rawW;
+        const visH = swapped ? rawW : rawH;
+        function toPdf(vx,vy){ switch(rot){ case 0:return{x:vx,y:vy}; case 90:return{x:rawW-vy,y:vx}; case 180:return{x:rawW-vx,y:rawH-vy}; default:return{x:vy,y:rawH-vx}; } }
+        // Logo size is % of visual width
+        const imgW = visW * (scalePct / 100);
+        const imgH = (emb.height / emb.width) * imgW;
+        // Visual center of logo
+        let vcx, vcy;
+        if      (pos === 'center') { vcx = visW/2;                vcy = visH/2; }
+        else if (pos === 'br')     { vcx = visW-imgW/2-margin;    vcy = imgH/2+margin; }
+        else if (pos === 'tl')     { vcx = imgW/2+margin;         vcy = visH-imgH/2-margin; }
+        else if (pos === 'tr')     { vcx = visW-imgW/2-margin;    vcy = visH-imgH/2-margin; }
+        else                       { vcx = imgW/2+margin;         vcy = imgH/2+margin; }
+        // Convert visual center to PDF raw coords
+        const {x: pcx, y: pcy} = toPdf(vcx, vcy);
+        // pdf-lib drawImage rotates around bottom-left; adjust for center-pivot + page rotation
+        const totalRad = (rotDeg + rot) * Math.PI / 180;
+        const tCos = Math.cos(totalRad), tSin = Math.sin(totalRad);
+        const adjX = pcx - (imgW/2)*tCos + (imgH/2)*tSin;
+        const adjY = pcy - (imgW/2)*tSin - (imgH/2)*tCos;
+        page.drawImage(emb, { x:adjX, y:adjY, width:imgW, height:imgH, opacity, rotate:PDFLib.degrees(rotDeg+rot) });
       });
-    });
-
-    wlBytes = await pdfDoc.save({ useObjectStreams: true });
-    status('wl-status', `Logo applied — grayscale, ${scalePct}% width, ${rotDeg}° rotation.`, 'ok');
-    document.getElementById('wl-dl').disabled = false;
-    document.getElementById('wl-apply').disabled = false;
+      zip.file(file.name.replace(/\.pdf$/i,'_logo.pdf'), await pdfDoc.save({ useObjectStreams:true }));
+    }
+    const blob = await zip.generateAsync({ type:'blob' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'logo_watermarked.zip'; a.click();
+    status('wl-status', `Done — ${pdfFiles.length} PDF(s) processed.`, 'ok');
   } catch(e) { status('wl-status', 'Error: ' + e.message, 'err'); }
 });
-document.getElementById('wl-dl').addEventListener('click', () => { if (wlBytes) download(wlBytes, nameSuffix('_logo_wm')); });
-document.getElementById('wl-apply').addEventListener('click', () => { if (wlBytes) applyAsActive(wlBytes, 'Logo WM', 'wl-status', 'wl-apply'); });
 
 // ─── 5. RESIZE TO FORMAT ──────────────────────────────────────────────────
 let cropBytes = null;
@@ -2344,90 +2490,79 @@ document.getElementById('crop-btn').addEventListener('click', async () => {
 document.getElementById('crop-dl').addEventListener('click', () => { if (cropBytes) download(cropBytes, nameSuffix(`_${document.getElementById('crop-format').value}`)); });
 document.getElementById('crop-apply').addEventListener('click', () => { if (cropBytes) applyAsActive(cropBytes, `Resize ${document.getElementById('crop-format').value}`, 'crop-status', 'crop-apply'); });
 
-// ─── 6. REORDER & REMOVE ──────────────────────────────────────────────────
-let reorderBytes = null;
-
-document.getElementById('ro-render-btn').addEventListener('click', async () => {
-  if (!currentBuffer) return;
-  if (!window.pdfjsLib) { status('ro-status', 'PDF.js still loading.', 'err'); return; }
-  status('ro-status', 'Loading thumbnails…', 'run');
-  const grid = document.getElementById('reorder-grid');
-  grid.innerHTML = '';
-  ['ro-btn','ro-dl','ro-apply'].forEach(id => document.getElementById(id).disabled = true);
-  try {
-    const pdfDoc = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
-    for (let i = 1; i <= pdfDoc.numPages; i++) {
-      const page = await pdfDoc.getPage(i);
-      const vp = page.getViewport({ scale: 0.28 });
-      const canvas = document.createElement('canvas');
-      canvas.width = vp.width; canvas.height = vp.height;
-      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
-      const thumb = document.createElement('div');
-      thumb.className = 'page-thumb'; thumb.dataset.index = i - 1; thumb.draggable = true;
-      const cb = document.createElement('input');
-      cb.type = 'checkbox'; cb.className = 'delete-cb'; cb.title = 'Remove this page';
-      cb.addEventListener('change', () => {
-        thumb.style.opacity = cb.checked ? '0.3' : '1';
-        thumb.style.borderColor = cb.checked ? 'var(--err)' : '';
-      });
-      const lbl = document.createElement('div');
-      lbl.className = 'thumb-label'; lbl.textContent = `p. ${i}`;
-      thumb.appendChild(canvas); thumb.appendChild(cb); thumb.appendChild(lbl);
-      grid.appendChild(thumb);
-    }
-    initDragDrop(grid);
-    status('ro-status', `${pdfDoc.numPages} pages loaded. Drag to reorder, check to remove.`, 'ok');
-    document.getElementById('ro-btn').disabled = false;
-  } catch(e) { status('ro-status', 'Error: ' + e.message, 'err'); }
-});
-
-function initDragDrop(grid) {
-  let dragged = null;
-  grid.addEventListener('dragstart', e => {
-    dragged = e.target.closest('.page-thumb');
-    if (dragged) setTimeout(() => dragged.classList.add('dragging'), 0);
-  });
-  grid.addEventListener('dragend', () => {
-    document.querySelectorAll('.page-thumb').forEach(t => t.classList.remove('dragging','drag-over'));
-    dragged = null;
-  });
-  grid.addEventListener('dragover', e => {
-    e.preventDefault();
-    const t = e.target.closest('.page-thumb');
-    document.querySelectorAll('.page-thumb').forEach(x => x.classList.remove('drag-over'));
-    if (t && t !== dragged) t.classList.add('drag-over');
-  });
-  grid.addEventListener('drop', e => {
-    e.preventDefault();
-    const target = e.target.closest('.page-thumb');
-    if (!target || !dragged || target === dragged) return;
-    const all = [...grid.querySelectorAll('.page-thumb')];
-    const fi = all.indexOf(dragged), ti = all.indexOf(target);
-    if (fi < ti) grid.insertBefore(dragged, target.nextSibling);
-    else grid.insertBefore(dragged, target);
-    document.querySelectorAll('.page-thumb').forEach(t => t.classList.remove('drag-over'));
-  });
+function showDonationBanner() {
+  const banner = document.getElementById('donation-banner');
+  const heart  = document.getElementById('donation-heart');
+  const stage  = document.getElementById('donation-heart-stage');
+  const content= document.getElementById('donation-content');
+  if (!banner) return;
+  banner.style.display = 'block';
+  heart.className = '';
+  void heart.offsetWidth;
+  heart.className = '';
+  heart.style.animation = 'heartIn 0.45s cubic-bezier(.17,.67,.35,1.3) forwards';
+  content.style.display = 'none';
+  stage.style.display = 'flex';
+  setTimeout(() => { heart.style.animation = 'heartOut 0.3s ease-in forwards'; }, 650);
+  setTimeout(() => {
+    stage.style.display = 'none';
+    content.style.display = 'block';
+    void content.offsetWidth;
+    content.style.animation = 'donationContentIn 0.35s ease-out forwards';
+  }, 950);
+  document.getElementById('donation-dismiss').onclick = () => { banner.style.display = 'none'; };
 }
 
-document.getElementById('ro-btn').addEventListener('click', async () => {
-  if (!currentBuffer) return;
-  status('ro-status', 'Rebuilding PDF…', 'run');
-  try {
-    const src = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
-    const out = await PDFLib.PDFDocument.create();
-    const thumbs = [...document.getElementById('reorder-grid').querySelectorAll('.page-thumb')];
-    const selected = thumbs.filter(t => !t.querySelector('.delete-cb').checked);
-    if (selected.length === 0) { status('ro-status', 'You must keep at least one page.', 'err'); return; }
-    const indices = selected.map(t => parseInt(t.dataset.index));
-    const copied  = await out.copyPages(src, indices);
-    copied.forEach(p => out.addPage(p));
-    reorderBytes = await out.save({ useObjectStreams: true });
-    const removed = thumbs.length - selected.length;
-    status('ro-status', `PDF rebuilt: ${selected.length} page(s)${removed > 0 ? `, ${removed} removed` : ''}.`, 'ok');
-    document.getElementById('ro-dl').disabled = false;
-    document.getElementById('ro-apply').disabled = false;
-  } catch(e) { status('ro-status', 'Error: ' + e.message, 'err'); }
+// ─── ROTATE PAGES TOOL ────────────────────────────────────────────────────
+let rpBytes = null;
+document.getElementById('tool-choose-file').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  currentBuffer = new Uint8Array(await readFile(file));
+  currentFileName = file.name;
+  document.getElementById('tool-choose-name').textContent = file.name;
+  document.getElementById('file-indicator').innerHTML = 'File: <span>' + file.name + '</span>';
+  document.getElementById('btn-change-file').style.display = 'inline-block';
+  rpBytes = null;
+  document.getElementById('rp-dl').disabled = true;
+  document.getElementById('rp-apply').disabled = true;
+  status('rp-status', file.name + ' loaded.', 'ok');
 });
+document.getElementById('rp-pages').addEventListener('change', function() {
+  document.getElementById('rp-range-wrap').style.display = this.value === 'range' ? 'flex' : 'none';
+});
+document.getElementById('rp-btn').addEventListener('click', async () => {
+  if (!currentBuffer) { status('rp-status', _T.no_file || 'No file loaded.', 'err'); return; }
+  status('rp-status', 'Rotating…', 'run');
+  document.getElementById('rp-btn').disabled = true;
+  try {
+    const src = currentBuffer instanceof ArrayBuffer ? currentBuffer : (currentBuffer.buffer || currentBuffer);
+    const pdfDoc = await PDFLib.PDFDocument.load(src, { ignoreEncryption: true });
+    const pages = pdfDoc.getPages();
+    const deg = parseInt(document.getElementById('rp-angle').value);
+    const applyTo = document.getElementById('rp-pages').value;
+    const fromPg = parseInt(document.getElementById('rp-from').value) || 1;
+    const toPg   = parseInt(document.getElementById('rp-to').value)   || pages.length;
+    let count = 0;
+    pages.forEach((page, i) => {
+      const pg = i + 1;
+      if (applyTo === 'odd'  && pg % 2 === 0) return;
+      if (applyTo === 'even' && pg % 2 !== 0) return;
+      if (applyTo === 'range' && (pg < fromPg || pg > toPg)) return;
+      const cur = page.getRotation().angle;
+      page.setRotation(PDFLib.degrees((cur + deg) % 360));
+      count++;
+    });
+    rpBytes = await pdfDoc.save({ useObjectStreams: true });
+    status('rp-status', '✓ Rotated ' + count + ' page(s).', 'ok');
+    document.getElementById('rp-dl').disabled = false;
+    document.getElementById('rp-apply').disabled = false;
+    showDonationBanner();
+  } catch(e) { status('rp-status', 'Error: ' + e.message, 'err'); }
+  finally { document.getElementById('rp-btn').disabled = false; }
+});
+document.getElementById('rp-dl').addEventListener('click', () => { if (rpBytes) { download(rpBytes, nameSuffix('_rotated')); showDonationBanner(); } });
+document.getElementById('rp-apply').addEventListener('click', () => { if (rpBytes) applyAsActive(rpBytes, 'Rotate pages', 'rp-status', 'rp-apply'); });
+
 // ─── 7. GRAPHIC SCALE BAR (shared helpers) ───────────────────────────────
 const PT_PER_MM = 72 / 25.4;
 const MM_PER_FOOT = 304.8;
@@ -3665,12 +3800,604 @@ document.querySelectorAll('.sb-style-btn').forEach(btn => {
   });
 });
 
+
+// ─── 13. PAGE GRID ────────────────────────────────────────────────────────
+{
+  let gridBytes = null;
+  let gridMode = 'spacing';  // 'spacing' | 'divisions'
+
+  window.gridSetMode = function(m) {
+    gridMode = m;
+    document.getElementById('grid-spacing-opts').style.display = m === 'spacing' ? '' : 'none';
+    document.getElementById('grid-div-opts').style.display     = m === 'divisions' ? '' : 'none';
+    document.getElementById('grid-mode-spacing').style.background   = m === 'spacing'   ? '#1a1a1a' : '#f8f8f6';
+    document.getElementById('grid-mode-spacing').style.color        = m === 'spacing'   ? '#fff' : '#555';
+    document.getElementById('grid-mode-divisions').style.background = m === 'divisions' ? '#1a1a1a' : '#f8f8f6';
+    document.getElementById('grid-mode-divisions').style.color      = m === 'divisions' ? '#fff' : '#555';
+  };
+
+
+  // ── Scale/interval lookup table ──────────────────────────────────────────
+  const GRID_INTERVALS = {
+    20:   [{v:'0.5',l:'0.5 m'},{v:'1',l:'1 m'},{v:'5',l:'5 m'}],
+    50:   [{v:'0.5',l:'0.5 m'},{v:'1',l:'1 m'},{v:'5',l:'5 m'}],
+    100:  [{v:'0.5',l:'0.5 m'},{v:'1',l:'1 m'},{v:'5',l:'5 m'}],
+    200:  [{v:'5',l:'5 m'},{v:'10',l:'10 m'},{v:'50',l:'50 m'}],
+    500:  [{v:'5',l:'5 m'},{v:'10',l:'10 m'},{v:'50',l:'50 m'}],
+    1000: [{v:'5',l:'5 m'},{v:'10',l:'10 m'},{v:'50',l:'50 m'}],
+  };
+
+  window.gridUpdateIntervals = function() {
+    const scale = parseInt(document.getElementById('grid-scale').value) || 100;
+    const sel   = document.getElementById('grid-interval');
+    const opts  = GRID_INTERVALS[scale] || GRID_INTERVALS[100];
+    sel.innerHTML = opts.map((o,i) =>
+      `<option value="${o.v}"${i===1?' selected':''}>${o.l}</option>`
+    ).join('');
+    gridComputeMm();
+  };
+
+  window.gridComputeMm = function() {
+    const scale  = parseInt(document.getElementById('grid-scale').value) || 100;
+    const realM  = parseFloat(document.getElementById('grid-interval').value) || 1;
+    const mm     = (realM * 1000) / scale;
+    const txt    = mm < 1 ? mm.toFixed(2) + ' mm' : Number.isInteger(mm) ? mm + ' mm' : mm.toFixed(1) + ' mm';
+    const el     = document.getElementById('grid-computed-mm');
+    if (el) el.value = txt;
+  };
+
+  document.getElementById('grid-interval').addEventListener('change', gridComputeMm);
+  // Init on load
+  gridUpdateIntervals();
+
+  document.getElementById('grid-btn').addEventListener('click', async () => {
+    if (!currentBuffer) return;
+    status('grid-status', 'Adding grid…', 'run');
+    document.getElementById('grid-btn').disabled = true;
+    try {
+      const hex      = document.getElementById('grid-color').value;
+      const cr = parseInt(hex.slice(1,3),16)/255;
+      const cg = parseInt(hex.slice(3,5),16)/255;
+      const cb = parseInt(hex.slice(5,7),16)/255;
+      const lw       = Math.max(0.05, Math.min(2, parseFloat(document.getElementById('grid-lw').value) || 0.15));
+      const position = document.getElementById('grid-position').value;
+      const applyTo  = document.getElementById('grid-pages').value;
+
+      const pdfDoc  = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+      const pages   = applyTo === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+
+      pages.forEach(page => {
+        const { width: W, height: H } = page.getSize();
+
+        // ── Compute grid lines in PDF pts (origin bottom-left, Y up) ──────
+        let xs = [], ys = [];  // x = vertical lines, y = horizontal lines
+
+        if (gridMode === 'spacing') {
+          // spacingMm = realDistance_m * 1000 / scale
+          const scale      = parseInt(document.getElementById('grid-scale').value) || 100;
+          const realM      = parseFloat(document.getElementById('grid-interval').value) || 1;
+          const spacingMm  = (realM * 1000) / scale;
+          const borderMm   = Math.max(0, parseFloat(document.getElementById('grid-border').value) || 0);
+          const spacingPt  = spacingMm * PT_PER_MM;
+          const borderPt   = borderMm  * PT_PER_MM;
+          const x0 = borderPt, x1 = W - borderPt;
+          const y0 = borderPt, y1 = H - borderPt;
+          for (let x = x0; x <= x1 + 0.01; x += spacingPt) xs.push(x);
+          for (let y = y0; y <= y1 + 0.01; y += spacingPt) ys.push(y);
+        } else {
+          const dh = Math.max(2, Math.min(100, parseInt(document.getElementById('grid-div-h').value) || 10));
+          const dv = Math.max(2, Math.min(100, parseInt(document.getElementById('grid-div-v').value) || 10));
+          // horizontal divisions → vertical lines
+          for (let i = 0; i <= dh; i++) xs.push((W / dh) * i);
+          // vertical divisions → horizontal lines
+          for (let i = 0; i <= dv; i++) ys.push((H / dv) * i);
+        }
+
+        // ── Build PDF content stream operators ────────────────────────────
+        const parts = [];
+        parts.push('q');                                           // save state
+        parts.push(`${cr.toFixed(4)} ${cg.toFixed(4)} ${cb.toFixed(4)} RG`); // stroke colour
+        parts.push(`${lw.toFixed(4)} w`);                         // line width
+        parts.push('[] 0 d');                                      // solid line (reset dash)
+        parts.push('0 J 0 j');                                     // butt caps, miter joins
+
+        const y0 = ys[0] ?? 0, y1 = ys[ys.length-1] ?? H;
+        const x0 = xs[0] ?? 0, x1 = xs[xs.length-1] ?? W;
+
+        // Vertical lines
+        xs.forEach(x => {
+          parts.push(`${x.toFixed(3)} ${y0.toFixed(3)} m`);
+          parts.push(`${x.toFixed(3)} ${y1.toFixed(3)} l`);
+        });
+        // Horizontal lines
+        ys.forEach(y => {
+          parts.push(`${x0.toFixed(3)} ${y.toFixed(3)} m`);
+          parts.push(`${x1.toFixed(3)} ${y.toFixed(3)} l`);
+        });
+        parts.push('S');    // stroke all paths
+        parts.push('Q');    // restore state
+
+        const gridStreamBytes = new TextEncoder().encode(parts.join('\n') + '\n');
+
+        // ── Inject into page content stream ───────────────────────────────
+        // pdf-lib stores Contents as a single stream ref or an array of refs.
+        // We create a new PDFRawStream and inject it before (below) or after (above).
+        const gridStream = pdfDoc.context.stream(gridStreamBytes, {});
+        const gridRef    = pdfDoc.context.register(gridStream);
+
+        const contentsRef  = page.node.get(PDFLib.PDFName.of('Contents'));
+
+        if (!contentsRef) {
+          // No existing contents — just set ours
+          page.node.set(PDFLib.PDFName.of('Contents'), gridRef);
+        } else {
+          // Normalise to array
+          let existingRefs;
+          if (contentsRef instanceof PDFLib.PDFArray) {
+            existingRefs = contentsRef;
+          } else {
+            // Single ref — wrap in array
+            existingRefs = pdfDoc.context.obj([contentsRef]);
+          }
+          const newArray = position === 'below'
+            ? pdfDoc.context.obj([gridRef, ...existingRefs.asArray()])
+            : pdfDoc.context.obj([...existingRefs.asArray(), gridRef]);
+          page.node.set(PDFLib.PDFName.of('Contents'), newArray);
+        }
+      });
+
+      gridBytes = await pdfDoc.save({ useObjectStreams: true });
+      const lineCount = pages.length;
+      const _scl = parseInt(document.getElementById('grid-scale').value)||100;
+      const _rm  = parseFloat(document.getElementById('grid-interval').value)||1;
+      const _smm = ((_rm*1000)/_scl);
+      const _stxt= _smm<1?_smm.toFixed(2)+'mm':Number.isInteger(_smm)?_smm+'mm':_smm.toFixed(1)+'mm';
+      const _msg = gridMode==='spacing'
+        ? `Grid added — 1:${_scl}, ${_rm}m intervals (${_stxt} on paper), ${lineCount} page(s).`
+        : `Grid added — ${lineCount} page(s).`;
+      status('grid-status', _msg, 'ok');
+      document.getElementById('grid-dl').disabled    = false;
+      document.getElementById('grid-apply').disabled = false;
+    } catch(e) {
+      status('grid-status', 'Error: ' + e.message, 'err');
+    } finally {
+      document.getElementById('grid-btn').disabled = false;
+    }
+  });
+
+  document.getElementById('grid-dl').addEventListener('click',
+    () => { if (gridBytes) download(gridBytes, nameSuffix('_grid')); });
+  document.getElementById('grid-apply').addEventListener('click',
+    () => { if (gridBytes) applyAsActive(gridBytes, 'Grid', 'grid-status', 'grid-apply'); });
+}
+
+
+// ─── BATCH WATERMARK HELPERS (moved into wt-btn / wl-btn handlers above) ───
+
+// ─── 14. PLAN NUMBERING ────────────────────────────────────────────────────
+document.getElementById('pn-btn').addEventListener('click', async () => {
+  const files = (document.getElementById('tool-choose-file') || document.getElementById('pn-files') || {files:[]}).files;
+  if (!files.length) { status('pn-status', 'Choose at least one PDF file.', 'err'); return; }
+  const prefix  = document.getElementById('pn-prefix').value;
+  const start   = parseInt(document.getElementById('pn-start').value) || 1;
+  const pad     = parseInt(document.getElementById('pn-pad').value) || 2;
+  const pos     = document.getElementById('pn-pos').value;
+  const sz      = parseInt(document.getElementById('pn-size').value) || 18;
+  const hex     = document.getElementById('pn-color').value;
+  const cr = parseInt(hex.slice(1,3),16)/255;
+  const cg = parseInt(hex.slice(3,5),16)/255;
+  const cb = parseInt(hex.slice(5,7),16)/255;
+  const applyTo = document.getElementById('pn-pages').value;
+  status('pn-status', `Numbering ${files.length} file(s)…`, 'run');
+  try {
+    const zip = new JSZip();
+    for (let fi = 0; fi < files.length; fi++) {
+      const file   = files[fi];
+      const numStr = prefix + String(start + fi).padStart(pad, '0');
+      const buf    = await readFile(file);
+      const pdfDoc = await PDFLib.PDFDocument.load(buf.slice(0), { ignoreEncryption: true });
+      const font   = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+      const tw     = font.widthOfTextAtSize(numStr, sz);
+      const margin = 16;
+      const pg     = applyTo === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+      pg.forEach(page => {
+        let rot = 0;
+        try { const rn = page.node.get(PDFLib.PDFName.of('Rotate')); if (rn) rot = ((rn.value()%360)+360)%360; } catch(_){}
+        const swapped = rot===90||rot===270;
+        const { width: rawW, height: rawH } = page.getSize();
+        const visW = swapped ? rawH : rawW;
+        const visH = swapped ? rawW : rawH;
+        function toPdf(vx,vy){ switch(rot){ case 0:return{x:vx,y:vy}; case 90:return{x:rawW-vy,y:vx}; case 180:return{x:rawW-vx,y:rawH-vy}; default:return{x:vy,y:rawH-vx}; } }
+        const textRot = PDFLib.degrees(rot);
+        let vx, vy;
+        if      (pos === 'br') { vx = visW - tw - margin; vy = margin; }
+        else if (pos === 'bl') { vx = margin;              vy = margin; }
+        else if (pos === 'tr') { vx = visW - tw - margin; vy = visH - sz - margin; }
+        else                   { vx = margin;              vy = visH - sz - margin; }
+        const {x, y} = toPdf(vx, vy);
+        page.drawText(numStr, { x, y, size: sz, font, color: PDFLib.rgb(cr,cg,cb), rotate: textRot });
+      });
+      zip.file(numStr.replace(/[\/\\:*?"<>|]/g,'_') + '_' + file.name, await pdfDoc.save({ useObjectStreams:true }));
+    }
+    const blob = await zip.generateAsync({ type:'blob' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'numbered_plans.zip'; a.click();
+    status('pn-status', `Done — ${files.length} plan(s) numbered and zipped.`, 'ok');
+  } catch(e) { status('pn-status', 'Error: ' + e.message, 'err'); }
+});
+
+// ─── 15. REVISION CLOUD ────────────────────────────────────────────────────
+// COORDINATE SYSTEMS IN PDF-LIB:
+//   drawSvgPath  → SVG space: (0,0)=top-left, Y increases DOWNWARD
+//   drawText     → PDF space: (0,0)=bottom-left, Y increases UPWARD
+//   Convert SVG→PDF: pdf_y = pageH - svg_y
+{
+  let rcBytes = null;
+
+  // Build revision cloud outline in SVG space (y-down).
+  // Traverse clockwise: TL→TR→BR→BL→TL
+  // sweep-flag=1 (clockwise arc) on a clockwise path = bumps convex outward.
+  function buildCloudSvgPath(sx0, sy0, sx1, sy1, arcR) {
+    const dx = sx1 - sx0, dy = sy1 - sy0;
+    const n_h = Math.max(1, Math.round(dx / (arcR * 2)));
+    const n_v = Math.max(1, Math.round(dy / (arcR * 2)));
+    const sh = dx / n_h, sv = dy / n_v;
+    const p = [`M ${sx0.toFixed(2)} ${sy0.toFixed(2)}`];
+    // Top: left→right
+    for (let i=1;i<=n_h;i++) p.push(`A ${arcR.toFixed(2)} ${arcR.toFixed(2)} 0 0 1 ${(sx0+sh*i).toFixed(2)} ${sy0.toFixed(2)}`);
+    // Right: top→bottom
+    for (let i=1;i<=n_v;i++) p.push(`A ${arcR.toFixed(2)} ${arcR.toFixed(2)} 0 0 1 ${sx1.toFixed(2)} ${(sy0+sv*i).toFixed(2)}`);
+    // Bottom: right→left
+    for (let i=1;i<=n_h;i++) p.push(`A ${arcR.toFixed(2)} ${arcR.toFixed(2)} 0 0 1 ${(sx1-sh*i).toFixed(2)} ${sy1.toFixed(2)}`);
+    // Left: bottom→top
+    for (let i=1;i<=n_v;i++) p.push(`A ${arcR.toFixed(2)} ${arcR.toFixed(2)} 0 0 1 ${sx0.toFixed(2)} ${(sy1-sv*i).toFixed(2)}`);
+    p.push('Z');
+    return p.join(' ');
+  }
+
+  // Draw filled equilateral triangle + revision label at a cloud corner.
+  // All coords in SVG space; drawText converted to PDF space.
+  function drawRevTriangle(page, sx0, sy0, sx1, sy1, corner, revText, font, sz, inkColor) {
+    const side = Math.min(sx1-sx0, sy1-sy0) * 0.22;
+    const h    = side * Math.sqrt(3) / 2;
+    let v1, v2, v3;
+    // Triangle points outward from its corner (SVG y-down)
+    if      (corner==='tl') { v1=[sx0,sy0];     v2=[sx0+side,sy0]; v3=[sx0,sy0+h]; }
+    else if (corner==='tr') { v1=[sx1,sy0];     v2=[sx1-side,sy0]; v3=[sx1,sy0+h]; }
+    else if (corner==='bl') { v1=[sx0,sy1];     v2=[sx0+side,sy1]; v3=[sx0,sy1-h]; }
+    else                    { v1=[sx1,sy1];     v2=[sx1-side,sy1]; v3=[sx1,sy1-h]; }
+
+    // drawSvgPath uses SVG coords — pass as-is
+    const triPath = `M ${v1[0].toFixed(2)} ${v1[1].toFixed(2)} L ${v2[0].toFixed(2)} ${v2[1].toFixed(2)} L ${v3[0].toFixed(2)} ${v3[1].toFixed(2)} Z`;
+    page.drawSvgPath(triPath, { color: inkColor, borderColor: inkColor, borderWidth: 0.5 });
+
+    // drawText uses PDF coords (y-up): pdf_y = pageH - svg_y
+    const pageH = page.getSize().height;
+    const tw  = font.widthOfTextAtSize(revText, sz);
+    const cxS = (v1[0]+v2[0]+v3[0])/3;
+    const cyS = (v1[1]+v2[1]+v3[1])/3;
+    const tx  = cxS - tw/2;
+    const ty  = pageH - cyS - sz*0.35;  // SVG→PDF y conversion
+    page.drawText(revText, { x: tx, y: ty, size: sz, font, color: PDFLib.rgb(1,1,1) });
+  }
+
+  document.getElementById('rc-btn').addEventListener('click', async () => {
+    if (!currentBuffer) return;
+    status('rc-status', 'Adding revision cloud…', 'run');
+    document.getElementById('rc-btn').disabled = true;
+    try {
+      const revText  = document.getElementById('rc-rev').value.trim() || '1';
+      const corner   = document.getElementById('rc-corner').value;
+      const cloudWmm = parseFloat(document.getElementById('rc-w').value)      || 80;
+      const cloudHmm = parseFloat(document.getElementById('rc-h').value)      || 50;
+      const arcRmm   = parseFloat(document.getElementById('rc-arc').value)    || 4;
+      const marginMm = parseFloat(document.getElementById('rc-margin').value) || 10;
+      const applyTo  = document.getElementById('rc-pages').value;
+      const hex      = document.getElementById('rc-color').value;
+      const cr = parseInt(hex.slice(1,3),16)/255;
+      const cg = parseInt(hex.slice(3,5),16)/255;
+      const cb = parseInt(hex.slice(5,7),16)/255;
+      const inkColor = PDFLib.rgb(cr,cg,cb);
+
+      const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption:true });
+      const font   = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+      const pages  = applyTo === 'all' ? pdfDoc.getPages() : [pdfDoc.getPages()[0]];
+
+      pages.forEach(page => {
+        // For drawSvgPath: use visual page dimensions.
+        // getSize() returns raw dims; Rotate flag swaps them visually.
+        let pageRot = 0;
+        try { const rn = page.node.get(PDFLib.PDFName.of('Rotate')); if (rn) pageRot = ((rn.value()%360)+360)%360; } catch(_){}
+        const { width: rawW, height: rawH } = page.getSize();
+        // drawSvgPath sees the page in its natural (un-rotated) raw dimensions.
+        // We work in those raw dimensions, treating (0,0) as top-left (SVG space).
+        const W = rawW, H = rawH;
+
+        const cW  = cloudWmm * PT_PER_MM;
+        const cH  = cloudHmm * PT_PER_MM;
+        const mg  = marginMm * PT_PER_MM;
+        const arc = arcRmm   * PT_PER_MM;
+
+        // Cloud position in SVG space (y-down from top-left of raw page)
+        let sx0, sy0;
+        if      (corner === 'tl') { sx0 = mg;       sy0 = mg; }
+        else if (corner === 'tr') { sx0 = W-mg-cW;  sy0 = mg; }
+        else if (corner === 'bl') { sx0 = mg;        sy0 = H-mg-cH; }
+        else                      { sx0 = W-mg-cW;  sy0 = H-mg-cH; }
+        const sx1 = sx0+cW, sy1 = sy0+cH;
+
+        // Draw cloud outline
+        const cloudPath = buildCloudSvgPath(sx0, sy0, sx1, sy1, arc);
+        page.drawSvgPath(cloudPath, { borderColor: inkColor, borderWidth: 1.4 });
+
+        // Draw triangle + label
+        drawRevTriangle(page, sx0, sy0, sx1, sy1, corner, revText, font,
+          Math.min(cW, cH) * 0.13, inkColor);
+      });
+
+      rcBytes = await pdfDoc.save({ useObjectStreams:true });
+      status('rc-status', `Revision cloud "${revText}" added to ${pages.length} page(s).`, 'ok');
+      document.getElementById('rc-dl').disabled    = false;
+      document.getElementById('rc-apply').disabled = false;
+    } catch(e) {
+      status('rc-status', 'Error: ' + e.message, 'err');
+    } finally {
+      document.getElementById('rc-btn').disabled = false;
+    }
+  });
+
+  document.getElementById('rc-dl').addEventListener('click',
+    () => { if (rcBytes) download(rcBytes, nameSuffix('_revcloud')); });
+  document.getElementById('rc-apply').addEventListener('click',
+    () => { if (rcBytes) applyAsActive(rcBytes, 'Rev cloud', 'rc-status', 'rc-apply'); });
+}
+
+document.addEventListener('DOMContentLoaded', () => { openTool('rotate-pages');  });
+function resetToHome() {
+  currentBuffer=null; currentFileName=''; modificationHistory=[];
+  try { sessionStorage.removeItem('sb_file'); sessionStorage.removeItem('sb_name'); } catch(e){}
+  document.getElementById('file-indicator').textContent='No file loaded';
+  document.getElementById('btn-change-file').style.display='none';
+  const btn=document.getElementById('tool-choose-btn'), nm=document.getElementById('tool-choose-name');
+  if(btn) btn.textContent='Choose PDF'; if(nm) nm.textContent='';
+  const inp=document.getElementById('tool-choose-file'); if(inp) inp.value='';
+}
+(async function(){
+  try {
+    const b64=sessionStorage.getItem('sb_file'), name=sessionStorage.getItem('sb_name')||'document.pdf';
+    if(b64){
+      const bin=atob(b64),arr=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
+      currentBuffer=arr.buffer; currentFileName=name; _updateChooseBtn(name);
+      document.getElementById('file-indicator').innerHTML='File: <span style="color:#fff">'+name+'</span>';
+      document.getElementById('btn-change-file').style.display='inline-block';
+    }
+  }catch(e){}
+  const inp=document.getElementById('tool-choose-file');
+  if(inp) inp.addEventListener('change',async e=>{
+    const file=e.target.files[0]; if(!file) return;
+    await loadPDF(file); _updateChooseBtn(file.name);
+  });
+  document.addEventListener('dragover',e=>e.preventDefault());
+  document.addEventListener('drop',async e=>{
+    e.preventDefault();
+    const file=[...(e.dataTransfer.files||[])].find(f=>f.type==='application/pdf');
+    if(file){await loadPDF(file);_updateChooseBtn(file.name);}
+  });
+})();
+function _updateChooseBtn(name){
+  const btn=document.getElementById('tool-choose-btn'),span=document.getElementById('tool-choose-name');
+  if(btn) btn.textContent='\u2713 PDF loaded'; if(span) span.textContent=name;
+}
+
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: { no_file: 'No file loaded',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'banner_working': 'Working on modified file',
+    'btn_dl_pdf': 'Download PDF',
+    'btn_keep': 'Keep working with this version',
+    'btn_dl': 'Download',
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'rp_h2': 'Rotate PDF pages',
+    'rp_desc': 'Rotate all pages or a specific range — 90°, 180° or 270°. Applied as a native PDF transform.',
+    'rp_label_angle': 'Rotation:',
+    'rp_90cw': '90° clockwise',
+    'rp_90ccw': '90° counter-clockwise',
+    'rp_180': '180°',
+    'rp_label_pages': 'Apply to:',
+    'rp_pages_all': 'All pages',
+    'rp_pages_odd': 'Odd pages only',
+    'rp_pages_even': 'Even pages only',
+    'rp_pages_range': 'Page range',
+    'rp_label_from': 'From page:',
+    'rp_label_to': 'To page:',
+    'rp_btn': 'Rotate pages',
+  },
+  es: { no_file: 'Sin archivo cargado',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl_pdf': 'Descargar PDF',
+    'btn_keep': 'Seguir trabajando con esta versión',
+    'btn_dl': 'Descargar',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'rp_h2': 'Rotar páginas de un PDF',
+    'rp_desc': 'Rota todas las páginas o un rango específico — 90°, 180° o 270°. Se aplica como transformación PDF nativa.',
+    'rp_label_angle': 'Rotación:',
+    'rp_90cw': '90° en sentido horario',
+    'rp_90ccw': '90° en sentido antihorario',
+    'rp_180': '180°',
+    'rp_label_pages': 'Aplicar a:',
+    'rp_pages_all': 'Todas las páginas',
+    'rp_pages_odd': 'Solo páginas impares',
+    'rp_pages_even': 'Solo páginas pares',
+    'rp_pages_range': 'Rango de páginas',
+    'rp_label_from': 'Desde la página:',
+    'rp_label_to': 'Hasta la página:',
+    'rp_btn': 'Rotar páginas',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
+
+
+// ─── COLOR PALETTE ──────────────────────────────────────────────────────────
+const CP_KEY = 'sb_color_palette';
+const CP_MAX = 7;
+let cpActiveColor = '#1a1a1a';
+let cpTargetInputId = null; // which color input is currently active
+
+function cpInit() {
+  // Show EyeDropper button if supported
+  if (window.EyeDropper) {
+    document.getElementById('cp-eyedropper').classList.add('supported');
+  }
+  // Pre-apply first palette color if one was saved in this session
+  const _saved = cpLoad();
+  if (_saved.length > 0) cpActiveColor = _saved[0];
+  cpSetActive(cpActiveColor, false);
+  cpRenderSwatches();
+
+  // Watch all known color inputs for changes
+  const colorIds = ['sb-color','sbf-color','grid-color','pn-color','rc-color',
+                    'tn-color','vn-plancolor','wt-color'];
+  colorIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', e => cpOnToolColorChange(e.target.value));
+    el.addEventListener('input',  e => cpOnToolColorChange(e.target.value));
+    el.addEventListener('focus',  () => { cpTargetInputId = id; });
+  });
+
+  // Show palette when a tool is open
+  document.addEventListener('toolOpened', () => {
+    document.getElementById('color-palette-wrap').classList.add('visible');
+  });
+}
+
+function cpOnToolColorChange(hex) {
+  if (!hex || hex.length < 4) return;
+  cpSetActive(hex, true);
+}
+
+function cpSetActive(hex, save) {
+  cpActiveColor = hex;
+  const shape = document.getElementById('cp-active-shape');
+  if (shape) shape.style.background = hex;
+  if (save) cpSave(hex);
+}
+
+function cpSave(hex) {
+  let palette = cpLoad();
+  palette = palette.filter(c => c.toLowerCase() !== hex.toLowerCase());
+  palette.unshift(hex);
+  if (palette.length > CP_MAX) palette = palette.slice(0, CP_MAX);
+  sessionStorage.setItem(CP_KEY, JSON.stringify(palette));
+  cpRenderSwatches();
+}
+
+function cpLoad() {
+  try { return JSON.parse(sessionStorage.getItem(CP_KEY)) || []; }
+  catch { return []; }
+}
+
+function cpRenderSwatches() {
+  const container = document.getElementById('color-palette-swatches');
+  if (!container) return;
+  const palette = cpLoad();
+  container.innerHTML = '';
+  palette.forEach(hex => {
+    const sw = document.createElement('div');
+    sw.className = 'cp-swatch';
+    sw.style.background = hex;
+    sw.title = hex;
+    sw.onclick = () => cpApplyColor(hex);
+    container.appendChild(sw);
+  });
+}
+
+function cpApplyColor(hex) {
+  cpSetActive(hex, false);
+  // Apply to active tool color input if known
+  if (cpTargetInputId) {
+    const el = document.getElementById(cpTargetInputId);
+    if (el) { el.value = hex; el.dispatchEvent(new Event('input')); }
+    return;
+  }
+  // Fallback: apply to all visible color inputs in active panel
+  const activePanel = document.querySelector('.tool-panel.active');
+  if (!activePanel) return;
+  activePanel.querySelectorAll('input[type="color"]').forEach(inp => {
+    inp.value = hex; inp.dispatchEvent(new Event('input'));
+  });
+  // Also wt-color (text input)
+  const wt = activePanel.querySelector('#wt-color');
+  if (wt) { wt.value = hex; wt.dispatchEvent(new Event('input')); }
+}
+
+function cpOpenPicker() {
+  const inp = document.getElementById('cp-hidden-input');
+  inp.value = cpActiveColor;
+  inp.click();
+}
+
+function cpOnPick(hex) {
+  cpSetActive(hex, true);
+  cpApplyColor(hex);
+}
+
+async function cpEyeDropper() {
+  try {
+    const eyeDropper = new EyeDropper();
+    const result = await eyeDropper.open();
+    cpOnPick(result.sRGBHex);
+  } catch(e) { /* user cancelled */ }
+}
+
+// Hook into openTool to show palette and detect active color input
+const _cpOrigOpenTool = openTool;
+openTool = function(id) {
+  _cpOrigOpenTool(id);
+  document.getElementById('color-palette-wrap').classList.add('visible');
+  cpTargetInputId = null;
+  // Apply saved palette color to this tool's color inputs
+  const _pal = cpLoad();
+  if (_pal.length > 0) {
+    setTimeout(() => cpApplyColor(_pal[0]), 0);
+  }
+};
+
+document.addEventListener('DOMContentLoaded', cpInit);
+
 </script>
 
 <footer style="text-align:center;padding:24px 20px;font-size:0.75rem;color:var(--mid);border-top:1px solid var(--light);margin-top:40px;">
-  © 2026 Scalebar PDF Tools &nbsp;·&nbsp;
-  <a href="https://www.linkedin.com/company/scalebar-pdf" target="_blank" rel="noopener"
-     style="color:var(--mid);text-decoration:underline;">LinkedIn</a>
+  © 2026 Scalebar PDF Tools
 </footer>
 </body>
 </html>
