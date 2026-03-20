@@ -71,6 +71,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     gap: 12px;
     margin-bottom: 4px;
   }
+  @media (max-width: 600px) {
+    .tools-grid { grid-template-columns: repeat(2, 1fr); }
+    .tools-peek-wrap { max-height: calc(120px + 10px + 120px + 10px + 80px); }
+  }
   .tool-card {
     background: var(--white); border: 1px solid var(--light);
     border-radius: var(--radius); padding: 18px; cursor: pointer;
@@ -1623,7 +1627,7 @@ let gsInstance = null; // Ghostscript WASM singleton
 const TRANSLATIONS = {
   en: {
     tagline:       'Scalebar PDF Tools — 100% free',
-    hero_desc:     '20 free tools for architects and technical professionals — compress, watermark, scale bar, title block, merge, split, OCR and more. No account, no upload, no limits.',
+    hero_desc:     'For architects and professionals who need to edit files efficiently and confidentially. Compress your PDF, add graphic scale bars and architectural title blocks, resize and number pages, add watermarks, find text with OCR and more.',
     privacy_badge: 'No upload · No account · No file size limit',
     choose_tool:   'Choose a tool:',
     more_tools:    'More tools',
@@ -3644,7 +3648,9 @@ document.querySelectorAll('.sb-style-btn').forEach(btn => {
 </script>
 
 <footer style="text-align:center;padding:24px 20px;font-size:0.75rem;color:var(--mid);border-top:1px solid var(--light);margin-top:40px;">
-  © 2026 Scalebar PDF Tools
+  © 2026 Scalebar PDF Tools &nbsp;·&nbsp;
+  <a href="https://www.linkedin.com/company/scalebar-pdf" target="_blank" rel="noopener"
+     style="color:var(--mid);text-decoration:underline;">LinkedIn</a>
 </footer>
 </body>
 </html>
