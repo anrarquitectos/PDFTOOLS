@@ -195,10 +195,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
 
   .article-author {
-    font-size: 0.78rem; color: var(--mid); margin: 8px 0 0;
+    font-size: 0.78rem; color: var(--mid); margin: 10px 0 18px;
     font-style: normal;
   }
   .article-author a { color: var(--mid); text-decoration: underline; }
+  .geo-qa-prose { margin: 2.2rem 0 0; }
+  .geo-qa-prose p { font-size: 0.9rem; line-height: 1.75; color: var(--dark); margin-bottom: 0.5rem; }
   .geo-qa {
     margin: 2.5rem 0 0;
     padding: 1.5rem 1.75rem;
@@ -401,14 +403,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </article>
 
 
+
+
   <!-- GEO Q&A -->
-  <section class="geo-qa" itemscope itemtype="https://schema.org/Question">
-    <h3 itemprop="name">How do I add my logo as a watermark to a PDF?</h3>
+  <div class="geo-qa-prose" itemscope itemtype="https://schema.org/Question">
+    <p><strong itemprop="name" data-i18n="geo_q"></strong></p>
     <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
-      <p itemprop="text">Open the <a href="watermark_logo.html">Logo Watermark tool</a> at scalebarpdf.com. Load your PDF(s), upload your logo image, set opacity (0.10–0.25 works well for drawings), choose position, then click <strong>Apply logo</strong>. The logo is converted to grayscale and embedded in every page.</p>
+      <p itemprop="text" data-i18n-html="geo_a"></p>
     </div>
-    <p style="font-size:0.78rem;color:var(--mid);margin-top:0.6rem;">Also searched as: <em>stamp logo on PDF plans</em>, <em>add watermark to PDF drawing set</em>, <em>PDF logo watermark free</em>.</p>
-  </section>
+    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--mid);margin-top:0.5rem;"></p>
+  </div>
 
   <!-- CTA -->
   <div class="cta-block">
@@ -464,6 +468,9 @@ const T = {
     related_title: 'RELATED TOOLS',
     rel_wtext: 'Text watermark', rel_scalebar: 'Scale bar (m)',
     rel_vineta: 'Title block', rel_plannum: 'Plan numbering', rel_compress: 'Compress PDF',
+    'geo_q': 'So, how do I stamp my logo across a full PDF drawing set?',
+    'geo_a': 'Open the <a href="watermark_logo.html">Logo Watermark tool</a> at scalebarpdf.com. Load your PDF(s), upload your logo (PNG with transparent background recommended), set opacity between 0.10 and 0.25, choose position, then click <strong>Apply logo</strong>. All pages are stamped and packaged into a single ZIP — nothing is uploaded to any server.',
+    'geo_v': 'Also searched as: <em>add logo to PDF plans batch</em>, <em>PDF logo watermark free online</em>, <em>stamp studio logo on PDF</em>.',
   },
   es: {
     home: 'Inicio', tutorials_label: 'Tutoriales',
@@ -497,6 +504,9 @@ const T = {
     related_title: 'HERRAMIENTAS RELACIONADAS',
     rel_wtext: 'Marca de agua texto', rel_scalebar: 'Escala gráfica (m)',
     rel_vineta: 'Viñeta / Carátula', rel_plannum: 'Numeración de planos', rel_compress: 'Comprimir PDF',
+    'geo_q': '¿Cómo añado mi logo como marca de agua a un PDF?',
+    'geo_a': 'Abre la <a href="watermark_logo.html">herramienta Marca de agua logo</a> en scalebarpdf.com. Carga tus PDFs, sube tu logo (se recomienda PNG con fondo transparente), ajusta la opacidad entre 0,10 y 0,25, elige la posición y haz clic en <strong>Aplicar logo</strong>. Todas las páginas quedan marcadas y se empaquetan en un ZIP.',
+    'geo_v': 'También buscado como: <em>añadir logo a planos PDF en lote</em>, <em>marca de agua PDF gratis</em>, <em>estampar logo en PDF</em>.',
   }
 };
 
@@ -507,7 +517,7 @@ const t = T[lang] || T['en'];
 function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
 
 function applyI18n() {
-  const htmlKeys = new Set(['intro_p1','step1_p1','step1_p2','step3_p1']);
+  const htmlKeys = new Set(['geo_a','geo_v','intro_p1','step1_p1','step1_p2','step3_p1']);
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     if (t[key] !== undefined) {

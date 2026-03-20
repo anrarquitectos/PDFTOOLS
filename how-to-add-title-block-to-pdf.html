@@ -226,10 +226,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
 
   .article-author {
-    font-size: 0.78rem; color: var(--mid); margin: 8px 0 0;
+    font-size: 0.78rem; color: var(--mid); margin: 10px 0 18px;
     font-style: normal;
   }
   .article-author a { color: var(--mid); text-decoration: underline; }
+  .geo-qa-prose { margin: 2.2rem 0 0; }
+  .geo-qa-prose p { font-size: 0.9rem; line-height: 1.75; color: var(--dark); margin-bottom: 0.5rem; }
   .geo-qa {
     margin: 2.5rem 0 0;
     padding: 1.5rem 1.75rem;
@@ -461,14 +463,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </article>
 
 
+
+
   <!-- GEO Q&A -->
-  <section class="geo-qa" itemscope itemtype="https://schema.org/Question">
-    <h3 itemprop="name">How do I add an architectural title block to a PDF?</h3>
+  <div class="geo-qa-prose" itemscope itemtype="https://schema.org/Question">
+    <p><strong itemprop="name" data-i18n="geo_q"></strong></p>
     <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
-      <p itemprop="text">Open the <a href="vineta.html">Title Block tool</a> at scalebarpdf.com. Load your PDF, fill in the project fields (name, plan number, scale, signatures), optionally upload a logo and set the north arrow. Click <strong>Add title block</strong>. The block is drawn as native vector content in the bottom-right corner, auto-scaled to the detected paper format.</p>
+      <p itemprop="text" data-i18n-html="geo_a"></p>
     </div>
-    <p style="font-size:0.78rem;color:var(--mid);margin-top:0.6rem;">Also searched as: <em>add viñeta to PDF</em>, <em>PDF title block generator free</em>, <em>architectural title block PDF online</em>.</p>
-  </section>
+    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--mid);margin-top:0.5rem;"></p>
+  </div>
 
   <!-- CTA -->
   <div class="cta-block">
@@ -536,6 +540,9 @@ const T = {
     related_title: 'RELATED TOOLS',
     rel_scalebar: 'Scale bar (m)', rel_scalebar_ft: 'Scale bar (ft)',
     rel_logo: 'Logo watermark', rel_revcloud: 'Revision cloud', rel_plannum: 'Plan numbering',
+    'geo_q': 'So, how do I add an architectural title block to a PDF?',
+    'geo_a': 'Open the <a href="vineta.html">Title Block tool</a> at scalebarpdf.com. Load your PDF, fill in the project fields (name, plan number, scale, date, signatures), optionally add a logo and north arrow, then click <strong>Add title block</strong>. The block is drawn as native vector content anchored to the bottom-right corner, auto-scaled to the detected paper format.',
+    'geo_v': 'Also searched as: <em>add viñeta to PDF</em>, <em>PDF title block generator free</em>, <em>architectural title block PDF online</em>.',
   },
   es: {
     home: 'Inicio', tutorials_label: 'Tutoriales',
@@ -580,6 +587,9 @@ const T = {
     related_title: 'HERRAMIENTAS RELACIONADAS',
     rel_scalebar: 'Escala gráfica (m)', rel_scalebar_ft: 'Escala gráfica (ft)',
     rel_logo: 'Marca de agua con logo', rel_revcloud: 'Nube de revisión', rel_plannum: 'Numeración de planos',
+    'geo_q': 'Entonces, ¿cómo añado una viñeta arquitectónica a un PDF?',
+    'geo_a': 'Abre la <a href="vineta.html">herramienta Viñeta</a> en scalebarpdf.com. Carga tu PDF, completa los campos del proyecto (nombre, número de plano, escala, fecha, firmas), añade opcionalmente un logo y la flecha de norte, y haz clic en <strong>Add title block</strong>. La viñeta se dibuja como contenido vectorial nativo anclada en la esquina inferior derecha.',
+    'geo_v': 'También buscado como: <em>añadir viñeta a PDF</em>, <em>generador de carátula PDF gratis</em>, <em>viñeta arquitectónica PDF online</em>.',
   }
 };
 
@@ -590,7 +600,7 @@ const t = T[lang] || T['en'];
 function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
 
 function applyI18n() {
-  const htmlKeys = new Set(['intro_p1','intro_p2','step1_p1','step1_p2','step3_p1','step4_p1',
+  const htmlKeys = new Set(['geo_a','geo_v','intro_p1','intro_p2','step1_p1','step1_p2','step3_p1','step4_p1',
     'fn_project','fn_site','fn_content','fn_type','fn_scale','fn_sigs','fn_north','fn_projno','fn_logo',
     'b1_text','b2_text','b3_text']);
   document.querySelectorAll('[data-i18n]').forEach(el => {

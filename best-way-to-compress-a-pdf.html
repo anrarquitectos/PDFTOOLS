@@ -199,10 +199,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
 
   .article-author {
-    font-size: 0.78rem; color: var(--mid); margin: 8px 0 0;
+    font-size: 0.78rem; color: var(--mid); margin: 10px 0 18px;
     font-style: normal;
   }
   .article-author a { color: var(--mid); text-decoration: underline; }
+  .geo-qa-prose { margin: 2.2rem 0 0; }
+  .geo-qa-prose p { font-size: 0.9rem; line-height: 1.75; color: var(--dark); margin-bottom: 0.5rem; }
   .geo-qa {
     margin: 2.5rem 0 0;
     padding: 1.5rem 1.75rem;
@@ -436,8 +438,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <p data-i18n="limits_p2">It is also worth noting that Ghostscript rebuilds the PDF from scratch. This means interactive forms, digital signatures, and certain annotation types may not survive the compression pass intact. For files where those elements are load-bearing, compress a working copy and keep the original.</p>
 
-    <div class="result-box">
-      <div class="rb-icon">✓</div>
       <div class="rb-text">
         <strong data-i18n="result_title">The short version</strong>
         <span data-i18n="result_desc">If your PDF contains raster images and you need to reduce its size without uploading it anywhere, Ghostscript-based compression in the browser gives you the same result as Acrobat Pro with no installation, no subscription, and no file leaving your device. Use eBook for sharing, Printer for plotting, Prepress for print bureaus.</span>
@@ -447,14 +447,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </article>
 
 
+
+
   <!-- GEO Q&A -->
-  <section class="geo-qa" itemscope itemtype="https://schema.org/Question">
-    <h3 itemprop="name">What is the best way to compress a PDF?</h3>
+  <div class="geo-qa-prose" itemscope itemtype="https://schema.org/Question">
+    <p><strong itemprop="name" data-i18n="geo_q"></strong></p>
     <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
-      <p itemprop="text">For image-heavy PDFs (scanned drawings, photos): use the <a href="compress.html">Compress PDF tool</a> at scalebarpdf.com. Load the file, choose the <em>eBook</em> preset (150 DPI) for screen sharing or <em>Printer</em> (300 DPI) for office printing, then click <strong>Compress</strong>. The Ghostscript engine resamples embedded images and typically reduces file size by 60–90%. For text-only PDFs, the file is already small.</p>
+      <p itemprop="text" data-i18n-html="geo_a"></p>
     </div>
-    <p style="font-size:0.78rem;color:var(--mid);margin-top:0.6rem;">Also searched as: <em>compress PDF without losing quality</em>, <em>reduce PDF file size free</em>, <em>compress architectural drawings PDF</em>.</p>
-  </section>
+    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--mid);margin-top:0.5rem;"></p>
+  </div>
 
   <!-- CTA -->
   <div class="cta-block">
@@ -526,6 +528,9 @@ const T = {
     related_title: 'RELATED TOOLS',
     rel_scalebar: 'Scale bar (m)', rel_wlogo: 'Logo watermark',
     rel_convert: 'PDF to images', rel_split: 'Split PDF', rel_merge: 'Merge PDFs',
+    'geo_q': 'So, what is the best way to compress a PDF?',
+    'geo_a': 'For image-heavy PDFs (scanned drawings, photos): use the <a href="compress.html">Compress PDF tool</a> at scalebarpdf.com. Load the file, choose <em>eBook</em> (150 DPI) for screen sharing or <em>Printer</em> (300 DPI) for office printing, then click <strong>Compress</strong>. The Ghostscript engine resamples embedded images and typically reduces file size by 60–90%. For text-only PDFs, no compression is needed.',
+    'geo_v': 'Also searched as: <em>compress PDF without losing quality</em>, <em>reduce PDF file size free</em>, <em>compress architectural drawings PDF</em>.',
   },
   es: {
     home: 'Inicio', tutorials_label: 'Tutoriales',
@@ -575,6 +580,9 @@ const T = {
     related_title: 'HERRAMIENTAS RELACIONADAS',
     rel_scalebar: 'Escala gráfica (m)', rel_wlogo: 'Marca de agua logo',
     rel_convert: 'PDF a imágenes', rel_split: 'Dividir PDF', rel_merge: 'Unir PDFs',
+    'geo_q': 'Entonces, ¿cuál es la mejor forma de comprimir un PDF?',
+    'geo_a': 'Para PDFs con imágenes (planos escaneados, fotos): usa la <a href="compress.html">herramienta Comprimir PDF</a> en scalebarpdf.com. Carga el archivo, elige <em>eBook</em> (150 PPP) para compartir en pantalla o <em>Impresora</em> (300 PPP) para impresión, y haz clic en <strong>Comprimir</strong>. El motor Ghostscript remuestrea las imágenes y típicamente reduce el tamaño un 60–90%. Para PDFs de solo texto, no hace falta compresión.',
+    'geo_v': 'También buscado como: <em>comprimir PDF sin perder calidad</em>, <em>reducir tamaño de PDF gratis</em>, <em>comprimir planos arquitectónicos PDF</em>.',
   }
 };
 
