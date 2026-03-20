@@ -125,15 +125,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     overflow: hidden;
   }
   .screenshot-wrap img { display: block; width: 100%; height: auto; }
-  .screenshot-placeholder {
-    background: var(--white);
-    border: 2px dashed #ccc;
-    border-radius: var(--radius);
-    padding: 48px 24px;
-    text-align: center;
-    color: var(--mid); font-size: 0.8rem;
-  }
-  .screenshot-placeholder .sc-icon { font-size: 2rem; margin-bottom: 8px; }
   .screenshot-caption {
     padding: 8px 14px;
     background: #f2f2f0;
@@ -335,64 +326,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n="step1_p2">Then click <strong>Choose image</strong> and select your logo file. PNG with a transparent background works best. JPG is also accepted. The tool will convert it to grayscale automatically, so the original colors of your logo file do not matter.</p>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc1-placeholder">
-        <div class="sc-icon">🖼</div>
-        <span>Screenshot 1</span>
-      </div>
-      <img id="sc1-img" src="img/tutorial-wlogo-01.png" alt="Logo watermark tool panel with multiple PDFs loaded and a logo file selected" style="display:none;"
-        onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';"
-        onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';">
-      <div class="screenshot-caption" data-i18n="sc1_caption">The panel after loading several PDFs and a logo file. The button shows the number of PDFs ready.</div>
-    </div>
-
-    <!-- STEP 2 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step2_title">Adjust opacity, size, rotation and position</span></h3>
-
-    <p data-i18n="step2_p1">Four parameters control how the logo appears on each sheet:</p>
-
-    <ul style="margin: 0 0 16px 20px; font-size:0.88rem; line-height:1.9;">
-      <li data-i18n="bullet1"><strong data-i18n="b1_label">Opacity</strong> <span data-i18n="b1_text">— a value between 0.05 and 1. For a background stamp on working drawings, 0.10 to 0.18 is usually enough to be readable without interfering with drawing content. For a title page or cover sheet, 0.30 or higher works well.</span></li>
-      <li data-i18n="bullet2"><strong data-i18n="b2_label">Scale</strong> <span data-i18n="b2_text">— as a percentage of the page width. 40% places a centered logo that reads clearly on A1 or A0 sheets. Reduce to 20–25% for a corner logo.</span></li>
-      <li data-i18n="bullet3"><strong data-i18n="b3_label">Rotation</strong> <span data-i18n="b3_text">— in degrees. A slight diagonal angle (around -30°) is a common choice for central watermarks. For corner positions, 0° tends to look cleaner.</span></li>
-      <li data-i18n="bullet4"><strong data-i18n="b4_label">Position</strong> <span data-i18n="b4_text">— center, bottom right, top left, top right or bottom left. Center with a diagonal rotation is the standard for a discreet full-sheet stamp. Corner positions with 0° rotation work for a persistent logo mark.</span></li>
-    </ul>
-
-    <p data-i18n="step2_p2">The same settings apply to every page of every PDF in the batch. If you need different settings for a cover sheet and the rest of the set, process them as two separate runs.</p>
-
-    <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc2-placeholder">
-        <div class="sc-icon">🖼</div>
-        <span>Screenshot 2</span>
-      </div>
-      <img id="sc2-img" src="img/tutorial-wlogo-02.png" alt="Logo watermark controls showing opacity 0.15, scale 40, rotation -30, position center" style="display:none;"
-        onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';"
-        onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';">
-      <div class="screenshot-caption" data-i18n="sc2_caption">Typical settings for a discreet central stamp: opacity 0.15, scale 40%, rotation -30°, applied to all pages.</div>
-    </div>
-
-    <!-- STEP 3 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step3_title">Apply and download the ZIP</span></h3>
-
-    <p data-i18n="step3_p1">Click <strong>Apply logo and download ZIP</strong>. Each PDF is processed in turn and packaged into a single ZIP file that downloads automatically. The original file names are preserved so the set stays organised. The entire operation runs in your browser — no files leave your device at any point.</p>
-
-    <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc3-placeholder">
-        <div class="sc-icon">🖼</div>
-        <span>Screenshot 3</span>
-      </div>
-      <img id="sc3-img" src="img/tutorial-wlogo-03.png" alt="Architectural drawing with a grayscale studio logo stamped diagonally across the sheet" style="display:none;"
-        onerror="this.style.display='none';document.getElementById('sc3-placeholder').style.display='block';"
-        onload="this.style.display='block';document.getElementById('sc3-placeholder').style.display='none';">
-      <div class="screenshot-caption" data-i18n="sc3_caption">Result: a grayscale studio logo embedded diagonally at low opacity. The drawing content remains fully legible.</div>
-    </div>
-
-    <div class="result-box">
-      <div class="rb-icon">✓</div>
-      <div class="rb-text">
-        <strong data-i18n="result_title">The logo is embedded as a PDF image object</strong>
-        <span data-i18n="result_desc">The watermark is not a flattened raster overlay of the whole page. Only the logo image is composited into the content stream, keeping the rest of the PDF data intact. Text, vectors and annotations on the original pages remain selectable and searchable after watermarking.</span>
-      </div>
-    </div>
 
     <h3 style="border:none; padding:0;" data-i18n="tips_title">A few practical notes</h3>
 
@@ -524,6 +457,10 @@ function applyI18n() {
       if (htmlKeys.has(key)) el.innerHTML = t[key];
       else el.textContent = t[key];
     }
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.dataset.i18nHtml;
+    if (t[key] !== undefined) el.innerHTML = t[key];
   });
   const activeBtn = document.getElementById('lang-' + lang);
   if (activeBtn) activeBtn.classList.add('active');

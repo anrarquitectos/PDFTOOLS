@@ -143,12 +143,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     overflow: hidden;
   }
   .screenshot-wrap img { display: block; width: 100%; height: auto; }
-  .screenshot-placeholder {
-    background: var(--white); border: 2px dashed #ccc;
-    border-radius: var(--radius); padding: 48px 24px;
-    text-align: center; color: var(--mid); font-size: 0.8rem;
-  }
-  .screenshot-placeholder .sc-icon { font-size: 2rem; margin-bottom: 8px; }
   .screenshot-caption {
     padding: 8px 14px; background: #f2f2f0;
     border-top: 1px solid var(--light);
@@ -388,15 +382,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n="gs_p2">On a scanned A1 drawing at 600 DPI, compressing to the eBook preset (150 DPI) typically produces an 80–90% reduction in file size with no visible degradation at screen viewing distances. The Printer preset (300 DPI) typically yields 50–70% reduction while remaining suitable for office laser printing. These are the numbers that matter for day-to-day use in a practice.</p>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc1-placeholder">
-        <div class="sc-icon">🖼</div>
-        <span>Screenshot 1</span>
-      </div>
       <img id="sc1-img" src="img/tutorial-compress-01.png"
         alt="Compress tool panel showing the four presets with Screen, eBook, Printer and Prepress options"
-        style="display:none;"
-        onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';"
-        onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';">
+>
       <div class="screenshot-caption" data-i18n="sc1_caption">The four presets map directly to Ghostscript's -dPDFSETTINGS values. Custom mode exposes DPI and JPEG quality as separate controls.</div>
     </div>
 
@@ -420,15 +408,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n="access_p2">This matters in several specific contexts: a freelance architect without an Acrobat subscription, a student working from a university computer where installing software is restricted, a practice collaborator on a client-site machine, or anyone in a region where the subscription cost of Adobe tools represents a significant expense. The result they get is equivalent to what a studio with full Acrobat Pro produces.</p>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc2-placeholder">
-        <div class="sc-icon">🖼</div>
-        <span>Screenshot 2</span>
-      </div>
       <img id="sc2-img" src="img/tutorial-compress-02.png"
         alt="Status area after compression showing original and compressed file size"
-        style="display:none;"
-        onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';"
-        onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';">
+>
       <div class="screenshot-caption" data-i18n="sc2_caption">After compression, the status area shows the original size, the compressed size and the reduction percentage.</div>
     </div>
 
@@ -596,6 +578,10 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     if (t[key] !== undefined) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.dataset.i18nHtml;
+    if (t[key] !== undefined) el.innerHTML = t[key];
   });
   const activeBtn = document.getElementById('lang-' + lang);
   if (activeBtn) activeBtn.classList.add('active');

@@ -146,16 +146,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .screenshot-wrap img {
     display: block; width: 100%; height: auto;
   }
-  .screenshot-placeholder {
-    background: var(--white);
-    border: 2px dashed #ccc;
-    border-radius: var(--radius);
-    padding: 48px 24px;
-    text-align: center;
-    color: var(--mid);
-    font-size: 0.8rem;
-  }
-  .screenshot-placeholder .sc-icon { font-size: 2rem; margin-bottom: 8px; }
   .screenshot-caption {
     padding: 8px 14px;
     background: #f2f2f0;
@@ -366,10 +356,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n="step1_p2">If you have a multi-page plan set, you can apply the title block to all pages at once or to the first page only. The tool detects each page's paper format independently, so the block width will adapt correctly even if your set mixes A1 and A3 sheets.</p>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc1-placeholder">
-        <div class="sc-icon">🖼</div>
-        <div data-i18n="sc_placeholder">Screenshot — to be added</div>
-      </div>
       <img id="sc1-img" src="img/tutorial-vineta-01.png" alt="Title block tool panel with a PDF loaded" style="display:none;"
            onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';"
            onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';">
@@ -402,10 +388,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </table>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc2-placeholder">
-        <div class="sc-icon">🖼</div>
-        <div data-i18n="sc_placeholder">Screenshot — to be added</div>
-      </div>
       <img id="sc2-img" src="img/tutorial-vineta-02.png" alt="Title block form fields filled in with sample project data" style="display:none;"
            onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';"
            onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';">
@@ -420,10 +402,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p class="note" data-i18n="note_vector">The block is drawn as pure PDF vector content — lines, rectangles and text operators — so it is resolution-independent and survives any subsequent compression or merge operation without quality loss.</p>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc3-placeholder">
-        <div class="sc-icon">🖼</div>
-        <div data-i18n="sc_placeholder">Screenshot — to be added</div>
-      </div>
       <img id="sc3-img" src="img/tutorial-vineta-03.png" alt="Options row showing size selector, plan ID colour picker and colour swatches" style="display:none;"
            onerror="this.style.display='none';document.getElementById('sc3-placeholder').style.display='block';"
            onload="this.style.display='block';document.getElementById('sc3-placeholder').style.display='none';">
@@ -436,10 +414,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n="step4_p1">Click <strong>Add title block</strong>. The block is drawn into the PDF content stream of each selected page. Download the result immediately, or click <strong>↩ Keep working</strong> to promote the output as the active file and apply further tools in the same session — a scale bar, a watermark, compression — without any intermediate downloads.</p>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc4-placeholder">
-        <div class="sc-icon">🖼</div>
-        <div data-i18n="sc_placeholder">Screenshot — to be added</div>
-      </div>
       <img id="sc4-img" src="img/tutorial-vineta-04.png" alt="A finished architectural PDF with the title block visible in the bottom-right corner" style="display:none;"
            onerror="this.style.display='none';document.getElementById('sc4-placeholder').style.display='block';"
            onload="this.style.display='block';document.getElementById('sc4-placeholder').style.display='none';">
@@ -509,7 +483,6 @@ const T = {
     step1_p1: 'Navigate to the <strong>Title block</strong> tool from the homepage and click <strong>Choose PDF</strong>. The file is processed entirely in your browser — nothing is sent to any server at any point.',
     step1_p2: 'If you have a multi-page plan set, you can apply the title block to all pages at once or to the first page only. The tool detects each page\'s paper format independently, so the block width will adapt correctly even if your set mixes A1 and A3 sheets.',
     sc1_caption: 'The tool panel after loading a PDF, with the input fields ready to fill in.',
-    sc_placeholder: 'Screenshot — to be added',
     step2_title: 'Fill in the project data fields',
     step2_p1: 'The tool provides a set of standard architectural fields. All text is automatically uppercased. Fields left empty are omitted from the block — the layout contracts cleanly around whatever you provide.',
     th_field: 'Field', th_notes: 'Notes',
@@ -556,7 +529,6 @@ const T = {
     step1_p1: 'Ve a la herramienta <strong>Title block</strong> desde la página de inicio y haz clic en <strong>Choose PDF</strong>. El archivo se procesa completamente en tu navegador — nada se envía a ningún servidor.',
     step1_p2: 'Si tienes un conjunto de planos de varias páginas, puedes aplicar la viñeta a todas las páginas a la vez o solo a la primera. La herramienta detecta el formato de cada página de forma independiente, por lo que el ancho de la viñeta se adaptará correctamente incluso si el conjunto mezcla láminas A1 y A3.',
     sc1_caption: 'El panel de la herramienta después de cargar un PDF, con los campos de entrada listos para completar.',
-    sc_placeholder: 'Captura de pantalla — pendiente de añadir',
     step2_title: 'Completa los campos de datos del proyecto',
     step2_p1: 'La herramienta dispone de un conjunto de campos arquitectónicos estándar. Todo el texto se convierte automáticamente a mayúsculas. Los campos que se dejan vacíos se omiten de la viñeta — el diseño se contrae limpiamente alrededor de lo que proporciones.',
     th_field: 'Campo', th_notes: 'Notas',
@@ -609,6 +581,10 @@ function applyI18n() {
       if (htmlKeys.has(key)) el.innerHTML = t[key];
       else el.textContent = t[key];
     }
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.dataset.i18nHtml;
+    if (t[key] !== undefined) el.innerHTML = t[key];
   });
   const activeBtn = document.getElementById('lang-' + lang);
   if (activeBtn) activeBtn.classList.add('active');

@@ -128,16 +128,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .screenshot-wrap img {
     display: block; width: 100%; height: auto;
   }
-  .screenshot-placeholder {
-    background: var(--white);
-    border: 2px dashed #ccc;
-    border-radius: var(--radius);
-    padding: 48px 24px;
-    text-align: center;
-    color: var(--mid);
-    font-size: 0.8rem;
-  }
-  .screenshot-placeholder .sc-icon { font-size: 2rem; margin-bottom: 8px; }
   .screenshot-caption {
     padding: 8px 14px;
     background: #f2f2f0;
@@ -348,11 +338,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n="step1_p2">If your drawings are in feet and inches, use the <strong>Scale bar (ft)</strong> tool instead. Both tools work identically, only the unit system changes.</p>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc1-placeholder">
-        <div class="sc-icon">🖼</div>
-        <div id="sc1-caption-placeholder" data-i18n="sc1_placeholder">Screenshot 1 — to be added</div>
-      </div>
-      <img id="sc1-img" src="img/tutorial-scalebar-01.png" alt="Scale bar tool with a PDF loaded showing the tool panel" style="display:none;" onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';" onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';">
+      <img id="sc1-img" src="img/tutorial-scalebar-01.png" alt="Scale bar tool with a PDF loaded showing the tool panel">
       <div class="screenshot-caption" data-i18n="sc1_caption">The tool panel after loading a PDF. The file name confirms the PDF is active.</div>
     </div>
 
@@ -370,11 +356,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n="step2_p2">You can override the auto-sized length if needed, or select a specific page format manually if the PDF has non-standard dimensions. Position and offset are set as a percentage of the page width so they work regardless of page size.</p>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc2-placeholder">
-        <div class="sc-icon">🖼</div>
-        <div id="sc2-caption-placeholder" data-i18n="sc2_placeholder">Screenshot 2 — to be added</div>
-      </div>
-      <img id="sc2-img" src="img/tutorial-scalebar-02.png" alt="Scale bar controls showing scale dropdown set to 1:100 with auto-computed bar length" style="display:none;" onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';" onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';">
+      <img id="sc2-img" src="img/tutorial-scalebar-02.png" alt="Scale bar controls showing scale dropdown set to 1:100 with auto-computed bar length">
       <div class="screenshot-caption" data-i18n="sc2_caption">Scale set to 1:100 on an A1 sheet. The tool has automatically selected a 10 m bar — exactly 100 mm on paper at that scale.</div>
     </div>
 
@@ -384,11 +366,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n="step3_p1">Click <strong>Add scale bar</strong>. The bar is drawn as vector content directly into the PDF content stream — it will print at full resolution regardless of the output DPI. Download the result immediately or click <strong>↩ Keep working</strong> to promote it as the active file and apply further tools (title block, watermark, etc.) in the same session.</p>
 
     <div class="screenshot-wrap">
-      <div class="screenshot-placeholder" id="sc3-placeholder">
-        <div class="sc-icon">🖼</div>
-        <div id="sc3-caption-placeholder" data-i18n="sc3_placeholder">Screenshot 3 — to be added</div>
-      </div>
-      <img id="sc3-img" src="img/tutorial-scalebar-03.png" alt="PDF page with the finished scale bar in the bottom-left corner" style="display:none;" onerror="this.style.display='none';document.getElementById('sc3-placeholder').style.display='block';" onload="this.style.display='block';document.getElementById('sc3-placeholder').style.display='none';">
+      <img id="sc3-img" src="img/tutorial-scalebar-03.png" alt="PDF page with the finished scale bar in the bottom-left corner">
       <div class="screenshot-caption" data-i18n="sc3_caption">The finished result: a clean, correctly-proportioned scale bar embedded in the PDF as vector content.</div>
     </div>
 
@@ -540,6 +518,10 @@ function applyI18n() {
       if (htmlKeys.has(key)) el.innerHTML = t[key];
       else el.textContent = t[key];
     }
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.dataset.i18nHtml;
+    if (t[key] !== undefined) el.innerHTML = t[key];
   });
   // Active lang button
   const activeBtn = document.getElementById('lang-' + lang);
