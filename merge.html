@@ -1337,20 +1337,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- ── 9. MERGE PDFs ── -->
     <div class="tool-panel" id="panel-merge">
       <div class="panel-box">
-      <div id="tool-choose-wrap" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:8px 12px;border:1.5px solid #c8e6c9;border-radius:6px;background:#f1f8e9;">
-        <span style="font-size:0.85rem;color:#388e3c;font-weight:600;">✓ Upload files directly below</span>
+      <div id="tool-choose-wrap" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <button type="button"
+          onclick="document.getElementById('mg-input').click()"
+          style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
+          <span data-i18n="btn_choose_pdfs">Choose PDF(s)</span>
+        </button>
+        <input type="file" id="mg-input" accept="application/pdf" multiple style="display:none;"
+          onchange="onMergeFilesSelected(this.files)">
+        <span id="mg-file-name" style="font-size:0.80rem;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
       </div>
         <h2 data-i18n="mg_h2">Merge PDFs</h2>
         <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;">
           <span data-i18n="mg_desc">Upload multiple PDF files. Drag the preview cards to reorder them, then merge into one document.</span>
         </p>
-        <div class="file-input-wrap" style="margin-bottom:14px;">
-          <input type="file" id="mg-input" accept="application/pdf" multiple
-            onchange="onMergeFilesSelected(this.files)">
-          <div class="file-input-label" data-i18n="mg_file_label">📁 Choose PDF files (multiple allowed)…
-            <span class="file-name" id="mg-file-name"></span>
-          </div>
-        </div>
         <div id="merge-grid" style="display:flex;flex-wrap:wrap;gap:12px;min-height:60px;
           padding:12px;background:var(--bg);border:1px solid var(--light);
           border-radius:var(--radius);margin-bottom:14px;"></div>
@@ -4208,6 +4208,9 @@ function cpInit() {
   if (window.EyeDropper) {
     document.getElementById('cp-eyedropper').classList.add('supported');
   }
+  // Pre-apply first palette color if one was saved in this session
+  const _saved = cpLoad();
+  if (_saved.length > 0) cpActiveColor = _saved[0];
   cpSetActive(cpActiveColor, false);
   cpRenderSwatches();
 
@@ -4313,6 +4316,11 @@ openTool = function(id) {
   _cpOrigOpenTool(id);
   document.getElementById('color-palette-wrap').classList.add('visible');
   cpTargetInputId = null;
+  // Apply saved palette color to this tool's color inputs
+  const _pal = cpLoad();
+  if (_pal.length > 0) {
+    setTimeout(() => cpApplyColor(_pal[0]), 0);
+  }
 };
 
 document.addEventListener('DOMContentLoaded', cpInit);
