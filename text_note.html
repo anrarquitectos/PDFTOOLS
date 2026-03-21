@@ -484,7 +484,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
-<div id="view-home" class="view" style="display:none!important">
+<div id="view-home" class="view">
   <div style="max-width:860px; margin:0 auto; padding:40px 20px;">
 
     <div class="home-header">
@@ -2244,28 +2244,99 @@ function teDrawEdits(){
   });
 }
 
+const BORDER_PX = 6; // px from edge = drag zone
+
+function isOnBorder(e, d){
+  const r=d.getBoundingClientRect();
+  const rx=e.clientX-r.left, ry=e.clientY-r.top;
+  return rx<=BORDER_PX||ry<=BORDER_PX||rx>=r.width-BORDER_PX||ry>=r.height-BORDER_PX;
+}
+
 function teBuildHitLayer(){
   const hl=document.getElementById('te-hl');
   hl.innerHTML='';
   const pidx=tePageNum-1;
   teBlocks.filter(b=>b.pageIndex===pidx&&!b.deleted).forEach(b=>{
     const d=document.createElement('div');
-    d.style.cssText='position:absolute;cursor:text;';
+    d.style.cssText='position:absolute;box-sizing:border-box;';
     d.style.left=b.x+'px'; d.style.top=b.y+'px';
     d.style.width=b.w+'px'; d.style.height=b.h+'px';
-    d.addEventListener('click',e=>{e.stopPropagation();teActivate(b);});
+    // Cursor: move on border, text in center
+    d.addEventListener('mousemove',e=>{
+      d.style.cursor=isOnBorder(e,d)?'move':'text';
+    });
     d.addEventListener('mouseenter',()=>{
       const oc=document.getElementById('te-oc'),ctx=oc.getContext('2d');
       ctx.fillStyle='rgba(37,99,235,0.08)'; ctx.fillRect(b.x,b.y,b.w,b.h);
     });
     d.addEventListener('mouseleave',()=>teDrawEdits());
+    // Click center → activate (edit)
+    d.addEventListener('click',e=>{
+      e.stopPropagation();
+      if(!isOnBorder(e,d)) teActivate(b);
+    });
+    // Drag from border → move block
+    d.addEventListener('mousedown',e=>{
+      if(!isOnBorder(e,d)) return;
+      e.preventDefault(); e.stopPropagation();
+      teCommitActive();
+      const startX=e.clientX, startY=e.clientY;
+      const origX=b.x, origY=b.y;
+      const onMove=ev=>{
+        const dx=ev.clientX-startX, dy=ev.clientY-startY;
+        b.x=Math.max(0,origX+dx); b.y=Math.max(0,origY+dy);
+        d.style.left=b.x+'px'; d.style.top=b.y+'px';
+        teDrawEdits();
+      };
+      const onUp=()=>{
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
+        tePushHistory();
+        b.edited=true;
+        teDrawEdits(); teBuildHitLayer();
+      };
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onUp);
+    });
+    // Touch drag from border
+    d.addEventListener('touchstart',e=>{
+      const t=e.touches[0];
+      const r=d.getBoundingClientRect();
+      const rx=t.clientX-r.left,ry=t.clientY-r.top;
+      const onBorder=rx<=BORDER_PX||ry<=BORDER_PX||rx>=r.width-BORDER_PX||ry>=r.height-BORDER_PX;
+      if(!onBorder) return;
+      e.preventDefault(); e.stopPropagation();
+      teCommitActive();
+      const startX=t.clientX,startY=t.clientY,origX=b.x,origY=b.y;
+      const onTMove=ev=>{
+        const tc=ev.touches[0];
+        b.x=Math.max(0,origX+tc.clientX-startX);
+        b.y=Math.max(0,origY+tc.clientY-startY);
+        d.style.left=b.x+'px'; d.style.top=b.y+'px';
+        teDrawEdits();
+      };
+      const onTEnd=()=>{
+        document.removeEventListener('touchmove',onTMove);
+        document.removeEventListener('touchend',onTEnd);
+        tePushHistory(); b.edited=true;
+        teDrawEdits(); teBuildHitLayer();
+      };
+      document.addEventListener('touchmove',onTMove,{passive:false});
+      document.addEventListener('touchend',onTEnd);
+    },{passive:false});
     hl.appendChild(d);
   });
-  hl.addEventListener('click',e=>{
+  // Double-click on blank space → create new text
+  hl.ondblclick=e=>{
     if(e.target!==hl) return;
     const rect=hl.getBoundingClientRect();
     teAddNew(e.clientX-rect.left, e.clientY-rect.top);
-  });
+  };
+  // Single click on blank → commit active only
+  hl.onclick=e=>{
+    if(e.target!==hl) return;
+    teCommitActive();
+  };
 }
 
 function teActivate(block){
