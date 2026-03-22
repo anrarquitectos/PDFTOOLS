@@ -18,204 +18,258 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta property="og:title" content="How to Add a Scale Bar to a PDF">
 <meta property="og:description" content="Automatically sized for your drawing scale and paper format. Works on any PDF, in your browser.">
 <meta property="og:type" content="article">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f8f8f6;
-    --white: #ffffff;
-    --ink: #1a1a1a;
-    --mid: #555;
-    --light: #e8e8e4;
-    --ok: #2d6a2d;
+    --bg: #080b12;
+    --white: #e8eaf6;
+    --ink: #e8eaf6;
+    --mid: #6b7080;
+    --light: rgba(255,255,255,0.08);
+    --ok: #00f5d4;
     --radius: 4px;
-    --accent: #1a4db3;
+    --accent: #00f5d4;
+    --dark: #e8eaf6;
+    --text: #e8eaf6;
+    --muted: #6b7080;
+    --cyan: #00f5d4;
+    --magenta: #f700ff;
     --max: 720px;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Courier New', Courier, monospace;
-    background: var(--bg); color: var(--ink);
+    font-family: 'Space Mono','Courier New',monospace;
+    background: var(--bg); color: var(--text);
     font-size: 14px; line-height: 1.7;
+    overflow-x: hidden;
   }
+
+  /* ── BACKGROUND ── */
+  #bg-svg { position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+  .glow-orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+  .orb-1 { width:620px; height:620px; background:var(--cyan); top:-200px; left:-160px; opacity:0.15; }
+  .orb-2 { width:280px; height:280px; background:var(--magenta); bottom:-60px; right:-80px; opacity:0.1; }
 
   /* ── TOP BAR ── */
   #topbar {
-    background: var(--ink); color: var(--white);
-    padding: 12px 28px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,11,18,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--light); color: var(--text);
+    padding: 16px 32px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
   }
-  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
-  #topbar a { color: inherit; text-decoration: none; }
+  #topbar h1 { font-family:'Space Mono',monospace; font-size:0.95rem; letter-spacing:0.12em; font-weight:700; }
+  #topbar h1 a { color:inherit; text-decoration:none; }
+  #topbar h1 a .logo-accent { color:var(--cyan); }
 
   /* ── LANG SWITCHER ── */
-  #lang-switcher { display: flex; gap: 4px; }
+  #lang-switcher { display:flex; gap:4px; }
   #lang-switcher button {
-    background: none; border: 1px solid #444; color: #aaa;
-    padding: 2px 7px; font-size: 0.72rem; border-radius: 3px;
-    cursor: pointer; font-family: inherit;
-    transition: color 0.15s, border-color 0.15s;
+    background:none; border:1px solid rgba(255,255,255,0.15); color:var(--muted);
+    padding:3px 9px; font-size:0.7rem; border-radius:100px;
+    cursor:pointer; font-family:inherit; letter-spacing:0.08em; transition:all 0.2s;
   }
-  #lang-switcher button:hover { color: #fff; border-color: #fff; }
-  #lang-switcher button.active { color: #fff; border-color: #fff; }
+  #lang-switcher button:hover, #lang-switcher button.active { border-color:var(--cyan); color:var(--cyan); }
 
   /* ── LAYOUT ── */
   .page-wrap {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: 48px 24px 80px;
+    max-width: var(--max); margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative; z-index: 1;
   }
 
   /* ── BREADCRUMB ── */
-  .breadcrumb {
-    font-size: 0.75rem; color: var(--mid);
-    margin-bottom: 32px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .breadcrumb a { color: var(--mid); text-decoration: none; }
-  .breadcrumb a:hover { color: var(--ink); }
-  .breadcrumb span { opacity: 0.5; }
+  .breadcrumb { font-size:0.75rem; color:var(--muted); margin-bottom:32px; display:flex; align-items:center; gap:6px; }
+  .breadcrumb a { color:var(--muted); text-decoration:none; }
+  .breadcrumb a:hover { color:var(--cyan); }
+  .breadcrumb span { opacity:0.5; }
 
   /* ── ARTICLE HEADER ── */
   .article-header { margin-bottom: 40px; }
-  .article-meta {
-    font-size: 0.75rem; color: var(--mid);
-    margin-bottom: 14px; letter-spacing: 0.05em;
-  }
+  .article-meta { font-size:0.7rem; color:var(--cyan); margin-bottom:14px; letter-spacing:0.12em; }
   .article-header h2 {
-    font-size: 1.6rem; font-weight: normal;
-    letter-spacing: 0.02em; line-height: 1.3;
-    margin-bottom: 16px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 1.5rem; font-weight: 700;
+    letter-spacing: 0.01em; line-height: 1.25;
+    margin-bottom: 16px; color: var(--text);
   }
   .article-header .lede {
-    font-size: 0.95rem; color: var(--mid);
-    line-height: 1.7; max-width: 600px;
-    border-left: 3px solid var(--ink);
-    padding-left: 16px;
+    font-size: 0.9rem; color: #8fa8c4; line-height: 1.75; max-width: 600px;
+    border-left: 3px solid var(--cyan); padding-left: 16px;
   }
+  .article-author { font-size:0.78rem; color:var(--muted); margin:10px 0 18px; font-style:normal; }
+  .article-author a { color:var(--muted); text-decoration:underline; }
+  .article-author a:hover { color:var(--cyan); }
 
   /* ── PROSE ── */
   .prose { max-width: var(--max); }
   .prose h3 {
-    font-size: 1rem; font-weight: bold;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
     margin: 36px 0 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--light);
-    letter-spacing: 0.04em;
+     letter-spacing: 0.04em;
+    color: var(--text);
   }
-  .prose h3 .step-num {
-    display: inline-block;
-    background: var(--ink); color: var(--white);
-    font-size: 0.72rem; padding: 1px 7px;
-    border-radius: 2px; margin-right: 8px;
-    vertical-align: middle; letter-spacing: 0.05em;
-  }
-  .prose p { margin-bottom: 16px; font-size: 0.88rem; color: var(--ink); }
+  .prose p { margin-bottom:16px; font-size:0.86rem; color:#c8ccd8; }
   .prose p.note {
-    background: var(--white); border: 1px solid var(--light);
-    border-left: 3px solid var(--accent);
+    background: rgba(0,245,212,0.05); border: 1px solid rgba(0,245,212,0.2);
+    border-left: 3px solid var(--cyan);
     padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0;
-    color: var(--mid); font-size: 0.82rem; margin-bottom: 20px;
+    color: #8fa8c4; font-size:0.82rem; margin-bottom:20px;
   }
-  .prose strong { color: var(--ink); }
+  .prose strong { color:var(--text); }
+  .prose em { color: #8fa8c4; }
+  .prose a { color: var(--cyan); }
+  .prose code { background:rgba(0,245,212,0.08); padding:1px 5px; border-radius:3px; color:var(--cyan); font-size:0.85em; }
 
-  /* ── SCREENSHOT PLACEHOLDER ── */
+  /* ── COMPARISON TABLE ── */
+  .compare-table { width:100%; border-collapse:collapse; margin:20px 0 28px; font-size:0.82rem; }
+  .compare-table th {
+    text-align:left; padding:8px 12px;
+    background: rgba(0,245,212,0.12); color:var(--cyan);
+    font-weight:600; letter-spacing:0.08em; font-size:0.72rem;
+    border-bottom: 1px solid rgba(0,245,212,0.2);
+  }
+  .compare-table td { padding:9px 12px; border-bottom:1px solid var(--light); vertical-align:top; color:#c8ccd8; }
+  .compare-table tr:last-child td { border-bottom:none; }
+  .compare-table tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
+  .tag { display:inline-block; font-size:0.7rem; padding:2px 7px; border-radius:100px; margin-right:2px; letter-spacing:0.04em; font-family:'Space Mono',monospace; }
+  .tag-good { background:rgba(0,245,212,0.12); color:var(--cyan); border:1px solid rgba(0,245,212,0.25); }
+  .tag-bad  { background:rgba(255,77,109,0.12); color:#ff4d6d; border:1px solid rgba(255,77,109,0.25); }
+  .tag-mid  { background:rgba(255,230,0,0.1);  color:#ffe600; border:1px solid rgba(255,230,0,0.2); }
+
+  /* ── SCREENSHOT ── */
   .screenshot-wrap {
-    margin: 24px 0 28px;
-    border: 1px solid var(--light);
-    border-radius: var(--radius);
-    overflow: hidden;
+    margin:24px 0 28px; border:1px solid var(--glass-border);
+    border-radius:12px; overflow:hidden; backdrop-filter:blur(10px);
   }
-  .screenshot-wrap img {
-    display: block; width: 100%; height: auto;
-  }
+  .screenshot-wrap img { display:block; width:100%; height:auto; }
   .screenshot-caption {
-    padding: 8px 14px;
-    background: #f2f2f0;
-    border-top: 1px solid var(--light);
-    font-size: 0.75rem; color: var(--mid);
-    font-style: italic;
+    padding:8px 14px; background:rgba(255,255,255,0.04);
+    border-top:1px solid var(--light);
+    font-size:0.75rem; color:var(--muted); font-style:italic;
   }
+
+  /* ── PRESET LIST ── */
+  .preset-list { margin:0 0 20px; padding:0; list-style:none; }
+  .preset-list li { padding:8px 0; border-bottom:1px solid var(--light); font-size:0.86rem; color:#c8ccd8; }
+  .preset-list li:last-child { border-bottom:none; }
 
   /* ── RESULT BOX ── */
   .result-box {
-    background: var(--white);
-    border: 1px solid var(--light);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    margin: 24px 0;
-    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--glass); border:1px solid var(--glass-border);
+    backdrop-filter:blur(10px);
+    border-radius:12px; padding:18px 20px;
+    margin:24px 0; display:flex; gap:14px; align-items:flex-start;
   }
-  .result-box .rb-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
-  .result-box .rb-text { font-size: 0.85rem; }
-  .result-box .rb-text strong { display: block; margin-bottom: 4px; }
+  .result-box .rb-icon { font-size:1.4rem; flex-shrink:0; margin-top:2px; }
+  .result-box .rb-text { font-size:0.85rem; color:#c8ccd8; }
+  .result-box .rb-text strong { display:block; margin-bottom:4px; color:var(--text); }
 
   /* ── CTA ── */
   .cta-block {
-    background: var(--ink); color: var(--white);
-    border-radius: var(--radius);
-    padding: 32px 28px;
-    margin-top: 48px;
-    text-align: center;
-  }
-  .cta-block p {
-    font-size: 0.85rem; color: #aaa;
-    margin-bottom: 20px; margin-top: 8px;
-  }
-  .cta-block h3 {
-    font-size: 1.1rem; font-weight: normal;
-    letter-spacing: 0.06em; margin-bottom: 0;
-    border: none; padding: 0; color: var(--white);
+    background: rgba(0,245,212,0.06);
+    border:1px solid rgba(0,245,212,0.2);
+    border-radius:16px; padding:36px 28px;
+    margin-top:48px; text-align:center;
+    backdrop-filter:blur(10px);
   }
   .cta-btn {
-    display: inline-block;
-    background: var(--white); color: var(--ink);
-    padding: 11px 28px; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.9rem; font-weight: bold;
-    text-decoration: none; letter-spacing: 0.04em;
-    transition: background 0.15s, color 0.15s;
-    border: 2px solid var(--white);
+    display:inline-block;
+    background: rgba(0,245,212,0.12);
+    color:var(--cyan); border:1px solid rgba(0,245,212,0.35);
+    padding:12px 32px; border-radius:100px;
+    font-family:'Space Mono',monospace; font-size:0.88rem; font-weight:700;
+    text-decoration:none; letter-spacing:0.06em;
+    transition:all 0.2s;
   }
-  .cta-btn:hover { background: transparent; color: var(--white); }
+  .cta-btn:hover { background:rgba(0,245,212,0.2); box-shadow:0 0 24px rgba(0,245,212,0.2); }
 
   /* ── RELATED ── */
-  .related-wrap {
-    margin-top: 56px;
-    border-top: 1px solid var(--light);
-    padding-top: 28px;
-  }
-  .related-wrap h4 {
-    font-size: 0.75rem; color: var(--mid);
-    letter-spacing: 0.1em; margin-bottom: 14px;
-    text-transform: uppercase;
-  }
-  .related-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .related-wrap { margin-top:48px; border-top:1px solid var(--light); padding-top:28px; }
+  .related-wrap h4 { font-size:0.7rem; color:var(--muted); letter-spacing:0.12em; margin-bottom:14px; text-transform:uppercase; }
+  .related-tools { display:flex; flex-wrap:wrap; gap:8px; }
   .related-tools a {
-    padding: 6px 14px; border: 1px solid #ccc;
-    background: var(--white); border-radius: var(--radius);
-    font-size: 0.8rem; color: var(--ink); text-decoration: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    padding:5px 14px; border:1px solid var(--glass-border);
+    background:var(--glass); border-radius:100px;
+    font-size:0.78rem; color:var(--muted); text-decoration:none;
+    font-family:'Space Mono',monospace;
+    transition:all 0.2s;
   }
-  .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .related-tools a:hover { border-color:rgba(0,245,212,0.3); color:var(--cyan); }
 
-  .article-author {
-    font-size: 0.78rem; color: var(--mid); margin: 10px 0 18px;
-    font-style: normal;
-  }
-  .article-author a { color: var(--mid); text-decoration: underline; }
-  .geo-qa-prose { margin: 2.2rem 0 0; }
-  .geo-qa-prose p { font-size: 0.9rem; line-height: 1.75; color: var(--dark); margin-bottom: 0.5rem; }
+  /* ── GEO Q&A ── */
+  .geo-qa-prose { margin:2.2rem 0 0; }
+  .geo-qa-prose p { font-size:0.86rem; line-height:1.75; color:#c8ccd8; margin-bottom:0.5rem; }
   .geo-qa {
-    margin: 2.5rem 0 0;
-    padding: 1.5rem 1.75rem;
-    background: #f8f8f6;
-    border-left: 3px solid #1a1a1a;
-    border-radius: 0 4px 4px 0;
+    margin:2.5rem 0 0; padding:1.5rem 1.75rem;
+    background:rgba(255,255,255,0.03);
+    border-left:3px solid var(--cyan);
+    border-radius:0 8px 8px 0;
   }
-  .geo-qa h3 {
-    font-size: 1rem; font-weight: 700; margin: 0 0 0.75rem;
-    color: var(--dark);
+  .geo-qa h3 { font-family:'Chakra Petch',sans-serif; font-size:0.95rem; font-weight:700; margin:0 0 0.75rem; color:var(--text); }
+  .geo-qa p { font-size:0.86rem; line-height:1.7; margin:0; color:#c8ccd8; }
+  .geo-qa a, .geo-qa-prose a { color:var(--cyan); }
+
+  /* ── FOOTER ── */
+  footer {
+    position:relative; z-index:1; text-align:center; padding:28px 20px;
+    font-size:0.72rem; color:var(--muted);
+    border-top:1px solid var(--light); margin-top:40px;
+    font-family:'Space Mono',monospace;
   }
-  .geo-qa p { font-size: 0.88rem; line-height: 1.7; margin: 0; color: var(--dark); }
+  footer a { color:var(--cyan); text-decoration:none; }
+
+  /* ── STEP LABEL ── */
+  .prose h3 {
+    /* Override previous rule: border moves to top, becomes a marker line */
+    border-bottom: none;
+    border-top: 1px solid rgba(0,245,212,0.25);
+    padding-bottom: 0;
+    padding-top: 14px;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .step-num {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  /* ── PROSE UL/OL ── */
+  .prose ul, .prose ol {
+    margin: 0 0 16px 20px;
+    font-size: 0.86rem;
+    line-height: 1.9;
+    color: #c8ccd8;
+  }
+  .prose li { margin-bottom: 4px; }
+  .prose li strong { color: var(--text); }
+
+  /* ── SCREENSHOT CAPTION outside wrap ── */
+  .screenshot-caption {
+    padding: 6px 2px 0;
+    background: transparent;
+    border-top: none;
+    font-size: 0.74rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 24px;
+  }
+  .screenshot-wrap {
+    margin: 24px 0 6px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
 </style>
   <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -267,7 +321,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           "name": "How do I add a scale bar to a PDF?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "1. Open the <a href='scalebar.html'>Scale Bar tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF</strong> and load your drawing. 3. Select your drawing scale from the dropdown (e.g. 1:100). 4. Choose the bar position, style and colour. 5. Click <strong>Add scale bar</strong>. 6. Download the result — the bar is embedded as native vector content at the correct proportions."
+            "text": "1. Open the <a href='scalebar.html' style="color:var(--cyan);">Scale Bar tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF</strong> and load your drawing. 3. Select your drawing scale from the dropdown (e.g. 1:100). 4. Choose the bar position, style and colour. 5. Click <strong>Add scale bar</strong>. 6. Download the result — the bar is embedded as native vector content at the correct proportions."
           }
         }
       ]
@@ -297,9 +351,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
+<!-- SVG Background -->
+<svg id="bg-svg" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(0,245,212,0.06)"/>
+    </pattern>
+  </defs>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#grid)"/>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#dots)"/>
+</svg>
+<div class="glow-orb orb-1"></div>
+<div class="glow-orb orb-2"></div>
+
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html">▣ SCALEBAR PDF TOOLS</a></h1>
+  <h1><a href="index.html"><span class="logo-accent">▣ SCALEBAR</span> PDF TOOLS</a></h1>
   <div id="lang-switcher">
     <button id="lang-en" onclick="setLang('en')">EN</button>
     <button id="lang-es" onclick="setLang('es')">ES</button>
@@ -310,7 +380,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- BREADCRUMB -->
   <nav class="breadcrumb">
-    <a href="index.html" data-i18n="home">Home</a>
+    <a href="index.html" data-i18n="home" style="color:var(--cyan);">Home</a>
     <span>›</span>
     <span data-i18n="tutorials_label">Tutorials</span>
   </nav>
@@ -318,7 +388,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE HEADER -->
   <header class="article-header">
     <div class="article-meta" data-i18n="article_meta">TUTORIAL — SCALE BAR · PDF WORKFLOW</div>
-    <p class="article-author">Written by <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
+    <p class="article-author">Written by <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener" style="color:var(--cyan);">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
     <h2 data-i18n="article_title">How to add a scale bar to a PDF — automatically sized for any drawing scale</h2>
     <p class="lede" data-i18n="article_lede">Most PDF editors treat a scale bar as a decoration you draw by hand. This tutorial shows how to add one that is mathematically correct and automatically proportioned to your drawing scale and paper size — without opening AutoCAD or Revit.</p>
   </header>
@@ -326,28 +396,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE BODY -->
   <article class="prose">
 
-    <p data-i18n="intro_p1">As an architect I kept running into the same situation: a PDF that needed a scale bar and no straightforward way to add one correctly. Not as decoration drawn by hand, but one that is mathematically tied to the drawing scale and paper size. So I built this tool. You can find it <a href="scalebar.html" style="color:var(--accent);">here</a>.</p>
+    <p data-i18n="intro_p1">As an architect I kept running into the same situation: a PDF that needed a scale bar and no straightforward way to add one correctly. Not as decoration drawn by hand, but one that is mathematically tied to the drawing scale and paper size. So I built this tool. You can find it <a href="scalebar.html" style="color:var(--cyan);">here</a>.</p>
 
     <p data-i18n="intro_p2">The correct approach is to compute the bar length from the scale ratio and the paper format, then draw it at an exact point size. That is what this tool does automatically.</p>
 
     <!-- STEP 1 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step1_title">Open the Scale Bar tool and load your PDF</span></h3>
+    <h3><span class="step-num">STEP 1</span> <span data-i18n="step1_title">Open the Scale Bar tool and load your PDF</span></h3>
 
     <p data-i18n="step1_p1">Navigate to the <strong>Scale bar (m)</strong> tool from the homepage and click <strong>Choose PDF</strong>. The file is loaded entirely in your browser — nothing is uploaded to any server.</p>
 
     <p data-i18n="step1_p2">If your drawings are in feet and inches, use the <strong>Scale bar (ft)</strong> tool instead. Both tools work identically, only the unit system changes.</p>
 
     <div class="screenshot-wrap">
-      <img id="sc1-img" src="img/tutorial-scalebar-01.png" alt="Scale bar tool with a PDF loaded showing the tool panel">
+      <img id="sc1-img" src="img/tutorial-scalebar-01.png" alt="Scale bar tool with a PDF loaded showing the tool panel"></div>
       <div class="screenshot-caption" data-i18n="sc1_caption">The tool panel after loading a PDF. The file name confirms the PDF is active.</div>
-    </div>
 
     <!-- STEP 2 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step2_title">Set your drawing scale — the bar length is calculated automatically</span></h3>
+    <h3><span class="step-num">STEP 2</span> <span data-i18n="step2_title">Set your drawing scale — the bar length is calculated automatically</span></h3>
 
     <p data-i18n="step2_p1">This is where automatic sizing matters. Select your drawing scale from the dropdown — 1:50, 1:100, 1:200, and so on. The tool detects the paper format from the PDF geometry and computes a bar length that is:</p>
 
-    <ul style="margin: 0 0 16px 20px; font-size:0.88rem; line-height:1.9;">
+    <ul>
       <li data-i18n="bullet1">A round number of metres (e.g. 5 m, 10 m, 20 m — never 7.3 m)</li>
       <li data-i18n="bullet2">Approximately 20% of the page width — legible without dominating the sheet</li>
       <li data-i18n="bullet3">Correct at the stated scale — if you print at 100%, the bar measures what it says</li>
@@ -356,19 +425,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n="step2_p2">You can override the auto-sized length if needed, or select a specific page format manually if the PDF has non-standard dimensions. Position and offset are set as a percentage of the page width so they work regardless of page size.</p>
 
     <div class="screenshot-wrap">
-      <img id="sc2-img" src="img/tutorial-scalebar-02.png" alt="Scale bar controls showing scale dropdown set to 1:100 with auto-computed bar length">
+      <img id="sc2-img" src="img/tutorial-scalebar-02.png" alt="Scale bar controls showing scale dropdown set to 1:100 with auto-computed bar length"></div>
       <div class="screenshot-caption" data-i18n="sc2_caption">Scale set to 1:100 on an A1 sheet. The tool has automatically selected a 10 m bar — exactly 100 mm on paper at that scale.</div>
-    </div>
 
     <!-- STEP 3 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step3_title">Apply and download — or continue working on the same file</span></h3>
+    <h3><span class="step-num">STEP 3</span> <span data-i18n="step3_title">Apply and download — or continue working on the same file</span></h3>
 
     <p data-i18n="step3_p1">Click <strong>Add scale bar</strong>. The bar is drawn as vector content directly into the PDF content stream — it will print at full resolution regardless of the output DPI. Download the result immediately or click <strong>↩ Keep working</strong> to promote it as the active file and apply further tools (title block, watermark, etc.) in the same session.</p>
 
     <div class="screenshot-wrap">
-      <img id="sc3-img" src="img/tutorial-scalebar-03.png" alt="PDF page with the finished scale bar in the bottom-left corner">
+      <img id="sc3-img" src="img/tutorial-scalebar-03.png" alt="PDF page with the finished scale bar in the bottom-left corner"></div>
       <div class="screenshot-caption" data-i18n="sc3_caption">The finished result: a clean, correctly-proportioned scale bar embedded in the PDF as vector content.</div>
-    </div>
 
     <div class="result-box">
       <div class="rb-icon">✓</div>
@@ -395,23 +462,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
       <p itemprop="text" data-i18n-html="geo_a"></p>
     </div>
-    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--mid);margin-top:0.5rem;"></p>
+    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--muted);margin-top:0.5rem;"></p>
   </div>
 
   <!-- CTA -->
   <div class="cta-block">
-    <a href="scalebar.html" class="cta-btn" data-i18n="cta_btn">Open Scale Bar tool →</a>
+    <a href="scalebar.html" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Scale Bar tool →</a>
   </div>
 
   <!-- RELATED TOOLS -->
   <div class="related-wrap">
     <h4 data-i18n="related_title">RELATED TOOLS</h4>
     <div class="related-tools">
-      <a href="scalebar_ft.html" data-i18n="rel_scalebar_ft">Scale bar (ft)</a>
-      <a href="vineta.html" data-i18n="rel_vineta">Title block</a>
-      <a href="revision_cloud.html" data-i18n="rel_revcloud">Revision cloud</a>
-      <a href="plan_numbering.html" data-i18n="rel_plannum">Plan numbering</a>
-      <a href="watermark_text.html" data-i18n="rel_watermark">Text watermark</a>
+      <a href="scalebar_ft.html" data-i18n="rel_scalebar_ft" style="color:var(--cyan);">Scale bar (ft)</a>
+      <a href="vineta.html" data-i18n="rel_vineta" style="color:var(--cyan);">Title block</a>
+      <a href="revision_cloud.html" data-i18n="rel_revcloud" style="color:var(--cyan);">Revision cloud</a>
+      <a href="plan_numbering.html" data-i18n="rel_plannum" style="color:var(--cyan);">Plan numbering</a>
+      <a href="watermark_text.html" data-i18n="rel_watermark" style="color:var(--cyan);">Text watermark</a>
     </div>
   </div>
 
@@ -425,7 +492,7 @@ const T = {
     article_meta: 'TUTORIAL — SCALE BAR · PDF WORKFLOW',
     article_title: 'How to add a scale bar to a PDF — automatically sized for any drawing scale',
     article_lede: 'Most PDF editors treat a scale bar as a decoration you draw by hand. This tutorial shows how to add one that is mathematically correct and automatically proportioned to your drawing scale and paper size — without opening AutoCAD or Revit.',
-    intro_p1: 'As an architect I kept running into the same situation: a PDF that needed a scale bar and no straightforward way to add one correctly. Not as decoration drawn by hand, but one that is mathematically tied to the drawing scale and paper size. So I built this tool. You can find it <a href="scalebar.html" style="color:#1a4db3;">here</a>.',
+    intro_p1: 'As an architect I kept running into the same situation: a PDF that needed a scale bar and no straightforward way to add one correctly. Not as decoration drawn by hand, but one that is mathematically tied to the drawing scale and paper size. So I built this tool. You can find it <a href="scalebar.html" style="color:var(--cyan);">here</a>.',
     intro_p2: 'The correct approach is to compute the bar length from the scale ratio and the paper format, then draw it at an exact point size. That is what this tool does automatically.',
     step: 'STEP',
     step1_title: 'Open the Scale Bar tool and load your PDF',
@@ -458,7 +525,7 @@ const T = {
     rel_scalebar_ft: 'Scale bar (ft)', rel_vineta: 'Title block',
     rel_revcloud: 'Revision cloud', rel_plannum: 'Plan numbering', rel_watermark: 'Text watermark',
     'geo_q': 'In short — how do I add a scale bar to a PDF?',
-    'geo_a': 'Open the <a href="scalebar.html">Scale Bar tool</a> at scalebarpdf.com. Load your PDF, select your drawing scale (e.g. 1:100), choose position and style, then click <strong>Add scale bar</strong>. The bar is embedded as native vector content, correctly proportioned for print.',
+    'geo_a': 'Open the <a href="scalebar.html" style="color:var(--cyan);">Scale Bar tool</a> at scalebarpdf.com. Load your PDF, select your drawing scale (e.g. 1:100), choose position and style, then click <strong>Add scale bar</strong>. The bar is embedded as native vector content, correctly proportioned for print.',
     'geo_v': 'Also searched as: <em>how to add a scale to a PDF drawing</em>, <em>add graphic scale to PDF</em>, <em>PDF scale bar generator</em>.',
   },
   es: {
@@ -466,7 +533,7 @@ const T = {
     article_meta: 'TUTORIAL — ESCALA GRÁFICA · FLUJO DE TRABAJO PDF',
     article_title: 'Cómo añadir una escala gráfica a un PDF — dimensionada automáticamente para cualquier escala de dibujo',
     article_lede: 'La mayoría de los editores PDF tratan la escala gráfica como un elemento decorativo que se dibuja a mano. Este tutorial muestra cómo añadir una que sea matemáticamente correcta y proporcionada automáticamente a la escala del dibujo y al formato del papel — sin abrir AutoCAD ni Revit.',
-    intro_p1: 'Como arquitecto me encontré repetidamente con la misma situación: un PDF que necesitaba una escala gráfica y ninguna forma directa de añadir una correctamente. No como un elemento decorativo dibujado a mano, sino una que esté matemáticamente vinculada a la escala del dibujo y al formato del papel. Por eso construí esta herramienta. La puedes encontrar <a href="scalebar.html" style="color:#1a4db3;">aquí</a>.',
+    intro_p1: 'Como arquitecto me encontré repetidamente con la misma situación: un PDF que necesitaba una escala gráfica y ninguna forma directa de añadir una correctamente. No como un elemento decorativo dibujado a mano, sino una que esté matemáticamente vinculada a la escala del dibujo y al formato del papel. Por eso construí esta herramienta. La puedes encontrar <a href="scalebar.html" style="color:var(--cyan);">aquí</a>.',
     intro_p2: 'La forma correcta es calcular la longitud de la barra a partir de la relación de escala y el formato del papel, y dibujarla a un tamaño exacto en puntos. Eso es lo que hace esta herramienta automáticamente.',
     step: 'PASO',
     step1_title: 'Abre la herramienta Escala gráfica y carga tu PDF',
@@ -499,7 +566,7 @@ const T = {
     rel_scalebar_ft: 'Escala gráfica (ft)', rel_vineta: 'Viñeta / Carátula',
     rel_revcloud: 'Nube de revisión', rel_plannum: 'Numeración de planos', rel_watermark: 'Marca de agua',
     'geo_q': 'En pocas palabras, ¿cómo añado una escala gráfica a un PDF?',
-    'geo_a': 'Abre la <a href="scalebar.html">herramienta Escala gráfica</a> en scalebarpdf.com. Carga tu PDF, selecciona la escala del dibujo (p. ej. 1:100), elige posición y estilo, y haz clic en <strong>Añadir escala gráfica</strong>. La barra se incrusta como contenido vectorial nativo con las proporciones correctas para impresión.',
+    'geo_a': 'Abre la <a href="scalebar.html" style="color:var(--cyan);">herramienta Escala gráfica</a> en scalebarpdf.com. Carga tu PDF, selecciona la escala del dibujo (p. ej. 1:100), elige posición y estilo, y haz clic en <strong>Añadir escala gráfica</strong>. La barra se incrusta como contenido vectorial nativo con las proporciones correctas para impresión.',
     'geo_v': 'También buscado como: <em>cómo añadir escala a un plano PDF</em>, <em>escala gráfica PDF online gratis</em>.',
   }
 };
@@ -532,7 +599,7 @@ document.addEventListener('DOMContentLoaded', applyI18n);
 </script>
 
 
-<footer style="text-align:center;padding:24px 20px;font-size:0.75rem;color:var(--mid);border-top:1px solid var(--light);margin-top:40px;">
+<footer>
   © 2026 Scalebar PDF Tools
 </footer>
 </body>
