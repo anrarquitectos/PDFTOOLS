@@ -1776,7 +1776,7 @@ function updateTopBar() {
     ? `${currentFileName} [modified ×${modificationHistory.length}]`
     : currentFileName;
   document.getElementById('file-indicator').innerHTML = `File: <span>${label}</span>`;
-  document.getElementById('btn-change-file').style.display = 'inline-block';
+  const _bcf = document.getElementById('btn-change-file'); if (_bcf) _bcf.style.display = 'inline-block';
   persistFile();
 }
 
@@ -1844,7 +1844,7 @@ function resetToHome() {
   currentBuffer = null; currentFileName = ''; modificationHistory = [];
   try { sessionStorage.removeItem('sb_file'); sessionStorage.removeItem('sb_name'); } catch(e){}
   document.getElementById('file-indicator').textContent = 'No file loaded';
-  document.getElementById('btn-change-file').style.display = 'none';
+  const _bcf2 = document.getElementById('btn-change-file'); if (_bcf2) _bcf2.style.display = 'none';
   document.getElementById('working-banner').classList.remove('show');
   goHome();
 }

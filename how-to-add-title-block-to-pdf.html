@@ -212,7 +212,41 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .geo-qa p { font-size:0.86rem; line-height:1.7; margin:0; color:#c8ccd8; }
   .geo-qa a, .geo-qa-prose a { color:var(--cyan); }
 
-  /* ── FOOTER ── */
+  /* ── FIELD TABLE ── */
+  .field-table {
+    width: 100%; border-collapse: collapse;
+    margin: 20px 0 28px; font-size: 0.84rem;
+    font-family: inherit;
+  }
+  .field-table th {
+    text-align: left; padding: 10px 14px;
+    background: rgba(0,245,212,0.08);
+    color: var(--cyan); font-weight: 600;
+    letter-spacing: 0.06em; font-size: 0.72rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(0,245,212,0.2);
+  }
+  .field-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--light);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .field-table tr:last-child td { border-bottom: none; }
+  .field-table td:first-child {
+    color: var(--text);
+    font-weight: 600;
+    white-space: nowrap;
+    width: 32%;
+    padding-right: 20px;
+  }
+  .field-table td:last-child {
+    color: #c8ccd8;
+    font-size: 0.82rem;
+  }
+  .field-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+
   footer {
     position:relative; z-index:1; text-align:center; padding:28px 20px;
     font-size:0.72rem; color:var(--muted);
@@ -340,7 +374,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           "name": "How do I add an architectural title block to a PDF?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "1. Open the <a href='vineta.html' style="color:var(--cyan);">Title Block tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF</strong> and load your drawing. 3. Fill in the project fields: name, site, drawing content, plan type and number, scale, date, signatures. 4. Optionally upload a logo and set the north arrow rotation. 5. Choose the page size override if needed (auto-detect works for standard ISO formats). 6. Click <strong>Add title block</strong>. The block is drawn as native PDF vector content anchored to the bottom-right corner."
+            "text": "Open the Title Block tool at scalebarpdf.com. Click Choose PDF and load your drawing. Fill in the project fields: name, site, drawing content, plan type and number, scale, date, client and designer signatures. Optionally upload a studio logo and set the north arrow rotation. Click Add title block. The block is drawn as native PDF vector content anchored to the bottom-right corner, auto-scaled to the detected paper format."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What paper formats does the title block support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The tool auto-detects the paper format from the PDF geometry and supports A4 through A0. The block width scales with the format: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, and 77 mm on A0. If the PDF uses a non-standard page size, you can set the format manually with the page size override option."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the title block work on rotated PDF pages?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The tool detects the rotation flag of each page and compensates automatically, so the title block always appears in the correct visual position regardless of whether the page is stored portrait, landscape, or at 90° or 270° rotation."
           }
         }
       ]
@@ -515,6 +565,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--muted);margin-top:0.5rem;"></p>
   </div>
 
+  <div class="geo-qa-prose" itemscope itemtype="https://schema.org/Question">
+    <p><strong itemprop="name" data-i18n="geo_q2"></strong></p>
+    <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+      <p itemprop="text" data-i18n="geo_a2"></p>
+    </div>
+  </div>
+
+  <div class="geo-qa-prose" itemscope itemtype="https://schema.org/Question">
+    <p><strong itemprop="name" data-i18n="geo_q3"></strong></p>
+    <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+      <p itemprop="text" data-i18n="geo_a3"></p>
+    </div>
+  </div>
+
   <!-- CTA -->
   <div class="cta-block">
     <a href="vineta.html" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Title Block tool →</a>
@@ -582,6 +646,10 @@ const T = {
     'geo_q': 'So, how do I add an architectural title block to a PDF?',
     'geo_a': 'Open the <a href="vineta.html" style="color:var(--cyan);">Title Block tool</a> at scalebarpdf.com. Load your PDF, fill in the project fields (name, plan number, scale, date, signatures), optionally add a logo and north arrow, then click <strong>Add title block</strong>. The block is drawn as native vector content anchored to the bottom-right corner, auto-scaled to the detected paper format.',
     'geo_v': 'Also searched as: <em>add viñeta to PDF</em>, <em>PDF title block generator free</em>, <em>architectural title block PDF online</em>.',
+    'geo_q2': 'What paper formats does the title block support?',
+    'geo_a2': 'The tool auto-detects A4 through A0 from the PDF geometry. Block width scales with the format: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, 77 mm on A0. Non-standard sizes can be set manually with the page size override.',
+    'geo_q3': 'Does the title block work on rotated PDF pages?',
+    'geo_a3': 'Yes. The tool detects each page\'s rotation flag and compensates automatically — the block always appears in the correct visual position regardless of portrait, landscape, or 90°/270° rotation.',
   },
   es: {
     home: 'Inicio', tutorials_label: 'Tutoriales',
@@ -628,6 +696,10 @@ const T = {
     'geo_q': 'Entonces, ¿cómo añado una viñeta arquitectónica a un PDF?',
     'geo_a': 'Abre la <a href="vineta.html" style="color:var(--cyan);">herramienta Viñeta</a> en scalebarpdf.com. Carga tu PDF, completa los campos del proyecto (nombre, número de plano, escala, fecha, firmas), añade opcionalmente un logo y la flecha de norte, y haz clic en <strong>Add title block</strong>. La viñeta se dibuja como contenido vectorial nativo anclada en la esquina inferior derecha.',
     'geo_v': 'También buscado como: <em>añadir viñeta a PDF</em>, <em>generador de carátula PDF gratis</em>, <em>viñeta arquitectónica PDF online</em>.',
+    'geo_q2': '¿Qué formatos de papel admite la viñeta?',
+    'geo_a2': 'La herramienta detecta automáticamente de A4 a A0 a partir de la geometría del PDF. El ancho de la viñeta escala con el formato: 36 mm en A4, 50 mm en A3, 59 mm en A2, 68 mm en A1, 77 mm en A0. Los formatos no estándar se pueden ajustar manualmente.',
+    'geo_q3': '¿Funciona la viñeta en páginas PDF rotadas?',
+    'geo_a3': 'Sí. La herramienta detecta el indicador de rotación de cada página y compensa automáticamente — la viñeta siempre aparece en la posición visual correcta sin importar si la página está en vertical, horizontal o con rotación de 90°/270°.',
   }
 };
 
