@@ -28,10 +28,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .orb-1 { width:620px; height:620px; background:var(--cyan); top:-200px; left:-160px; opacity:0.15; }
   .orb-2 { width:280px; height:280px; background:var(--magenta); bottom:-60px; right:-80px; opacity:0.1; }
 
-  #topbar { background:rgba(8,11,18,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--light); color:var(--text); padding:16px 32px; display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:100; }
+  #topbar { background:rgba(8,11,18,0.92); backdrop-filter:blur(20px); border-bottom:1px solid var(--light); color:var(--text); padding: 0 32px; height: 53px; display:flex; align-items:center; justify-content:space-between; gap:12px; position:sticky; top:0; z-index:100; }
   #topbar-right { display:flex; align-items:center; gap:14px; flex-shrink:0; }
-  #topbar h1 { font-family:'Space Mono',monospace; font-size:0.95rem; letter-spacing:0.12em; font-weight:700; }
-  #topbar h1 a { color:inherit; text-decoration:none; }
+  #topbar h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem; letter-spacing: 0.12em; font-weight: 700;
+    line-height: 1; display: flex; align-items: center;
+  }
+  #topbar h1 a { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:13px; }
   #topbar h1 a .logo-accent { color:var(--cyan); }
   #file-indicator { font-size:0.75rem; color:var(--muted); max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #file-indicator span { color:var(--cyan); }
@@ -278,7 +282,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><span class="logo-accent">▣ SCALEBAR</span> PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
