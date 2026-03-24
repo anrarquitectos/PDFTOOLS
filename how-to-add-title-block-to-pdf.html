@@ -18,228 +18,321 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta property="og:title" content="How to Add an Architectural Title Block to a PDF">
 <meta property="og:description" content="A customisable title block for PDF plans: project name, scale, signatures, north arrow, plan ID and logo. Works entirely in your browser.">
 <meta property="og:type" content="article">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f8f8f6;
-    --white: #ffffff;
-    --ink: #1a1a1a;
-    --mid: #555;
-    --light: #e8e8e4;
-    --ok: #2d6a2d;
+    --bg: #080b12;
+    --white: #e8eaf6;
+    --ink: #e8eaf6;
+    --mid: #6b7080;
+    --light: rgba(255,255,255,0.08);
+    --ok: #00f5d4;
     --radius: 4px;
-    --accent: #1a4db3;
+    --accent: #00f5d4;
+    --dark: #e8eaf6;
+    --text: #e8eaf6;
+    --muted: #6b7080;
+    --cyan: #00f5d4;
+    --magenta: #f700ff;
     --max: 720px;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Courier New', Courier, monospace;
-    background: var(--bg); color: var(--ink);
+    font-family: 'Space Mono','Courier New',monospace;
+    background: var(--bg); color: var(--text);
     font-size: 14px; line-height: 1.7;
+    overflow-x: hidden;
   }
+
+  /* ── BACKGROUND ── */
+  #bg-svg { position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+  .glow-orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+  .orb-1 { width:620px; height:620px; background:var(--cyan); top:-200px; left:-160px; opacity:0.15; }
+  .orb-2 { width:280px; height:280px; background:var(--magenta); bottom:-60px; right:-80px; opacity:0.1; }
 
   /* ── TOP BAR ── */
   #topbar {
-    background: var(--ink); color: var(--white);
-    padding: 12px 28px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,11,18,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--light); color: var(--text);
+    padding: 0 32px; height: 53px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
   }
-  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
-  #topbar a { color: inherit; text-decoration: none; }
+  #topbar h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem; letter-spacing: 0.12em; font-weight: 700;
+    line-height: 1; display: flex; align-items: center;
+  }
+  #topbar h1 a { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:13px; }
+  #topbar h1 a .logo-accent { color:var(--cyan); }
 
   /* ── LANG SWITCHER ── */
-  #lang-switcher { display: flex; gap: 4px; }
+  #lang-switcher { display:flex; gap:4px; }
   #lang-switcher button {
-    background: none; border: 1px solid #444; color: #aaa;
-    padding: 2px 7px; font-size: 0.72rem; border-radius: 3px;
-    cursor: pointer; font-family: inherit;
-    transition: color 0.15s, border-color 0.15s;
+    background:none; border:1px solid rgba(255,255,255,0.15); color:var(--muted);
+    padding:3px 9px; font-size:0.7rem; border-radius:100px;
+    cursor:pointer; font-family:inherit; letter-spacing:0.08em; transition:all 0.2s;
   }
-  #lang-switcher button:hover { color: #fff; border-color: #fff; }
-  #lang-switcher button.active { color: #fff; border-color: #fff; }
+  #lang-switcher button:hover, #lang-switcher button.active { border-color:var(--cyan); color:var(--cyan); }
 
   /* ── LAYOUT ── */
   .page-wrap {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: 48px 24px 80px;
+    max-width: var(--max); margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative; z-index: 1;
   }
 
   /* ── BREADCRUMB ── */
-  .breadcrumb {
-    font-size: 0.75rem; color: var(--mid);
-    margin-bottom: 32px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .breadcrumb a { color: var(--mid); text-decoration: none; }
-  .breadcrumb a:hover { color: var(--ink); }
-  .breadcrumb span { opacity: 0.5; }
+  .breadcrumb { font-size:0.75rem; color:var(--muted); margin-bottom:32px; display:flex; align-items:center; gap:6px; }
+  .breadcrumb a { color:var(--muted); text-decoration:none; }
+  .breadcrumb a:hover { color:var(--cyan); }
+  .breadcrumb span { opacity:0.5; }
 
   /* ── ARTICLE HEADER ── */
   .article-header { margin-bottom: 40px; }
-  .article-meta {
-    font-size: 0.75rem; color: var(--mid);
-    margin-bottom: 14px; letter-spacing: 0.05em;
-  }
+  .article-meta { font-size:0.7rem; color:var(--cyan); margin-bottom:14px; letter-spacing:0.12em; }
   .article-header h2 {
-    font-size: 1.6rem; font-weight: normal;
-    letter-spacing: 0.02em; line-height: 1.3;
-    margin-bottom: 16px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 1.5rem; font-weight: 700;
+    letter-spacing: 0.01em; line-height: 1.25;
+    margin-bottom: 16px; color: var(--text);
   }
   .article-header .lede {
-    font-size: 0.95rem; color: var(--mid);
-    line-height: 1.7; max-width: 600px;
-    border-left: 3px solid var(--ink);
-    padding-left: 16px;
+    font-size: 0.9rem; color: #8fa8c4; line-height: 1.75; max-width: 600px;
+    border-left: 3px solid var(--cyan); padding-left: 16px;
   }
+  .article-author { font-size:0.78rem; color:var(--muted); margin:10px 0 18px; font-style:normal; }
+  .article-author a { color:var(--muted); text-decoration:underline; }
+  .article-author a:hover { color:var(--cyan); }
 
   /* ── PROSE ── */
   .prose { max-width: var(--max); }
   .prose h3 {
-    font-size: 1rem; font-weight: bold;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
     margin: 36px 0 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--light);
-    letter-spacing: 0.04em;
+     letter-spacing: 0.04em;
+    color: var(--text);
   }
-  .prose h3 .step-num {
-    display: inline-block;
-    background: var(--ink); color: var(--white);
-    font-size: 0.72rem; padding: 1px 7px;
-    border-radius: 2px; margin-right: 8px;
-    vertical-align: middle; letter-spacing: 0.05em;
-  }
-  .prose p { margin-bottom: 16px; font-size: 0.88rem; color: var(--ink); }
+  .prose p { margin-bottom:16px; font-size:0.86rem; color:#c8ccd8; }
   .prose p.note {
-    background: var(--white); border: 1px solid var(--light);
-    border-left: 3px solid var(--accent);
+    background: rgba(0,245,212,0.05); border: 1px solid rgba(0,245,212,0.2);
+    border-left: 3px solid var(--cyan);
     padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0;
-    color: var(--mid); font-size: 0.82rem; margin-bottom: 20px;
+    color: #8fa8c4; font-size:0.82rem; margin-bottom:20px;
   }
-  .prose strong { color: var(--ink); }
+  .prose strong { color:var(--text); }
+  .prose em { color: #8fa8c4; }
+  .prose a { color: var(--cyan); }
+  .prose code { background:rgba(0,245,212,0.08); padding:1px 5px; border-radius:3px; color:var(--cyan); font-size:0.85em; }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table { width:100%; border-collapse:collapse; margin:20px 0 28px; font-size:0.82rem; }
+  .compare-table th {
+    text-align:left; padding:8px 12px;
+    background: rgba(0,245,212,0.12); color:var(--cyan);
+    font-weight:600; letter-spacing:0.08em; font-size:0.72rem;
+    border-bottom: 1px solid rgba(0,245,212,0.2);
+  }
+  .compare-table td { padding:9px 12px; border-bottom:1px solid var(--light); vertical-align:top; color:#c8ccd8; }
+  .compare-table tr:last-child td { border-bottom:none; }
+  .compare-table tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
+  .tag { display:inline-block; font-size:0.7rem; padding:2px 7px; border-radius:100px; margin-right:2px; letter-spacing:0.04em; font-family:'Space Mono',monospace; }
+  .tag-good { background:rgba(0,245,212,0.12); color:var(--cyan); border:1px solid rgba(0,245,212,0.25); }
+  .tag-bad  { background:rgba(255,77,109,0.12); color:#ff4d6d; border:1px solid rgba(255,77,109,0.25); }
+  .tag-mid  { background:rgba(255,230,0,0.1);  color:#ffe600; border:1px solid rgba(255,230,0,0.2); }
+
+  /* ── SCREENSHOT ── */
+  .screenshot-wrap {
+    margin:24px 0 28px; border:1px solid var(--glass-border);
+    border-radius:12px; overflow:hidden; backdrop-filter:blur(10px);
+  }
+  .screenshot-wrap img { display:block; width:100%; height:auto; }
+  .screenshot-caption {
+    padding:8px 14px; background:rgba(255,255,255,0.04);
+    border-top:1px solid var(--light);
+    font-size:0.75rem; color:var(--muted); font-style:italic;
+  }
+
+  /* ── PRESET LIST ── */
+  .preset-list { margin:0 0 20px; padding:0; list-style:none; }
+  .preset-list li { padding:8px 0; border-bottom:1px solid var(--light); font-size:0.86rem; color:#c8ccd8; }
+  .preset-list li:last-child { border-bottom:none; }
+
+  /* ── RESULT BOX ── */
+  .result-box {
+    background: var(--glass); border:1px solid var(--glass-border);
+    backdrop-filter:blur(10px);
+    border-radius:12px; padding:18px 20px;
+    margin:24px 0; display:flex; gap:14px; align-items:flex-start;
+  }
+  .result-box .rb-icon { font-size:1.4rem; flex-shrink:0; margin-top:2px; }
+  .result-box .rb-text { font-size:0.85rem; color:#c8ccd8; }
+  .result-box .rb-text strong { display:block; margin-bottom:4px; color:var(--text); }
+
+  /* ── CTA ── */
+  .cta-block {
+    background: rgba(0,245,212,0.06);
+    border:1px solid rgba(0,245,212,0.2);
+    border-radius:16px; padding:36px 28px;
+    margin-top:48px; text-align:center;
+    backdrop-filter:blur(10px);
+  }
+  .cta-btn {
+    display:inline-block;
+    background: rgba(0,245,212,0.12);
+    color:var(--cyan); border:1px solid rgba(0,245,212,0.35);
+    padding:12px 32px; border-radius:100px;
+    font-family:'Space Mono',monospace; font-size:0.88rem; font-weight:700;
+    text-decoration:none; letter-spacing:0.06em;
+    transition:all 0.2s;
+  }
+  .cta-btn:hover { background:rgba(0,245,212,0.2); box-shadow:0 0 24px rgba(0,245,212,0.2); }
+
+  /* ── RELATED ── */
+  .related-wrap { margin-top:48px; border-top:1px solid var(--light); padding-top:28px; }
+  .related-wrap h4 { font-size:0.7rem; color:var(--muted); letter-spacing:0.12em; margin-bottom:14px; text-transform:uppercase; }
+  .related-tools { display:flex; flex-wrap:wrap; gap:8px; }
+  .related-tools a {
+    padding:5px 14px; border:1px solid var(--glass-border);
+    background:var(--glass); border-radius:100px;
+    font-size:0.78rem; color:var(--muted); text-decoration:none;
+    font-family:'Space Mono',monospace;
+    transition:all 0.2s;
+  }
+  .related-tools a:hover { border-color:rgba(0,245,212,0.3); color:var(--cyan); }
+
+  /* ── GEO Q&A ── */
+  .geo-qa-prose { margin:2.2rem 0 0; }
+  .geo-qa-prose p { font-size:0.86rem; line-height:1.75; color:#c8ccd8; margin-bottom:0.5rem; }
+  .geo-qa {
+    margin:2.5rem 0 0; padding:1.5rem 1.75rem;
+    background:rgba(255,255,255,0.03);
+    border-left:3px solid var(--cyan);
+    border-radius:0 8px 8px 0;
+  }
+  .geo-qa h3 { font-family:'Chakra Petch',sans-serif; font-size:0.95rem; font-weight:700; margin:0 0 0.75rem; color:var(--text); }
+  .geo-qa p { font-size:0.86rem; line-height:1.7; margin:0; color:#c8ccd8; }
+  .geo-qa a, .geo-qa-prose a { color:var(--cyan); }
 
   /* ── FIELD TABLE ── */
   .field-table {
     width: 100%; border-collapse: collapse;
-    font-size: 0.82rem; margin: 20px 0 24px;
+    margin: 20px 0 28px; font-size: 0.84rem;
+    font-family: inherit;
   }
   .field-table th {
-    text-align: left; font-weight: bold;
-    font-size: 0.72rem; letter-spacing: 0.06em;
-    padding: 6px 10px; border-bottom: 2px solid var(--ink);
-    color: var(--ink);
+    text-align: left; padding: 10px 14px;
+    background: rgba(0,245,212,0.08);
+    color: var(--cyan); font-weight: 600;
+    letter-spacing: 0.06em; font-size: 0.72rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(0,245,212,0.2);
   }
   .field-table td {
-    padding: 7px 10px; border-bottom: 1px solid var(--light);
-    vertical-align: top; line-height: 1.5;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--light);
+    vertical-align: top;
+    line-height: 1.6;
   }
-  .field-table td:first-child { font-weight: bold; white-space: nowrap; }
   .field-table tr:last-child td { border-bottom: none; }
+  .field-table td:first-child {
+    color: var(--text);
+    font-weight: 600;
+    white-space: nowrap;
+    width: 32%;
+    padding-right: 20px;
+  }
+  .field-table td:last-child {
+    color: #c8ccd8;
+    font-size: 0.82rem;
+  }
+  .field-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
 
-  /* ── SCREENSHOT PLACEHOLDER ── */
+
+  footer {
+    position:relative; z-index:1; text-align:center; padding:28px 20px;
+    font-size:0.72rem; color:var(--muted);
+    border-top:1px solid var(--light); margin-top:40px;
+    font-family:'Space Mono',monospace;
+  }
+  footer a { color:var(--cyan); text-decoration:none; }
+
+  /* ── STEP LABEL ── */
+  .prose h3 {
+    /* Override previous rule: border moves to top, becomes a marker line */
+    border-bottom: none;
+    border-top: 1px solid rgba(0,245,212,0.25);
+    padding-bottom: 0;
+    padding-top: 14px;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .step-num {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  /* ── PROSE UL/OL ── */
+  .prose ul, .prose ol {
+    margin: 0 0 16px 20px;
+    font-size: 0.86rem;
+    line-height: 1.9;
+    color: #c8ccd8;
+  }
+  .prose li { margin-bottom: 4px; }
+  .prose li strong { color: var(--text); }
+
+  /* ── SCREENSHOT CAPTION outside wrap ── */
+  .screenshot-caption {
+    padding: 6px 2px 0;
+    background: transparent;
+    border-top: none;
+    font-size: 0.74rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 24px;
+  }
   .screenshot-wrap {
-    margin: 24px 0 28px;
-    border: 1px solid var(--light);
-    border-radius: var(--radius);
+    margin: 24px 0 6px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
     overflow: hidden;
   }
-  .screenshot-wrap img {
-    display: block; width: 100%; height: auto;
-  }
-  .screenshot-caption {
-    padding: 8px 14px;
-    background: #f2f2f0;
-    border-top: 1px solid var(--light);
-    font-size: 0.75rem; color: var(--mid);
-    font-style: italic;
-  }
 
-  /* ── RESULT BOX ── */
-  .result-box {
-    background: var(--white);
-    border: 1px solid var(--light);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    margin: 24px 0;
-    display: flex; gap: 14px; align-items: flex-start;
-  }
-  .result-box .rb-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
-  .result-box .rb-text { font-size: 0.85rem; }
-  .result-box .rb-text strong { display: block; margin-bottom: 4px; }
-
-  /* ── CTA ── */
-  .cta-block {
-    background: var(--ink); color: var(--white);
-    border-radius: var(--radius);
-    padding: 32px 28px;
-    margin-top: 48px;
+  /* ── IMAGE PLACEHOLDER ── */
+  .sc-placeholder {
+    display: none;
+    width: 100%; padding: 40px 20px;
     text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.02);
   }
-  .cta-block p {
-    font-size: 0.85rem; color: #aaa;
-    margin-bottom: 20px; margin-top: 8px;
+  .sc-placeholder::before {
+    content: '⬜';
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 8px;
+    opacity: 0.2;
   }
-  .cta-block h3 {
-    font-size: 1.1rem; font-weight: normal;
-    letter-spacing: 0.06em; margin-bottom: 0;
-    border: none; padding: 0; color: var(--white);
-  }
-  .cta-btn {
-    display: inline-block;
-    background: var(--white); color: var(--ink);
-    padding: 11px 28px; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.9rem; font-weight: bold;
-    text-decoration: none; letter-spacing: 0.04em;
-    transition: background 0.15s, color 0.15s;
-    border: 2px solid var(--white);
-  }
-  .cta-btn:hover { background: transparent; color: var(--white); }
-
-  /* ── RELATED ── */
-  .related-wrap {
-    margin-top: 56px;
-    border-top: 1px solid var(--light);
-    padding-top: 28px;
-  }
-  .related-wrap h4 {
-    font-size: 0.75rem; color: var(--mid);
-    letter-spacing: 0.1em; margin-bottom: 14px;
-    text-transform: uppercase;
-  }
-  .related-tools { display: flex; flex-wrap: wrap; gap: 8px; }
-  .related-tools a {
-    padding: 6px 14px; border: 1px solid #ccc;
-    background: var(--white); border-radius: var(--radius);
-    font-size: 0.8rem; color: var(--ink); text-decoration: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
-
-  .article-author {
-    font-size: 0.78rem; color: var(--mid); margin: 10px 0 18px;
-    font-style: normal;
-  }
-  .article-author a { color: var(--mid); text-decoration: underline; }
-  .geo-qa-prose { margin: 2.2rem 0 0; }
-  .geo-qa-prose p { font-size: 0.9rem; line-height: 1.75; color: var(--dark); margin-bottom: 0.5rem; }
-  .geo-qa {
-    margin: 2.5rem 0 0;
-    padding: 1.5rem 1.75rem;
-    background: #f8f8f6;
-    border-left: 3px solid #1a1a1a;
-    border-radius: 0 4px 4px 0;
-  }
-  .geo-qa h3 {
-    font-size: 1rem; font-weight: 700; margin: 0 0 0.75rem;
-    color: var(--dark);
-  }
-  .geo-qa p { font-size: 0.88rem; line-height: 1.7; margin: 0; color: var(--dark); }
 </style>
-  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="shortcut icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -285,7 +378,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           "name": "How do I add an architectural title block to a PDF?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "1. Open the <a href='vineta.html'>Title Block tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF</strong> and load your drawing. 3. Fill in the project fields: name, site, drawing content, plan type and number, scale, date, signatures. 4. Optionally upload a logo and set the north arrow rotation. 5. Choose the page size override if needed (auto-detect works for standard ISO formats). 6. Click <strong>Add title block</strong>. The block is drawn as native PDF vector content anchored to the bottom-right corner."
+            "text": "Open the Title Block tool at scalebarpdf.com. Click Choose PDF and load your drawing. Fill in the project fields: name, site, drawing content, plan type and number, scale, date, client and designer signatures. Optionally upload a studio logo and set the north arrow rotation. Click Add title block. The block is drawn as native PDF vector content anchored to the bottom-right corner, auto-scaled to the detected paper format."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What paper formats does the title block support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The tool auto-detects the paper format from the PDF geometry and supports A4 through A0. The block width scales with the format: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, and 77 mm on A0. If the PDF uses a non-standard page size, you can set the format manually with the page size override option."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the title block work on rotated PDF pages?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The tool detects the rotation flag of each page and compensates automatically, so the title block always appears in the correct visual position regardless of whether the page is stored portrait, landscape, or at 90° or 270° rotation."
           }
         }
       ]
@@ -315,9 +424,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
+<!-- SVG Background -->
+<svg id="bg-svg" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(0,245,212,0.06)"/>
+    </pattern>
+  </defs>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#grid)"/>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#dots)"/>
+</svg>
+<div class="glow-orb orb-1"></div>
+<div class="glow-orb orb-2"></div>
+
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html">▣ SCALEBAR PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
   <div id="lang-switcher">
     <button id="lang-en" onclick="setLang('en')">EN</button>
     <button id="lang-es" onclick="setLang('es')">ES</button>
@@ -328,7 +453,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- BREADCRUMB -->
   <nav class="breadcrumb">
-    <a href="index.html" data-i18n="home">Home</a>
+    <a href="index.html" data-i18n="home" style="color:var(--cyan);">Home</a>
     <span>›</span>
     <span data-i18n="tutorials_label">Tutorials</span>
   </nav>
@@ -336,7 +461,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE HEADER -->
   <header class="article-header">
     <div class="article-meta" data-i18n="article_meta">TUTORIAL — TITLE BLOCK · PDF WORKFLOW</div>
-    <p class="article-author">Written by <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
+    <p class="article-author">Written by <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener" style="color:var(--cyan);">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
     <h2 data-i18n="article_title">How to add a custom architectural title block to your PDF plans</h2>
     <p class="lede" data-i18n="article_lede">Most PDF tools let you add a text box. An architectural title block is a different thing: a structured panel with project data, signatures, a north arrow and a plan ID — all correctly laid out and scaled to your sheet format. This tutorial shows how to generate one directly in your browser.</p>
   </header>
@@ -344,12 +469,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE BODY -->
   <article class="prose">
 
-    <p data-i18n="intro_p1">Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content — the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:var(--accent);">here</a>.</p>
+    <p data-i18n="intro_p1">Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content — the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:var(--cyan);">here</a>.</p>
 
     <p data-i18n="intro_p2">The block anchors to the bottom-right corner, its width adapts to the detected paper format (A4 through A0), and its height adjusts dynamically to the amount of text you enter. Empty fields are simply left out — the block contracts accordingly.</p>
 
     <!-- STEP 1 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step1_title">Open the Title Block tool and load your PDF</span></h3>
+    <h3><span class="step-num">STEP 1</span> <span data-i18n="step1_title">Open the Title Block tool and load your PDF</span></h3>
 
     <p data-i18n="step1_p1">Navigate to the <strong>Title block</strong> tool from the homepage and click <strong>Choose PDF</strong>. The file is processed entirely in your browser — nothing is sent to any server at any point.</p>
 
@@ -358,12 +483,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="screenshot-wrap">
       <img id="sc1-img" src="img/tutorial-vineta-01.png" alt="Title block tool panel with a PDF loaded" style="display:none;"
            onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';"
-           onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';">
+           onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';"><div id="sc1-placeholder" class="sc-placeholder">Image coming soon</div></div>
       <div class="screenshot-caption" data-i18n="sc1_caption">The tool panel after loading a PDF, with the input fields ready to fill in.</div>
-    </div>
 
     <!-- STEP 2 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step2_title">Fill in the project data fields</span></h3>
+    <h3><span class="step-num">STEP 2</span> <span data-i18n="step2_title">Fill in the project data fields</span></h3>
 
     <p data-i18n="step2_p1">The tool provides a set of standard architectural fields. All text is automatically uppercased. Fields left empty are omitted from the block — the layout contracts cleanly around whatever you provide.</p>
 
@@ -390,12 +514,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="screenshot-wrap">
       <img id="sc2-img" src="img/tutorial-vineta-02.png" alt="Title block form fields filled in with sample project data" style="display:none;"
            onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';"
-           onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';">
+           onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';"><div id="sc2-placeholder" class="sc-placeholder">Image coming soon</div></div>
       <div class="screenshot-caption" data-i18n="sc2_caption">The input fields filled in for a sample project. The plan ID colour picker lets you match the colour used in the drawing itself.</div>
-    </div>
 
     <!-- STEP 3 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step3_title">Adjust size, colour and page format</span></h3>
+    <h3><span class="step-num">STEP 3</span> <span data-i18n="step3_title">Adjust size, colour and page format</span></h3>
 
     <p data-i18n="step3_p1">Three options let you fine-tune the result: <strong>Size</strong> (Small / Normal / Large) scales the entire block proportionally from the bottom-right anchor — useful for busy sheets or presentation drawings. <strong>Plan ID colour</strong> sets the colour of the plan number (e.g. ARCH-01); the tool detects the colours already present in the PDF and offers them as swatches so you can match the drawing style in one click. <strong>Page size override</strong> should normally stay on Auto-detect, but can be set manually if the PDF uses a non-standard format.</p>
 
@@ -404,21 +527,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="screenshot-wrap">
       <img id="sc3-img" src="img/tutorial-vineta-03.png" alt="Options row showing size selector, plan ID colour picker and colour swatches" style="display:none;"
            onerror="this.style.display='none';document.getElementById('sc3-placeholder').style.display='block';"
-           onload="this.style.display='block';document.getElementById('sc3-placeholder').style.display='none';">
+           onload="this.style.display='block';document.getElementById('sc3-placeholder').style.display='none';"><div id="sc3-placeholder" class="sc-placeholder">Image coming soon</div></div>
       <div class="screenshot-caption" data-i18n="sc3_caption">The options row. The colour swatches are extracted automatically from the PDF — clicking one sets the plan ID colour instantly.</div>
-    </div>
 
     <!-- STEP 4 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step4_title">Apply and download — or continue working on the same file</span></h3>
+    <h3><span class="step-num">STEP 4</span> <span data-i18n="step4_title">Apply and download — or continue working on the same file</span></h3>
 
     <p data-i18n="step4_p1">Click <strong>Add title block</strong>. The block is drawn into the PDF content stream of each selected page. Download the result immediately, or click <strong>↩ Keep working</strong> to promote the output as the active file and apply further tools in the same session — a scale bar, a watermark, compression — without any intermediate downloads.</p>
 
     <div class="screenshot-wrap">
       <img id="sc4-img" src="img/tutorial-vineta-04.png" alt="A finished architectural PDF with the title block visible in the bottom-right corner" style="display:none;"
            onerror="this.style.display='none';document.getElementById('sc4-placeholder').style.display='block';"
-           onload="this.style.display='block';document.getElementById('sc4-placeholder').style.display='none';">
+           onload="this.style.display='block';document.getElementById('sc4-placeholder').style.display='none';"><div id="sc4-placeholder" class="sc-placeholder">Image coming soon</div></div>
       <div class="screenshot-caption" data-i18n="sc4_caption">The finished result: a complete architectural title block in the bottom-right corner, scaled correctly to the A1 sheet.</div>
-    </div>
 
     <div class="result-box">
       <div class="rb-icon">✓</div>
@@ -445,24 +566,37 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
       <p itemprop="text" data-i18n-html="geo_a"></p>
     </div>
-    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--mid);margin-top:0.5rem;"></p>
+    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--muted);margin-top:0.5rem;"></p>
+  </div>
+
+  <div class="geo-qa-prose" itemscope itemtype="https://schema.org/Question">
+    <p><strong itemprop="name" data-i18n="geo_q2"></strong></p>
+    <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+      <p itemprop="text" data-i18n="geo_a2"></p>
+    </div>
+  </div>
+
+  <div class="geo-qa-prose" itemscope itemtype="https://schema.org/Question">
+    <p><strong itemprop="name" data-i18n="geo_q3"></strong></p>
+    <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
+      <p itemprop="text" data-i18n="geo_a3"></p>
+    </div>
   </div>
 
   <!-- CTA -->
   <div class="cta-block">
-    <a href="vineta.html" class="cta-btn" data-i18n="cta_btn">Open Title Block tool →</a>
-    <p data-i18n="cta_desc">Free, browser-only. No account. No upload. Works on rotated and non-standard page sizes.</p>
+    <a href="vineta.html" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Title Block tool →</a>
   </div>
 
   <!-- RELATED TOOLS -->
   <div class="related-wrap">
     <h4 data-i18n="related_title">RELATED TOOLS</h4>
     <div class="related-tools">
-      <a href="scalebar.html" data-i18n="rel_scalebar">Scale bar (m)</a>
-      <a href="scalebar_ft.html" data-i18n="rel_scalebar_ft">Scale bar (ft)</a>
-      <a href="watermark_logo.html" data-i18n="rel_logo">Logo watermark</a>
-      <a href="revision_cloud.html" data-i18n="rel_revcloud">Revision cloud</a>
-      <a href="plan_numbering.html" data-i18n="rel_plannum">Plan numbering</a>
+      <a href="scalebar.html" data-i18n="rel_scalebar" style="color:var(--cyan);">Scale bar (m)</a>
+      <a href="scalebar_ft.html" data-i18n="rel_scalebar_ft" style="color:var(--cyan);">Scale bar (ft)</a>
+      <a href="watermark_logo.html" data-i18n="rel_logo" style="color:var(--cyan);">Logo watermark</a>
+      <a href="revision_cloud.html" data-i18n="rel_revcloud" style="color:var(--cyan);">Revision cloud</a>
+      <a href="plan_numbering.html" data-i18n="rel_plannum" style="color:var(--cyan);">Plan numbering</a>
     </div>
   </div>
 
@@ -476,7 +610,7 @@ const T = {
     article_meta: 'TUTORIAL — TITLE BLOCK · PDF WORKFLOW',
     article_title: 'How to add a custom architectural title block to your PDF plans',
     article_lede: 'Most PDF tools let you add a text box. An architectural title block is a different thing: a structured panel with project data, signatures, a north arrow and a plan ID — all correctly laid out and scaled to your sheet format. This tutorial shows how to generate one directly in your browser.',
-    intro_p1: 'Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content — the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:#1a4db3;">here</a>.',
+    intro_p1: 'Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content — the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:var(--cyan);">here</a>.',
     intro_p2: 'The block anchors to the bottom-right corner, its width adapts to the detected paper format (A4 through A0), and its height adjusts dynamically to the amount of text you enter. Empty fields are simply left out — the block contracts accordingly.',
     step: 'STEP',
     step1_title: 'Open the Title Block tool and load your PDF',
@@ -514,15 +648,19 @@ const T = {
     rel_scalebar: 'Scale bar (m)', rel_scalebar_ft: 'Scale bar (ft)',
     rel_logo: 'Logo watermark', rel_revcloud: 'Revision cloud', rel_plannum: 'Plan numbering',
     'geo_q': 'So, how do I add an architectural title block to a PDF?',
-    'geo_a': 'Open the <a href="vineta.html">Title Block tool</a> at scalebarpdf.com. Load your PDF, fill in the project fields (name, plan number, scale, date, signatures), optionally add a logo and north arrow, then click <strong>Add title block</strong>. The block is drawn as native vector content anchored to the bottom-right corner, auto-scaled to the detected paper format.',
+    'geo_a': 'Open the <a href="vineta.html" style="color:var(--cyan);">Title Block tool</a> at scalebarpdf.com. Load your PDF, fill in the project fields (name, plan number, scale, date, signatures), optionally add a logo and north arrow, then click <strong>Add title block</strong>. The block is drawn as native vector content anchored to the bottom-right corner, auto-scaled to the detected paper format.',
     'geo_v': 'Also searched as: <em>add viñeta to PDF</em>, <em>PDF title block generator free</em>, <em>architectural title block PDF online</em>.',
+    'geo_q2': 'What paper formats does the title block support?',
+    'geo_a2': 'The tool auto-detects A4 through A0 from the PDF geometry. Block width scales with the format: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, 77 mm on A0. Non-standard sizes can be set manually with the page size override.',
+    'geo_q3': 'Does the title block work on rotated PDF pages?',
+    'geo_a3': 'Yes. The tool detects each page\'s rotation flag and compensates automatically — the block always appears in the correct visual position regardless of portrait, landscape, or 90°/270° rotation.',
   },
   es: {
     home: 'Inicio', tutorials_label: 'Tutoriales',
     article_meta: 'TUTORIAL — VIÑETA · FLUJO DE TRABAJO PDF',
     article_title: 'Cómo añadir una viñeta arquitectónica personalizada a tus planos en PDF',
     article_lede: 'La mayoría de las herramientas PDF permiten añadir un cuadro de texto. Una viñeta arquitectónica es algo distinto: un panel estructurado con datos del proyecto, firmas, flecha de norte y número de plano — todo correctamente dispuesto y escalado al formato de la lámina. Este tutorial muestra cómo generarla directamente en el navegador.',
-    intro_p1: 'Todo conjunto de planos arquitectónicos necesita una viñeta. El problema es que una vez exportado el dibujo a PDF, añadirla correctamente suele significar volver al archivo original o insertar una imagen rasterizada. Ninguna opción es ideal. Por eso construí una herramienta que dibuja la viñeta como contenido vectorial nativo en el PDF — exactamente igual que lo haría una aplicación CAD. La puedes encontrar <a href="vineta.html" style="color:#1a4db3;">aquí</a>.',
+    intro_p1: 'Todo conjunto de planos arquitectónicos necesita una viñeta. El problema es que una vez exportado el dibujo a PDF, añadirla correctamente suele significar volver al archivo original o insertar una imagen rasterizada. Ninguna opción es ideal. Por eso construí una herramienta que dibuja la viñeta como contenido vectorial nativo en el PDF — exactamente igual que lo haría una aplicación CAD. La puedes encontrar <a href="vineta.html" style="color:var(--cyan);">aquí</a>.',
     intro_p2: 'La viñeta se ancla en la esquina inferior derecha, su ancho se adapta al formato de papel detectado (de A4 a A0) y su alto se ajusta dinámicamente a la cantidad de texto ingresado. Los campos vacíos simplemente se omiten — la viñeta se contrae en consecuencia.',
     step: 'PASO',
     step1_title: 'Abre la herramienta Viñeta y carga tu PDF',
@@ -560,8 +698,12 @@ const T = {
     rel_scalebar: 'Escala gráfica (m)', rel_scalebar_ft: 'Escala gráfica (ft)',
     rel_logo: 'Marca de agua con logo', rel_revcloud: 'Nube de revisión', rel_plannum: 'Numeración de planos',
     'geo_q': 'Entonces, ¿cómo añado una viñeta arquitectónica a un PDF?',
-    'geo_a': 'Abre la <a href="vineta.html">herramienta Viñeta</a> en scalebarpdf.com. Carga tu PDF, completa los campos del proyecto (nombre, número de plano, escala, fecha, firmas), añade opcionalmente un logo y la flecha de norte, y haz clic en <strong>Add title block</strong>. La viñeta se dibuja como contenido vectorial nativo anclada en la esquina inferior derecha.',
+    'geo_a': 'Abre la <a href="vineta.html" style="color:var(--cyan);">herramienta Viñeta</a> en scalebarpdf.com. Carga tu PDF, completa los campos del proyecto (nombre, número de plano, escala, fecha, firmas), añade opcionalmente un logo y la flecha de norte, y haz clic en <strong>Add title block</strong>. La viñeta se dibuja como contenido vectorial nativo anclada en la esquina inferior derecha.',
     'geo_v': 'También buscado como: <em>añadir viñeta a PDF</em>, <em>generador de carátula PDF gratis</em>, <em>viñeta arquitectónica PDF online</em>.',
+    'geo_q2': '¿Qué formatos de papel admite la viñeta?',
+    'geo_a2': 'La herramienta detecta automáticamente de A4 a A0 a partir de la geometría del PDF. El ancho de la viñeta escala con el formato: 36 mm en A4, 50 mm en A3, 59 mm en A2, 68 mm en A1, 77 mm en A0. Los formatos no estándar se pueden ajustar manualmente.',
+    'geo_q3': '¿Funciona la viñeta en páginas PDF rotadas?',
+    'geo_a3': 'Sí. La herramienta detecta el indicador de rotación de cada página y compensa automáticamente — la viñeta siempre aparece en la posición visual correcta sin importar si la página está en vertical, horizontal o con rotación de 90°/270°.',
   }
 };
 
@@ -594,7 +736,7 @@ document.addEventListener('DOMContentLoaded', applyI18n);
 </script>
 
 
-<footer style="text-align:center;padding:24px 20px;font-size:0.75rem;color:var(--mid);border-top:1px solid var(--light);margin-top:40px;">
+<footer>
   © 2026 Scalebar PDF Tools
 </footer>
 </body>

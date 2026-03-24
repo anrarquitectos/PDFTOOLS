@@ -12,295 +12,459 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scalebar PDF Tools — Free browser-based PDF tools</title>
 <meta name="description" content="Free browser-based PDF tools for architects and technical professionals. Compress drawings, add scale bars and title blocks, watermark, merge, split and more — no upload, no account, 100% local processing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f8f8f6;
-    --white: #ffffff;
-    --ink: #1a1a1a;
-    --mid: #555;
-    --light: #e8e8e4;
-    --ok: #2d6a2d;
-    --err: #8b1a1a;
-    --run: #5a5a00;
+    --bg: #080b12;
+    --surface: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.08);
+    --border-solid: #1a1f2e;
+    --cyan: #00f5d4;
+    --magenta: #f700ff;
+    --yellow: #ffe600;
+    --text: #e8eaf6;
+    --muted: #6b7080;
+    --ok: #00f5d4;
+    --err: #ff4d6d;
+    --run: #ffe600;
+    --accent: #00f5d4;
+    --dark: #e8eaf6;
+    --white: #e8eaf6;
+    --ink: #e8eaf6;
+    --mid: #6b7080;
+    --light: rgba(255,255,255,0.08);
     --radius: 4px;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Courier New', Courier, monospace;
-    background: var(--bg); color: var(--ink);
+    font-family: 'Space Mono', 'Courier New', monospace;
+    background: var(--bg); color: var(--text);
     min-height: 100vh; font-size: 14px;
+    overflow-x: hidden;
   }
+
+  /* ── BACKGROUND LAYERS ── */
+  #bg-svg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+  .glow-orb {
+    position: fixed; border-radius: 50%;
+    filter: blur(100px); opacity: 0.22;
+    pointer-events: none; z-index: 0;
+  }
+  .orb-1 { width: 620px; height: 620px; background: var(--cyan); top: -200px; left: -160px; opacity: 0.15; }
+  .orb-2 { width: 280px; height: 280px; background: var(--magenta); bottom: -60px; right: -80px; opacity: 0.1; }
 
   /* ── TOP BAR ── */
   #topbar {
-    background: var(--ink); color: var(--white);
-    padding: 12px 28px; display: flex; align-items: center;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    background: rgba(8,11,18,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    padding: 0 32px; height: 53px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
   }
-  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
-  #file-indicator { font-size: 0.78rem; color: #aaa; max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  #file-indicator span { color: #fff; }
+  #topbar h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem; letter-spacing: 0.12em; font-weight: 700;
+    line-height: 1; display: flex; align-items: center;
+  }
+  #topbar h1 a { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:13px; }
+  #topbar h1 a .logo-accent { color: var(--cyan); }
+  #file-indicator {
+    font-size: 0.75rem; color: var(--muted);
+    max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  #file-indicator span { color: var(--cyan); }
   #btn-change-file {
-    background: none; border: 1px solid #555; color: #ccc;
-    padding: 4px 10px; cursor: pointer; font-family: inherit;
-    font-size: 0.75rem; border-radius: var(--radius);
+    background: none; border: 1px solid rgba(255,255,255,0.2); color: var(--muted);
+    padding: 4px 12px; cursor: pointer; font-family: inherit;
+    font-size: 0.72rem; border-radius: 100px; transition: all 0.2s;
+    letter-spacing: 0.05em;
   }
-  #btn-change-file:hover { border-color: #fff; color: #fff; }
+  #btn-change-file:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  #lang-switcher { display: flex; gap: 4px; margin-left: 12px; }
+  #lang-switcher button {
+    background: none; border: 1px solid rgba(255,255,255,0.15);
+    color: var(--muted); padding: 3px 9px; font-size: 0.7rem;
+    border-radius: 100px; cursor: pointer; font-family: inherit;
+    letter-spacing: 0.08em; transition: all 0.2s;
+  }
+  #lang-switcher button:hover { border-color: var(--cyan); color: var(--cyan); }
 
   /* ── VIEWS ── */
   .view { display: none; }
   .view.active { display: block; }
 
   /* ── HOME ── */
-  #view-home { max-width: 860px; margin: 0 auto; padding: 18px 20px 40px; }
-
-  .home-header { margin-bottom: 20px; }
-  .home-header h2 { font-size: 1.35rem; font-weight: normal; letter-spacing: 0.04em; margin-bottom: 8px; }
-  .home-header p { font-size: 0.85rem; color: var(--mid); line-height: 1.6; max-width: 600px; }
-  .home-header .privacy-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    margin-top: 12px; padding: 5px 12px;
-    border: 1px solid #ccc; border-radius: 20px;
-    font-size: 0.75rem; color: var(--mid);
+  #view-home {
+    max-width: 1080px; margin: 0 auto;
+    padding: 24px 12px 60px;
+    position: relative; z-index: 1;
   }
+
+  .home-header { margin-bottom: 32px; }
+
+  .home-header h2 {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+    font-weight: 700; line-height: 1.15;
+    letter-spacing: 0.01em;
+    margin-bottom: 14px;
+  }
+  .home-header h2 .h2-accent { color: var(--cyan); }
+
+  .home-header .privacy-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 14px; padding: 6px 16px;
+    background: rgba(0,245,212,0.06);
+    border: 1px solid rgba(0,245,212,0.2);
+    border-radius: 100px;
+    font-size: 0.72rem; color: var(--cyan);
+    letter-spacing: 0.05em;
+  }
+  .privacy-badge::before {
+    content: ''; display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--cyan);
+    animation: blink 2s infinite;
+  }
+  @keyframes blink {
+    0%,100% { opacity:1; } 50% { opacity:0.3; }
+  }
+
+  .home-header p {
+    font-size: 0.82rem; color: #8fa8c4;
+    line-height: 1.75; max-width: 620px;
+    margin-top: 4px;
+  }
+
+  /* choose tool label */
+  .choose-label {
+    font-size: 0.7rem; color: var(--magenta);
+    letter-spacing: 0.2em; text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+    margin-bottom: 16px;
+  }
+  .choose-label::before { content: '// '; }
 
   /* ── TOOLS GRID ── */
   .tools-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+    gap: 14px;
     margin-bottom: 4px;
   }
-  @media (max-width: 600px) {
+  @media (max-width: 640px) {
     .tools-grid { grid-template-columns: repeat(2, 1fr); }
-    .tools-peek-wrap { max-height: calc(120px + 10px + 120px + 10px + 80px); }
+    .tools-peek-wrap { max-height: calc(160px + 14px + 160px + 14px + 80px); }
   }
-  .tool-card {
-    background: var(--white); border: 1px solid var(--light);
-    border-radius: var(--radius); padding: 18px; cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-  }
-  .tool-card:hover { border-color: var(--ink); box-shadow: 0 4px 12px rgba(0,0,0,0.13); }
-  .tool-card .icon { font-size: 1.5rem; margin-bottom: 9px; display:flex; align-items:center; }
-  .tool-card .icon svg { width:28px; height:28px; }
-  .tool-card h3 { font-size: 0.86rem; margin-bottom: 4px; line-height: 1.3; }
-  .tool-card p { font-size: 0.74rem; color: var(--mid); line-height: 1.4; }
 
-  /* Peek row: half-height overflow reveals row 2 */
+  .tool-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 22px 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    isolation: isolate;
+  }
+  a.tool-card { color: inherit; text-decoration: none; display: block; }
+  a.tool-card:visited { color: inherit; }
+  .tool-card::before {
+    content: '';
+    position: absolute; inset: 0; border-radius: 16px;
+    background: linear-gradient(135deg, rgba(0,245,212,0.07), rgba(247,0,255,0.05));
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .tool-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0,245,212,0.28);
+    box-shadow: 0 16px 36px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,245,212,0.12), 0 0 24px rgba(0,245,212,0.06);
+  }
+  .tool-card:hover::before { opacity: 1; }
+
+  /* Icon wrapper */
+  .tool-card .icon {
+    width: 54px; height: 54px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+    font-size: 1.6rem;
+    position: relative; z-index: 1;
+  }
+  .icon-c { background: rgba(0,245,212,0.12);  border: 1px solid rgba(0,245,212,0.22); }
+  .icon-m { background: rgba(247,0,255,0.10);  border: 1px solid rgba(247,0,255,0.22); }
+  .icon-y { background: rgba(255,230,0,0.10);  border: 1px solid rgba(255,230,0,0.22); }
+  .tool-card .icon svg { width: 30px; height: 30px; }
+
+  .tool-card h3 {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 0.82rem; font-weight: 700;
+    margin-bottom: 6px; line-height: 1.3;
+    position: relative; z-index: 1;
+    color: var(--text);
+  }
+  .tool-card p {
+    font-size: 0.7rem; color: #8a93a8;
+    line-height: 1.55; position: relative; z-index: 1;
+  }
+
+  /* Peek */
   .tools-peek-wrap {
     overflow: hidden;
-    /* show row 1 (card ~110px) + most of row 2 (~155px) */
-    max-height: calc(110px + 12px + 155px);
+    padding-top: 6px;
+    max-height: calc(140px + 14px + 170px + 6px);
     transition: max-height 0.4s ease;
     margin-bottom: 0;
   }
-  .tools-peek-wrap.expanded {
-    max-height: 2000px;
-  }
-  /* fade at bottom when collapsed */
-  .tools-peek-outer {
-    position: relative;
-    margin-bottom: 4px;
-  }
+  .tools-peek-wrap.expanded { max-height: 3000px; }
+  .tools-peek-outer { position: relative; margin-top: -6px; margin-bottom: 4px; }
   .tools-peek-fade {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 48px;
+    position: absolute; bottom: 0; left: 0; right: 0; height: 56px;
     background: linear-gradient(to bottom, transparent, var(--bg));
-    pointer-events: none;
-    transition: opacity 0.3s;
+    pointer-events: none; transition: opacity 0.3s;
   }
   .tools-peek-outer.expanded .tools-peek-fade { opacity: 0; }
 
   /* More tools button */
   #more-tools-btn {
-    display: flex; align-items: center; gap: 7px; margin: 14px auto 0;
-    background: none; border: 1px solid #bbb; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.92rem; color: var(--mid);
-    padding: 9px 28px; cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    display: flex; align-items: center; gap: 7px; margin: 18px auto 0;
+    background: var(--glass); border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    border-radius: 100px;
+    font-family: 'Space Mono', monospace; font-size: 0.78rem; color: var(--cyan);
+    padding: 10px 28px; cursor: pointer;
+    transition: all 0.2s; letter-spacing: 0.06em;
   }
-  #more-tools-btn:hover { border-color: var(--ink); color: var(--ink); }
-  #more-tools-btn .chevron { transition: transform 0.3s; font-size: 0.65rem; }
+  #more-tools-btn:hover { border-color: rgba(0,245,212,0.5); background: rgba(0,245,212,0.07); }
+  #more-tools-btn .chevron { transition: transform 0.3s; font-size: 0.6rem; }
   #more-tools-btn.open .chevron { transform: rotate(180deg); }
 
+  /* ── CARBON ADS ── */
+  .carbon-wrap {
+    margin: 32px 0 0;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 14px;
+    min-height: 130px; background: var(--glass);
+    backdrop-filter: blur(10px);
+  }
+  .carbon-wrap .carbon-slot { flex: 1; min-height: 100px; }
+  .carbon-wrap .carbon-label { font-size: 0.65rem; color: var(--muted); white-space: nowrap; align-self: flex-end; }
+
   /* ── TOOL VIEW ── */
-  #view-tool { max-width: 860px; margin: 0 auto; padding: 32px 20px; }
+  #view-tool {
+    max-width: 1080px; margin: 0 auto;
+    padding: 32px 12px;
+    position: relative; z-index: 1;
+  }
   #back-btn {
     background: none; border: none; cursor: pointer;
-    font-family: inherit; font-size: 0.85rem; color: var(--mid);
-    padding: 0; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted);
+    padding: 0; margin-bottom: 24px; display: inline-flex; align-items: center; gap: 6px;
+    transition: color 0.2s; letter-spacing: 0.05em;
   }
-  #back-btn:hover { color: var(--ink); }
+  #back-btn:hover { color: var(--cyan); }
 
   .tool-panel { display: none; }
   .tool-panel.active { display: block; }
 
   .panel-box {
-    background: var(--white); border: 1px solid var(--light);
-    border-radius: var(--radius); padding: 24px; margin-bottom: 18px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    border-radius: 16px; padding: 28px; margin-bottom: 16px;
   }
-  .panel-box h2 { font-size: 1rem; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid var(--light); }
+  .panel-box h2 {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 1.1rem; font-weight: 800;
+    margin-bottom: 18px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    letter-spacing: -0.01em; color: var(--text);
+  }
 
-  /* Working file banner */
+  /* Working banner */
   #working-banner {
-    display: none; background: #f0f7f0; border: 1px solid #a8d4a8;
-    border-radius: var(--radius); padding: 8px 14px; margin-bottom: 16px;
-    font-size: 0.8rem; color: var(--ok);
+    display: none;
+    background: rgba(0,245,212,0.07);
+    border: 1px solid rgba(0,245,212,0.25);
+    border-radius: 10px; padding: 8px 14px; margin-bottom: 16px;
+    font-size: 0.78rem; color: var(--cyan);
   }
   #working-banner.show { display: flex; align-items: center; gap: 8px; }
 
-  label { display: block; margin-bottom: 5px; font-size: 0.85rem; }
-  input[type="text"], input[type="number"], select {
-    display: block; width: 100%; padding: 7px 10px; margin-bottom: 14px;
-    border: 1px solid #ccc; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.85rem; background: var(--white);
+  label { display: block; margin-bottom: 5px; font-size: 0.82rem; color: var(--muted); }
+  input[type="text"], input[type="number"], select, textarea {
+    display: block; width: 100%; padding: 8px 12px; margin-bottom: 14px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius);
+    font-family: 'Space Mono', monospace; font-size: 0.82rem;
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+    transition: border-color 0.2s;
+    outline: none;
   }
-  input[type="file"] { display: block; margin-bottom: 14px; font-family: inherit; font-size: 0.85rem; }
-  input[type="range"] { width: 100%; margin-bottom: 4px; cursor: pointer; }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+    border-color: rgba(0,245,212,0.4);
+  }
+  select option { background: #0f1320; color: var(--text); }
+  input[type="file"] { display: block; margin-bottom: 14px; font-family: inherit; font-size: 0.82rem; color: var(--muted); }
+  input[type="range"] { width: 100%; margin-bottom: 4px; cursor: pointer; accent-color: var(--cyan); }
+  input[type="color"] { background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: var(--radius); cursor: pointer; }
   .row { display: flex; gap: 14px; flex-wrap: wrap; }
   .row > div { flex: 1; min-width: 150px; }
 
   .btn {
     display: inline-block; padding: 8px 18px;
-    border: 1px solid var(--ink); background: var(--white);
-    font-family: inherit; font-size: 0.85rem; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+    font-family: 'Space Mono', monospace; font-size: 0.8rem; cursor: pointer;
     border-radius: var(--radius); margin-right: 8px; margin-bottom: 6px;
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.15s; letter-spacing: 0.03em;
   }
-  .btn:hover { background: var(--ink); color: var(--white); }
-  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-  .btn-primary { background: var(--ink); color: var(--white); }
-  .btn-primary:hover { background: #444; }
-  .btn-dl { border-color: var(--ok); color: var(--ok); }
-  .btn-dl:hover { background: var(--ok); color: var(--white); }
-  .btn-apply { border-color: #0055aa; color: #0055aa; font-size: 0.8rem; padding: 6px 14px; }
-  .btn-apply:hover { background: #0055aa; color: var(--white); }
+  .btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,245,212,0.06); }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-primary { background: rgba(0,245,212,0.12); border-color: rgba(0,245,212,0.35); color: var(--cyan); }
+  .btn-primary:hover { background: rgba(0,245,212,0.2); }
+  .btn-dl { border-color: rgba(0,245,212,0.3); color: var(--cyan); }
+  .btn-dl:hover { background: rgba(0,245,212,0.1); }
+  .btn-apply { border-color: rgba(167,139,250,0.35); color: #a78bfa; font-size: 0.76rem; padding: 6px 14px; }
+  .btn-apply:hover { background: rgba(167,139,250,0.1); }
 
-  .status { margin-top: 10px; font-size: 0.82rem; min-height: 18px; padding: 4px 0; }
-  .ok  { color: var(--ok); }
+  .status { margin-top: 10px; font-size: 0.78rem; min-height: 18px; padding: 4px 0; font-family: 'Space Mono', monospace; }
+  .ok  { color: var(--cyan); }
   .err { color: var(--err); }
-  .run { color: var(--run); }
+  .run { color: var(--yellow); }
 
   /* ── GS COMPRESS ── */
   .preset-grid { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
   .preset-btn {
-    flex: 1; min-width: 100px; padding: 10px 8px; border: 1px solid #ccc;
-    background: var(--white); cursor: pointer; font-family: inherit;
+    flex: 1; min-width: 100px; padding: 10px 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.03);
+    color: var(--text); cursor: pointer; font-family: 'Space Mono', monospace;
     border-radius: var(--radius); text-align: center; transition: all 0.15s;
   }
-  .preset-btn:hover { border-color: var(--ink); }
-  .preset-btn.active { border-color: var(--ink); background: var(--ink); color: var(--white); }
-  .preset-btn .preset-name { font-size: 0.85rem; font-weight: bold; display: block; }
-  .preset-btn .preset-desc { font-size: 0.72rem; color: inherit; opacity: 0.7; display: block; margin-top: 3px; }
-  .gs-custom-opts { background: var(--bg); border: 1px solid var(--light); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; }
-  .gs-load-note { font-size: 0.78rem; color: var(--mid); padding: 8px 0; }
-  .progress-bar-wrap { background: var(--light); border-radius: 2px; height: 6px; margin: 8px 0; overflow: hidden; display: none; }
+  .preset-btn:hover { border-color: rgba(0,245,212,0.3); }
+  .preset-btn.active { border-color: var(--cyan); background: rgba(0,245,212,0.1); color: var(--cyan); }
+  .preset-btn .preset-name { font-size: 0.82rem; font-weight: bold; display: block; }
+  .preset-btn .preset-desc { font-size: 0.68rem; color: inherit; opacity: 0.6; display: block; margin-top: 3px; }
+  .gs-custom-opts { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; }
+  .gs-load-note { font-size: 0.75rem; color: var(--muted); padding: 8px 0; }
+  .progress-bar-wrap { background: rgba(255,255,255,0.06); border-radius: 2px; height: 5px; margin: 8px 0; overflow: hidden; display: none; }
   .progress-bar-wrap.show { display: block; }
-  .progress-bar { height: 100%; background: var(--ink); width: 0%; transition: width 0.3s; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--magenta)); width: 0%; transition: width 0.3s; }
 
   /* ── CONVERT PREVIEW ── */
   #convert-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-  #convert-preview canvas { border: 1px solid var(--light); }
+  #convert-preview canvas { border: 1px solid var(--border); border-radius: 4px; }
 
   /* ── PAGE REORDER ── */
   #reorder-grid {
     display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px;
-    padding: 14px; background: var(--bg); border: 1px solid var(--light);
+    padding: 14px; background: rgba(255,255,255,0.02); border: 1px solid var(--border);
     border-radius: var(--radius); min-height: 100px;
   }
   .page-thumb {
     position: relative; cursor: grab; user-select: none;
-    border: 2px solid var(--light); border-radius: var(--radius);
-    background: var(--white); padding: 6px; text-align: center;
+    border: 2px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+    background: rgba(255,255,255,0.04); padding: 6px; text-align: center;
     transition: border-color 0.15s;
   }
-  .page-thumb:hover { border-color: var(--ink); }
+  .page-thumb:hover { border-color: var(--cyan); }
   .page-thumb.dragging { opacity: 0.4; cursor: grabbing; }
-  .page-thumb.drag-over { border-color: #0066cc; border-style: dashed; }
+  .page-thumb.drag-over { border-color: var(--cyan); border-style: dashed; }
   .page-thumb canvas { display: block; pointer-events: none; }
-  .page-thumb .thumb-label { font-size: 0.72rem; color: var(--mid); margin-top: 4px; }
+  .page-thumb .thumb-label { font-size: 0.68rem; color: var(--muted); margin-top: 4px; }
   .page-thumb .delete-cb { position: absolute; top: 4px; right: 4px; cursor: pointer; accent-color: var(--err); }
 
   /* ── OTHER TOOLS STRIP ── */
   #other-tools-section {
-    background: var(--white); border: 1px solid var(--light);
-    border-radius: var(--radius); padding: 18px 24px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px; padding: 18px 24px;
   }
-  #other-tools-section h3 { font-size: 0.85rem; color: var(--mid); margin-bottom: 12px; letter-spacing: 0.05em; }
+  #other-tools-section h3 { font-size: 0.78rem; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
   .other-tools-strip { display: flex; flex-wrap: wrap; gap: 8px; }
   .other-btn {
-    padding: 6px 14px; border: 1px solid #ccc; background: var(--white);
-    font-family: inherit; font-size: 0.8rem; cursor: pointer; border-radius: var(--radius);
-    transition: border-color 0.15s, background 0.15s;
+    padding: 5px 14px; border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace; font-size: 0.75rem; cursor: pointer; border-radius: 100px;
+    transition: all 0.15s;
   }
-  .other-btn:hover { border-color: var(--ink); background: var(--bg); }
+  .other-btn:hover { border-color: rgba(0,245,212,0.3); color: var(--cyan); background: rgba(0,245,212,0.05); }
 
   /* ── PATCH TOOL ── */
   #patch-fullscreen {
     display: none; position: fixed; inset: 0; z-index: 500;
-    background: #111; flex-direction: column;
+    background: #0a0c12; flex-direction: column;
   }
   #patch-fullscreen.open { display: flex; }
   #patch-topbar {
-    background: #1a1a1a; color: #fff; padding: 10px 16px;
+    background: rgba(8,11,18,0.95); color: #fff; padding: 10px 16px;
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-    border-bottom: 1px solid #333; flex-shrink: 0;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
-  #patch-topbar span { font-size: 0.8rem; color: #aaa; }
-  #patch-topbar .patch-sep { color: #444; }
+  #patch-topbar span { font-size: 0.78rem; color: var(--muted); }
+  #patch-topbar .patch-sep { color: var(--border); }
   #patch-canvas-wrap {
     flex: 1; overflow: auto; display: flex;
     align-items: flex-start; justify-content: center; padding: 16px;
   }
   #patch-canvas-container { position: relative; display: inline-block; cursor: crosshair; }
   #patch-canvas-bg  { display: block; }
-  #patch-canvas-draw {
-    position: absolute; top: 0; left: 0;
-    cursor: crosshair;
-  }
+  #patch-canvas-draw { position: absolute; top: 0; left: 0; cursor: crosshair; }
   .patch-vertex-dot {
     position: absolute; width: 10px; height: 10px;
     border-radius: 50%; background: #e03; border: 2px solid #fff;
     transform: translate(-50%, -50%); pointer-events: none;
   }
-  .patch-vertex-dot.first { width: 18px; height: 18px; background: #0af; }
+  .patch-vertex-dot.first { width: 18px; height: 18px; background: var(--cyan); }
   #patch-info-bar {
-    background: #1a1a1a; color: #aaa; font-size: 0.78rem;
-    padding: 6px 16px; border-top: 1px solid #333; flex-shrink: 0;
+    background: rgba(8,11,18,0.95); color: var(--muted); font-size: 0.75rem;
+    padding: 6px 16px; border-top: 1px solid var(--border); flex-shrink: 0;
   }
-  .carbon-wrap {
-    margin: 28px 0 0; border: 1px solid #e0e0dc; border-radius: var(--radius);
-    padding: 12px 16px; display: flex; align-items: center; gap: 14px;
-    min-height: 60px; background: var(--white);
-  }
-  .carbon-wrap .carbon-slot { flex: 1; min-height: 40px; }
-  .carbon-wrap .carbon-label { font-size: 0.68rem; color: #ccc; white-space: nowrap; align-self: flex-end; }
 
   /* ── SPLIT GRID ── */
   #split-grid { display: flex; flex-wrap: wrap; gap: 0; margin-top: 14px; align-items: flex-start; }
   .split-page-wrap { display: flex; align-items: center; }
   .split-thumb {
-    border: 2px solid var(--light); border-radius: var(--radius);
-    background: var(--white); padding: 5px; text-align: center;
+    border: 2px solid rgba(255,255,255,0.1); border-radius: var(--radius);
+    background: rgba(255,255,255,0.04); padding: 5px; text-align: center;
   }
   .split-thumb canvas { display: block; }
-  .split-thumb .thumb-label { font-size: 0.72rem; color: var(--mid); margin-top: 3px; }
+  .split-thumb .thumb-label { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
   .split-gap {
     width: 24px; display: flex; flex-direction: column;
     align-items: center; cursor: pointer; padding: 4px 0; position: relative;
   }
   .split-gap .split-line {
-    width: 3px; background: var(--light); flex: 1; min-height: 50px;
+    width: 3px; background: rgba(255,255,255,0.08); flex: 1; min-height: 50px;
     border-radius: 2px; transition: background 0.15s;
   }
   .split-gap.marked .split-line { background: var(--err); }
   .split-gap .split-icon {
-    font-size: 0.75rem; opacity: 0; transition: opacity 0.15s;
+    font-size: 0.72rem; opacity: 0; transition: opacity 0.15s;
     position: absolute; top: 50%; transform: translateY(-50%);
-    background: var(--white); padding: 0 2px; color: var(--err); pointer-events: none;
+    background: var(--bg); padding: 0 2px; color: var(--err); pointer-events: none;
   }
-  .split-gap:hover .split-line { background: #aaa; }
+  .split-gap:hover .split-line { background: rgba(0,245,212,0.3); }
   .split-gap:hover .split-icon,
   .split-gap.marked .split-icon { opacity: 1; }
 
@@ -309,18 +473,109 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .file-input-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; margin: 0; }
   .file-input-label {
     display: flex; align-items: center; gap: 8px;
-    padding: 7px 12px; border: 1px solid #ccc; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.85rem; color: var(--mid);
-    background: var(--white); cursor: pointer; transition: border-color 0.15s;
+    padding: 8px 14px; border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius);
+    font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted);
+    background: rgba(255,255,255,0.04); cursor: pointer; transition: border-color 0.15s;
   }
-  .file-input-wrap:hover .file-input-label { border-color: var(--ink); color: var(--ink); }
-  .file-input-label .file-name { color: var(--ink); }
+  .file-input-wrap:hover .file-input-label { border-color: rgba(0,245,212,0.3); color: var(--cyan); }
+  .file-input-label .file-name { color: var(--cyan); }
+
+  /* ── GUIDES SECTION ── */
+  .guides-grid a > div {
+    background: var(--glass) !important;
+    border-color: var(--glass-border) !important;
+    border-radius: 12px !important;
+    transition: all 0.2s !important;
+  }
+  .guides-grid a > div:hover {
+    border-color: rgba(0,245,212,0.3) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+    background: rgba(0,245,212,0.04) !important;
+  }
+
+  /* ── FAQ ── */
+  .faq-item { border-top: 1px solid var(--border); }
+  .faq-item:last-child { border-bottom: 1px solid var(--border); }
+  .faq-q {
+    width: 100%; background: none; border: none; text-align: left;
+    padding: 14px 4px; font-size: 0.84rem; font-weight: 600;
+    color: var(--text); font-family: 'Chakra Petch', sans-serif;
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    gap: 12px; transition: color 0.2s;
+  }
+  .faq-q:hover { color: var(--cyan); }
+  .faq-q .faq-arrow { font-size: 0.7rem; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
+  .faq-q.open .faq-arrow { transform: rotate(180deg); }
+  .faq-a {
+    display: none; padding: 0 4px 16px;
+    font-size: 0.8rem; line-height: 1.7; color: var(--muted);
+  }
+  .faq-a.open { display: block; }
+  .faq-a a { color: var(--cyan); }
+  .faq-a code {
+    background: rgba(0,245,212,0.08); padding: 1px 6px;
+    border-radius: 3px; font-size: 0.78rem; color: var(--cyan);
+    border: 1px solid rgba(0,245,212,0.15);
+  }
+  .faq-a strong { color: var(--text); }
+
+  /* Section headings */
+  .section-h3 {
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 1rem; font-weight: 700; color: var(--text);
+    margin-bottom: 20px; letter-spacing: 0.01em;
+  }
+  .section-h3::before { content: '// '; color: var(--magenta); font-family: 'Space Mono', monospace; font-size: 0.75rem; }
+
+  /* Patch mode radio cards */
+  label[for="patch-mode-layer"],
+  label[for="patch-mode-flat"] {
+    background: rgba(255,255,255,0.03) !important;
+    border-color: rgba(255,255,255,0.1) !important;
+  }
+
+  /* Inline style overrides for guide/misc divs */
+  [style*="background:#fff"], [style*="background: #fff"],
+  [style*="background:var(--white)"], [style*="background: var(--white)"] {
+    background: var(--glass) !important;
+  }
+  [style*="color:var(--dark)"], [style*="color: var(--dark)"],
+  [style*="color:var(--ink)"], [style*="color: var(--ink)"] {
+    color: var(--text) !important;
+  }
+  [style*="color:var(--mid)"], [style*="color: var(--mid)"] {
+    color: var(--muted) !important;
+  }
+  [style*="border:1px solid var(--light)"], [style*="border: 1px solid var(--light)"] {
+    border-color: var(--glass-border) !important;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 1;
+    text-align: center; padding: 28px 20px;
+    font-size: 0.72rem; color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+    font-family: 'Space Mono', monospace;
+  }
+  footer a { color: var(--cyan); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* Scale bar style picker btns */
+  .sb-style-btn {
+    background: rgba(255,255,255,0.04) !important;
+    border: 2px solid rgba(255,255,255,0.1) !important;
+    color: var(--text) !important;
+    border-radius: 6px !important;
+  }
+  .sb-style-btn:hover { border-color: rgba(0,245,212,0.3) !important; }
 </style>
-  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="shortcut icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -328,30 +583,45 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
+<!-- SVG Background Grid -->
+<svg id="bg-svg" xmlns="http://www.w3.org/2000/svg" style="position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;">
+  <defs>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(0,245,212,0.06)"/>
+    </pattern>
+  </defs>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#grid)"/>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#dots)"/>
+</svg>
+<div class="glow-orb orb-1"></div>
+<div class="glow-orb orb-2"></div>
+
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html" style="color:inherit;text-decoration:none;">▣ SCALEBAR PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
   <div id="file-indicator" style="display:none"></div>
   <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
-  <div id="lang-switcher" style="display:flex;gap:4px;margin-left:12px;">
-    <button onclick="setLang('en')" style="background:none;border:1px solid #444;color:#aaa;padding:2px 7px;font-size:0.72rem;border-radius:3px;cursor:pointer;font-family:inherit;" id="lang-en">EN</button>
-    <button onclick="setLang('es')" style="background:none;border:1px solid #444;color:#aaa;padding:2px 7px;font-size:0.72rem;border-radius:3px;cursor:pointer;font-family:inherit;" id="lang-es">ES</button>
+  <div id="lang-switcher">
+    <button onclick="setLang('en')" id="lang-en">EN</button>
+    <button onclick="setLang('es')" id="lang-es">ES</button>
   </div>
 </div>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
 <div id="view-home" class="view active">
-  <div style="max-width:860px; margin:0 auto; padding:40px 20px;">
 
     <div class="home-header">
-      <h2 data-i18n="tagline">Scalebar PDF Tools — 100% free</h2>
-      <p data-i18n="hero_desc">For architects and professionals who need to work with documents efficiently and confidentially. Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.</p>
+      <h2><span class="h2-accent" data-i18n="tagline">Scalebar PDF Tools — 100% free</span></h2>
       <div class="privacy-badge">
         <span data-i18n="privacy_badge">Your files never leave your browser — 100% local processing</span>
       </div>
+      <p data-i18n="hero_desc">For architects and professionals who need to work with documents efficiently and confidentially. Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.</p>
     </div>
 
-    <p style="font-size:0.8rem; color:var(--mid); margin-bottom:12px;" data-i18n="choose_tool">Choose a tool:</p>
+    <p class="choose-label" data-i18n="choose_tool">Choose a tool</p>
     <div class="tools-peek-outer" id="tools-peek-outer">
       <div class="tools-peek-wrap" id="tools-peek-wrap">
         <div class="tools-grid" id="home-tools-grid"></div>
@@ -374,45 +644,45 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
     <!-- ── GUIDES ── -->
-    <section style="margin-top:48px;">
-      <h3 style="font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:20px; letter-spacing:0.01em;">
+    <section class="guides-grid" style="margin-top:48px;">
+      <h3 class="section-h3">
         <span data-i18n="guides_title">Guides</span>
       </h3>
-      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; align-items:stretch;">
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px; align-items:stretch;">
 
         <a href="how-to-add-scale-bar-to-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
-          <div style="border:1px solid var(--light); border-radius:var(--radius); padding:16px 18px; transition:border-color .15s; background:#fff; width:100%;"
-               onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.10)'" onmouseout="this.style.borderColor='var(--light)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.07)'" style="box-shadow:0 2px 6px rgba(0,0,0,0.07);">
-            <div style="font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--mid); text-transform:uppercase; margin-bottom:6px;" data-i18n="g1_cat">Scale bar</div>
-            <div style="font-size:0.92rem; font-weight:600; color:var(--dark); margin-bottom:6px; line-height:1.3;" data-i18n="g1_title">How to add a scale bar to a PDF</div>
-            <div style="font-size:0.80rem; color:var(--mid); line-height:1.5;" data-i18n="g1_desc">Automatically sized for your drawing scale and paper format. No CAD software required.</div>
+          <div style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:22px 20px 24px; transition:all .2s; background:rgba(255,255,255,0.04); width:100%; backdrop-filter:blur(10px); display:flex; flex-direction:column; justify-content:space-between;"
+               onmouseover="this.style.borderColor='rgba(0,245,212,0.3)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)';this.style.background='rgba(0,245,212,0.04)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none';this.style.background='rgba(255,255,255,0.04)'">
+            <div style="font-size:0.68rem; font-weight:600; letter-spacing:0.1em; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;" data-i18n="g1_cat">Scale bar</div>
+            <div style="font-size:0.88rem; font-weight:700; color:var(--text); margin-bottom:6px; line-height:1.3; font-family:'Chakra Petch',sans-serif;" data-i18n="g1_title">How to add a scale bar to a PDF</div>
+            <div style="font-size:0.76rem; color:var(--muted); line-height:1.55;" data-i18n="g1_desc">Automatically sized for your drawing scale and paper format. No CAD software required.</div>
           </div>
         </a>
 
         <a href="how-to-add-logo-watermark-to-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
-          <div style="border:1px solid var(--light); border-radius:var(--radius); padding:16px 18px; transition:border-color .15s; background:#fff; width:100%;"
-               onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.10)'" onmouseout="this.style.borderColor='var(--light)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.07)'" style="box-shadow:0 2px 6px rgba(0,0,0,0.07);">
-            <div style="font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--mid); text-transform:uppercase; margin-bottom:6px;" data-i18n="g2_cat">Logo watermark</div>
-            <div style="font-size:0.92rem; font-weight:600; color:var(--dark); margin-bottom:6px; line-height:1.3;" data-i18n="g2_title">How to add your logo as a watermark to all your plans</div>
-            <div style="font-size:0.80rem; color:var(--mid); line-height:1.5;" data-i18n="g2_desc">Stamp your studio logo across an entire set of PDFs in one step.</div>
+          <div style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:22px 20px 24px; transition:all .2s; background:rgba(255,255,255,0.04); width:100%; backdrop-filter:blur(10px); display:flex; flex-direction:column; justify-content:space-between;"
+               onmouseover="this.style.borderColor='rgba(0,245,212,0.3)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)';this.style.background='rgba(0,245,212,0.04)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none';this.style.background='rgba(255,255,255,0.04)'">
+            <div style="font-size:0.68rem; font-weight:600; letter-spacing:0.1em; color:var(--magenta); text-transform:uppercase; margin-bottom:6px;" data-i18n="g2_cat">Logo watermark</div>
+            <div style="font-size:0.88rem; font-weight:700; color:var(--text); margin-bottom:6px; line-height:1.3; font-family:'Chakra Petch',sans-serif;" data-i18n="g2_title">How to add your logo as a watermark to all your plans</div>
+            <div style="font-size:0.76rem; color:var(--muted); line-height:1.55;" data-i18n="g2_desc">Stamp your studio logo across an entire set of PDFs in one step.</div>
           </div>
         </a>
 
         <a href="best-way-to-compress-a-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
-          <div style="border:1px solid var(--light); border-radius:var(--radius); padding:16px 18px; transition:border-color .15s; background:#fff; width:100%;"
-               onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.10)'" onmouseout="this.style.borderColor='var(--light)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.07)'" style="box-shadow:0 2px 6px rgba(0,0,0,0.07);">
-            <div style="font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--mid); text-transform:uppercase; margin-bottom:6px;" data-i18n="g3_cat">Compression</div>
-            <div style="font-size:0.92rem; font-weight:600; color:var(--dark); margin-bottom:6px; line-height:1.3;" data-i18n="g3_title">The best way to compress a PDF</div>
-            <div style="font-size:0.80rem; color:var(--mid); line-height:1.5;" data-i18n="g3_desc">What actually reduces file size, when each method is appropriate, and why.</div>
+          <div style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:22px 20px 24px; transition:all .2s; background:rgba(255,255,255,0.04); width:100%; backdrop-filter:blur(10px); display:flex; flex-direction:column; justify-content:space-between;"
+               onmouseover="this.style.borderColor='rgba(0,245,212,0.3)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)';this.style.background='rgba(0,245,212,0.04)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none';this.style.background='rgba(255,255,255,0.04)'">
+            <div style="font-size:0.68rem; font-weight:600; letter-spacing:0.1em; color:var(--yellow); text-transform:uppercase; margin-bottom:6px;" data-i18n="g3_cat">Compression</div>
+            <div style="font-size:0.88rem; font-weight:700; color:var(--text); margin-bottom:6px; line-height:1.3; font-family:'Chakra Petch',sans-serif;" data-i18n="g3_title">The best way to compress a PDF</div>
+            <div style="font-size:0.76rem; color:var(--muted); line-height:1.55;" data-i18n="g3_desc">What actually reduces file size, when each method is appropriate, and why.</div>
           </div>
         </a>
 
         <a href="how-to-add-title-block-to-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
-          <div style="border:1px solid var(--light); border-radius:var(--radius); padding:16px 18px; transition:border-color .15s; background:#fff; width:100%;"
-               onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.10)'" onmouseout="this.style.borderColor='var(--light)';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.07)'" style="box-shadow:0 2px 6px rgba(0,0,0,0.07);">
-            <div style="font-size:0.72rem; font-weight:600; letter-spacing:0.06em; color:var(--mid); text-transform:uppercase; margin-bottom:6px;" data-i18n="g4_cat">Title block</div>
-            <div style="font-size:0.92rem; font-weight:600; color:var(--dark); margin-bottom:6px; line-height:1.3;" data-i18n="g4_title">How to add a custom architectural title block to your PDF plans</div>
-            <div style="font-size:0.80rem; color:var(--mid); line-height:1.5;" data-i18n="g4_desc">Project name, scale, signatures, north arrow and plan ID — generated directly in your browser.</div>
+          <div style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:22px 20px 24px; transition:all .2s; background:rgba(255,255,255,0.04); width:100%; backdrop-filter:blur(10px); display:flex; flex-direction:column; justify-content:space-between;"
+               onmouseover="this.style.borderColor='rgba(0,245,212,0.3)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)';this.style.background='rgba(0,245,212,0.04)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none';this.style.background='rgba(255,255,255,0.04)'">
+            <div style="font-size:0.68rem; font-weight:600; letter-spacing:0.1em; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;" data-i18n="g4_cat">Title block</div>
+            <div style="font-size:0.88rem; font-weight:700; color:var(--text); margin-bottom:6px; line-height:1.3; font-family:'Chakra Petch',sans-serif;" data-i18n="g4_title">How to add a custom architectural title block to your PDF plans</div>
+            <div style="font-size:0.76rem; color:var(--muted); line-height:1.55;" data-i18n="g4_desc">Project name, scale, signatures, north arrow and plan ID — generated directly in your browser.</div>
           </div>
         </a>
 
@@ -422,30 +692,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <!-- ── FAQ ── -->
     <section style="margin-top:48px;">
-      <h3 style="font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:24px; letter-spacing:0.01em;">
+      <h3 class="section-h3" style="margin-bottom:24px;">
         <span data-i18n="faq_title">Frequently asked questions</span>
       </h3>
 
-      <style>
-        .faq-item { border-top: 1px solid var(--light); }
-        .faq-item:last-child { border-bottom: 1px solid var(--light); }
-        .faq-q {
-          width:100%; background:none; border:none; text-align:left;
-          padding:14px 4px; font-size:0.88rem; font-weight:600; color:var(--dark);
-          cursor:pointer; display:flex; justify-content:space-between; align-items:center;
-          gap:12px;
-        }
-        .faq-q:hover { color:var(--accent); }
-        .faq-q .faq-arrow { font-size:0.75rem; color:var(--mid); transition:transform .2s; flex-shrink:0; }
-        .faq-q.open .faq-arrow { transform:rotate(180deg); }
-        .faq-a {
-          display:none; padding:0 4px 16px; font-size:0.84rem; line-height:1.65;
-          color:var(--mid);
-        }
-        .faq-a.open { display:block; }
-        .faq-a a { color:var(--accent); }
-        .faq-a code { background:var(--bg); padding:1px 5px; border-radius:3px; font-size:0.82rem; }
-      </style>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
@@ -560,12 +810,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       }
     </script>
 
-  </div>
 </div>
 
 <!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
 <div id="view-tool" class="view">
-  <div style="max-width:860px; margin:0 auto; padding:32px 20px;">
+  <div style="max-width:1080px; margin:0 auto; padding:32px 12px;">
     <button id="back-btn" onclick="window.location.href='index.html'">← Home</button>
 
     <div id="working-banner">
@@ -879,7 +1128,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <!-- Fine-tune offset -->
-        <div style="background:var(--bg);border:1px solid var(--light);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">
           <div style="font-size:0.82rem;margin-bottom:10px;color:var(--mid);">
             Fine-tune offset — as % of visual page width/height (negative moves left/down):
           </div>
@@ -925,7 +1174,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
 </svg>
             </button><button type="button" class="sb-style-btn" data-prefix="sb" data-val="2"
-              style="border:2px solid #ddd;background:#fff;"
+              style="border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);"
               title="Style 2"
               style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
               <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
@@ -952,7 +1201,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
 </svg>
             </button><button type="button" class="sb-style-btn" data-prefix="sb" data-val="3"
-              style="border:2px solid #ddd;background:#fff;"
+              style="border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);"
               title="Style 3"
               style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
               <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
@@ -974,7 +1223,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
 </svg>
             </button><button type="button" class="sb-style-btn" data-prefix="sb" data-val="4"
-              style="border:2px solid #ddd;background:#fff;"
+              style="border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);"
               title="Style 4"
               style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
               <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
@@ -996,7 +1245,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
 </svg>
             </button><button type="button" class="sb-style-btn" data-prefix="sb" data-val="5"
-              style="border:2px solid #ddd;background:#fff;"
+              style="border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);"
               title="Style 5"
               style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
               <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
@@ -1079,7 +1328,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </select>
           </div>
         </div>
-        <div style="background:var(--bg);border:1px solid var(--light);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:var(--radius);padding:12px 14px;margin-bottom:14px;">
           <div style="font-size:0.82rem;margin-bottom:10px;color:var(--mid);">
             Fine-tune offset — as % of visual page width/height (negative moves left/down):
           </div>
@@ -1124,7 +1373,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
 </svg>
             </button><button type="button" class="sb-style-btn" data-prefix="sbf" data-val="2"
-              style="border:2px solid #ddd;background:#fff;"
+              style="border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);"
               title="Style 2"
               style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
               <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
@@ -1151,7 +1400,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
 </svg>
             </button><button type="button" class="sb-style-btn" data-prefix="sbf" data-val="3"
-              style="border:2px solid #ddd;background:#fff;"
+              style="border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);"
               title="Style 3"
               style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
               <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
@@ -1173,7 +1422,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
 </svg>
             </button><button type="button" class="sb-style-btn" data-prefix="sbf" data-val="4"
-              style="border:2px solid #ddd;background:#fff;"
+              style="border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);"
               title="Style 4"
               style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
               <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
@@ -1195,7 +1444,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <text x="70" y="7" font-size="5" font-family="sans-serif" text-anchor="middle" fill="currentColor">4</text>
 </svg>
             </button><button type="button" class="sb-style-btn" data-prefix="sbf" data-val="5"
-              style="border:2px solid #ddd;background:#fff;"
+              style="border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);"
               title="Style 5"
               style="padding:5px 7px;border-radius:6px;cursor:pointer;display:flex;align-items:center;color:#333;">
               <svg width="82" height="30" viewBox="0 0 82 30" xmlns="http://www.w3.org/2000/svg">
@@ -1263,7 +1512,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
         <div id="merge-grid" style="display:flex;flex-wrap:wrap;gap:12px;min-height:60px;
-          padding:12px;background:var(--bg);border:1px solid var(--light);
+          padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
           border-radius:var(--radius);margin-bottom:14px;"></div>
         <div>
           <button class="btn btn-primary" id="mg-btn" disabled>Merge into one PDF</button>
@@ -1325,7 +1574,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <!-- Mode explanation -->
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
           <label style="flex:1;min-width:200px;cursor:pointer;display:flex;gap:8px;align-items:flex-start;
-            padding:12px;border:1px solid #ccc;border-radius:var(--radius);background:var(--white);">
+            padding:12px;border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);background:rgba(255,255,255,0.04);">
             <input type="radio" name="patch-mode" id="patch-mode-layer" value="layer" checked style="margin-top:2px;flex-shrink:0;">
             <div>
               <div style="font-size:0.85rem;font-weight:bold;margin-bottom:3px;">White layer (non-destructive)</div>
@@ -1337,7 +1586,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
           </label>
           <label style="flex:1;min-width:200px;cursor:pointer;display:flex;gap:8px;align-items:flex-start;
-            padding:12px;border:1px solid #ccc;border-radius:var(--radius);background:var(--white);">
+            padding:12px;border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius);background:rgba(255,255,255,0.04);">
             <input type="radio" name="patch-mode" id="patch-mode-flat" value="flatten" style="margin-top:2px;flex-shrink:0;">
             <div>
               <div style="font-size:0.85rem;font-weight:bold;margin-bottom:3px;">Flatten page (permanent redaction)</div>
@@ -1494,8 +1743,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <!-- SCRIPTS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script>
 // ─── PDF.js lazy load ─────────────────────────────────────────────────────
 const pdfjsScript = document.createElement('script');
@@ -1829,14 +2078,18 @@ function setLang(lang) {
 }
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const _sm = {'compress':'compress','vineta':'vineta','patch':'patch','scalebar':'scalebar','scalebar-ft':'scalebar_ft','watermark-text':'watermark_text','watermark-logo':'watermark_logo','crop':'crop','reorder':'reorder','split':'split','merge':'merge','convert':'convert','img2pdf':'imagetopdf','grid':'grid','plan-numbering':'plan_numbering','revision-cloud':'revision_cloud','pdfa':'pdfa','ocr':'ocr','text-note':'text_note','linewidth':'linewidth','page-numbers':'page_numbers','rotate-pages':'rotate_pages','extract-pages':'extract_pages','add-image':'add_image'};
+const _iconColors = ['icon-c','icon-c','icon-m','icon-c','icon-m','icon-c','icon-m','icon-y','icon-m','icon-c','icon-y','icon-c','icon-m','icon-y','icon-c','icon-m','icon-c','icon-y','icon-m','icon-c','icon-y','icon-c','icon-m'];
 const homeGrid = document.getElementById('home-tools-grid');
-TOOLS.forEach(t => {
-  const card = document.createElement('div');
+TOOLS.forEach((t, i) => {
+  const card = document.createElement('a');
   card.className = 'tool-card';
+  const p = _sm[t.id];
+  if (p) card.href = p + '.html';
+  card.style.textDecoration = 'none';
   const name = T[t.id] || t.name;
   const desc = T['d_' + t.id] || t.desc;
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${name}</h3><p>${desc}</p>`;
-  card.onclick = () => { const p = _sm[t.id]; if (p) window.location.href = p + '.html'; };
+  const colorClass = _iconColors[i % _iconColors.length];
+  card.innerHTML = `<div class="icon ${colorClass}">${t.icon}</div><h3>${name}</h3><p>${desc}</p>`;
   homeGrid.appendChild(card);
 });
 // Apply i18n to static elements
@@ -3657,20 +3910,19 @@ document.querySelectorAll('.sb-style-btn').forEach(btn => {
     const val    = btn.dataset.val;
     document.getElementById(prefix + '-style').value = val;
     document.querySelectorAll(`.sb-style-btn[data-prefix="${prefix}"]`).forEach(b => {
-      b.style.border = '2px solid #ddd';
-      b.style.background = '#fff';
+      b.style.border = '2px solid rgba(255,255,255,0.1)';
+      b.style.background = 'rgba(255,255,255,0.04)';
     });
-    btn.style.border = '2px solid var(--accent)';
-    btn.style.background = '#f0f4ff';
+    btn.style.border = '2px solid var(--cyan)';
+    btn.style.background = 'rgba(0,245,212,0.1)';
   });
 });
 
 </script>
 
-<footer style="text-align:center;padding:24px 20px;font-size:0.75rem;color:var(--mid);border-top:1px solid var(--light);margin-top:40px;">
+<footer>
   © 2026 Scalebar PDF Tools &nbsp;·&nbsp;
-  <a href="https://www.linkedin.com/company/scalebar-pdf" target="_blank" rel="noopener"
-     style="color:var(--mid);text-decoration:underline;">LinkedIn</a>
+  <a href="https://www.linkedin.com/company/scalebar-pdf" target="_blank" rel="noopener">LinkedIn</a>
 </footer>
 </body>
 </html>
