@@ -12,6 +12,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scalebar PDF Tools — Free browser-based PDF tools</title>
 <meta name="description" content="Free browser-based PDF tools for architects and technical professionals. Compress drawings, add scale bars and title blocks, watermark, merge, split and more — no upload, no account, 100% local processing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -63,7 +66,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
     color: var(--text);
-    padding: 0 32px; height: 53px;
+    padding: 16px 32px;
     display: flex; align-items: center;
     justify-content: space-between;
     position: sticky; top: 0; z-index: 100;
@@ -71,9 +74,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #topbar h1 {
     font-family: 'Space Mono', monospace;
     font-size: 0.95rem; letter-spacing: 0.12em; font-weight: 700;
-    line-height: 1; display: flex; align-items: center;
   }
-  #topbar h1 a { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:13px; }
+  #topbar h1 a { color: inherit; text-decoration: none; }
   #topbar h1 a .logo-accent { color: var(--cyan); }
   #file-indicator {
     font-size: 0.75rem; color: var(--muted);
@@ -566,11 +568,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   .sb-style-btn:hover { border-color: rgba(0,245,212,0.3) !important; }
 </style>
-  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="shortcut icon" href="favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-  <link rel="manifest" href="site.webmanifest" />
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -596,7 +598,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
+  <h1><a href="index.html"><span class="logo-accent">▣ SCALEBAR</span> PDF TOOLS</a></h1>
   <div id="file-indicator" style="display:none"></div>
   <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
   <div id="lang-switcher">
@@ -1738,8 +1740,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <!-- SCRIPTS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script>
 // ─── PDF.js lazy load ─────────────────────────────────────────────────────
 const pdfjsScript = document.createElement('script');
@@ -2076,13 +2078,15 @@ const _sm = {'compress':'compress','vineta':'vineta','patch':'patch','scalebar':
 const _iconColors = ['icon-c','icon-c','icon-m','icon-c','icon-m','icon-c','icon-m','icon-y','icon-m','icon-c','icon-y','icon-c','icon-m','icon-y','icon-c','icon-m','icon-c','icon-y','icon-m','icon-c','icon-y','icon-c','icon-m'];
 const homeGrid = document.getElementById('home-tools-grid');
 TOOLS.forEach((t, i) => {
-  const card = document.createElement('div');
+  const card = document.createElement('a');
   card.className = 'tool-card';
+  const p = _sm[t.id];
+  if (p) card.href = p + '.html';
+  card.style.textDecoration = 'none';
   const name = T[t.id] || t.name;
   const desc = T['d_' + t.id] || t.desc;
   const colorClass = _iconColors[i % _iconColors.length];
   card.innerHTML = `<div class="icon ${colorClass}">${t.icon}</div><h3>${name}</h3><p>${desc}</p>`;
-  card.onclick = () => { const p = _sm[t.id]; if (p) window.location.href = p + '.html'; };
   homeGrid.appendChild(card);
 });
 // Apply i18n to static elements
