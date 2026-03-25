@@ -17,199 +17,271 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta property="og:title" content="How to Add Your Logo as a Watermark to All Your Plans">
 <meta property="og:description" content="Batch logo watermark for architectural PDFs. Grayscale, adjustable opacity, any position. Runs entirely in your browser.">
 <meta property="og:type" content="article">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f8f8f6;
-    --white: #ffffff;
-    --ink: #1a1a1a;
-    --mid: #555;
-    --light: #e8e8e4;
-    --ok: #2d6a2d;
+    --bg: #080b12;
+    --white: #e8eaf6;
+    --ink: #e8eaf6;
+    --mid: #6b7080;
+    --light: rgba(255,255,255,0.08);
+    --ok: #00f5d4;
     --radius: 4px;
-    --accent: #1a4db3;
+    --accent: #00f5d4;
+    --dark: #e8eaf6;
+    --text: #e8eaf6;
+    --muted: #6b7080;
+    --cyan: #00f5d4;
+    --magenta: #f700ff;
     --max: 720px;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Courier New', Courier, monospace;
-    background: var(--bg); color: var(--ink);
+    font-family: 'Space Mono','Courier New',monospace;
+    background: var(--bg); color: var(--text);
     font-size: 14px; line-height: 1.7;
+    overflow-x: hidden;
   }
+
+  /* ── BACKGROUND ── */
+  #bg-svg { position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+  .glow-orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+  .orb-1 { width:620px; height:620px; background:var(--cyan); top:-200px; left:-160px; opacity:0.15; }
+  .orb-2 { width:280px; height:280px; background:var(--magenta); bottom:-60px; right:-80px; opacity:0.1; }
 
   /* ── TOP BAR ── */
   #topbar {
-    background: var(--ink); color: var(--white);
-    padding: 12px 28px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,11,18,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--light); color: var(--text);
+    padding: 0 32px; height: 53px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
   }
-  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
-  #topbar a { color: inherit; text-decoration: none; }
+  #topbar h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem; letter-spacing: 0.12em; font-weight: 700;
+    line-height: 1; display: flex; align-items: center;
+  }
+  #topbar h1 a { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:13px; }
+  #topbar h1 a .logo-accent { color:var(--cyan); }
 
   /* ── LANG SWITCHER ── */
-  #lang-switcher { display: flex; gap: 4px; }
+  #lang-switcher { display:flex; gap:4px; }
   #lang-switcher button {
-    background: none; border: 1px solid #444; color: #aaa;
-    padding: 2px 7px; font-size: 0.72rem; border-radius: 3px;
-    cursor: pointer; font-family: inherit;
-    transition: color 0.15s, border-color 0.15s;
+    background:none; border:1px solid rgba(255,255,255,0.15); color:var(--muted);
+    padding:3px 9px; font-size:0.7rem; border-radius:100px;
+    cursor:pointer; font-family:inherit; letter-spacing:0.08em; transition:all 0.2s;
   }
-  #lang-switcher button:hover { color: #fff; border-color: #fff; }
-  #lang-switcher button.active { color: #fff; border-color: #fff; }
+  #lang-switcher button:hover, #lang-switcher button.active { border-color:var(--cyan); color:var(--cyan); }
 
   /* ── LAYOUT ── */
   .page-wrap {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: 48px 24px 80px;
+    max-width: var(--max); margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative; z-index: 1;
   }
 
   /* ── BREADCRUMB ── */
-  .breadcrumb {
-    font-size: 0.75rem; color: var(--mid);
-    margin-bottom: 32px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .breadcrumb a { color: var(--mid); text-decoration: none; }
-  .breadcrumb a:hover { color: var(--ink); }
-  .breadcrumb span { opacity: 0.5; }
+  .breadcrumb { font-size:0.75rem; color:var(--muted); margin-bottom:32px; display:flex; align-items:center; gap:6px; }
+  .breadcrumb a { color:var(--muted); text-decoration:none; }
+  .breadcrumb a:hover { color:var(--cyan); }
+  .breadcrumb span { opacity:0.5; }
 
   /* ── ARTICLE HEADER ── */
   .article-header { margin-bottom: 40px; }
-  .article-meta {
-    font-size: 0.75rem; color: var(--mid);
-    margin-bottom: 14px; letter-spacing: 0.05em;
-  }
+  .article-meta { font-size:0.7rem; color:var(--cyan); margin-bottom:14px; letter-spacing:0.12em; }
   .article-header h2 {
-    font-size: 1.6rem; font-weight: normal;
-    letter-spacing: 0.02em; line-height: 1.3;
-    margin-bottom: 16px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 1.5rem; font-weight: 700;
+    letter-spacing: 0.01em; line-height: 1.25;
+    margin-bottom: 16px; color: var(--text);
   }
   .article-header .lede {
-    font-size: 0.95rem; color: var(--mid);
-    line-height: 1.7; max-width: 600px;
-    border-left: 3px solid var(--ink);
-    padding-left: 16px;
+    font-size: 0.9rem; color: #8fa8c4; line-height: 1.75; max-width: 600px;
+    border-left: 3px solid var(--cyan); padding-left: 16px;
   }
+  .article-author { font-size:0.78rem; color:var(--muted); margin:10px 0 18px; font-style:normal; }
+  .article-author a { color:var(--muted); text-decoration:underline; }
+  .article-author a:hover { color:var(--cyan); }
 
   /* ── PROSE ── */
   .prose { max-width: var(--max); }
   .prose h3 {
-    font-size: 1rem; font-weight: bold;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
     margin: 36px 0 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--light);
-    letter-spacing: 0.04em;
+     letter-spacing: 0.04em;
+    color: var(--text);
   }
-  .prose h3 .step-num {
-    display: inline-block;
-    background: var(--ink); color: var(--white);
-    font-size: 0.72rem; padding: 1px 7px;
-    border-radius: 2px; margin-right: 8px;
-    vertical-align: middle; letter-spacing: 0.05em;
-  }
-  .prose p { margin-bottom: 16px; font-size: 0.88rem; color: var(--ink); }
+  .prose p { margin-bottom:16px; font-size:0.86rem; color:#c8ccd8; }
   .prose p.note {
-    background: var(--white); border: 1px solid var(--light);
-    border-left: 3px solid var(--accent);
+    background: rgba(0,245,212,0.05); border: 1px solid rgba(0,245,212,0.2);
+    border-left: 3px solid var(--cyan);
     padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0;
-    color: var(--mid); font-size: 0.82rem; margin-bottom: 20px;
+    color: #8fa8c4; font-size:0.82rem; margin-bottom:20px;
   }
-  .prose strong { color: var(--ink); }
+  .prose strong { color:var(--text); }
+  .prose em { color: #8fa8c4; }
+  .prose a { color: var(--cyan); }
+  .prose code { background:rgba(0,245,212,0.08); padding:1px 5px; border-radius:3px; color:var(--cyan); font-size:0.85em; }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table { width:100%; border-collapse:collapse; margin:20px 0 28px; font-size:0.82rem; }
+  .compare-table th {
+    text-align:left; padding:8px 12px;
+    background: rgba(0,245,212,0.12); color:var(--cyan);
+    font-weight:600; letter-spacing:0.08em; font-size:0.72rem;
+    border-bottom: 1px solid rgba(0,245,212,0.2);
+  }
+  .compare-table td { padding:9px 12px; border-bottom:1px solid var(--light); vertical-align:top; color:#c8ccd8; }
+  .compare-table tr:last-child td { border-bottom:none; }
+  .compare-table tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
+  .tag { display:inline-block; font-size:0.7rem; padding:2px 7px; border-radius:100px; margin-right:2px; letter-spacing:0.04em; font-family:'Space Mono',monospace; }
+  .tag-good { background:rgba(0,245,212,0.12); color:var(--cyan); border:1px solid rgba(0,245,212,0.25); }
+  .tag-bad  { background:rgba(255,77,109,0.12); color:#ff4d6d; border:1px solid rgba(255,77,109,0.25); }
+  .tag-mid  { background:rgba(255,230,0,0.1);  color:#ffe600; border:1px solid rgba(255,230,0,0.2); }
 
   /* ── SCREENSHOT ── */
   .screenshot-wrap {
-    margin: 24px 0 28px;
-    border: 1px solid var(--light);
-    border-radius: var(--radius);
-    overflow: hidden;
+    margin:24px 0 28px; border:1px solid var(--glass-border);
+    border-radius:12px; overflow:hidden; backdrop-filter:blur(10px);
   }
-  .screenshot-wrap img { display: block; width: 100%; height: auto; }
+  .screenshot-wrap img { display:block; width:100%; height:auto; }
   .screenshot-caption {
-    padding: 8px 14px;
-    background: #f2f2f0;
-    border-top: 1px solid var(--light);
-    font-size: 0.75rem; color: var(--mid);
-    font-style: italic;
+    padding:8px 14px; background:rgba(255,255,255,0.04);
+    border-top:1px solid var(--light);
+    font-size:0.75rem; color:var(--muted); font-style:italic;
   }
+
+  /* ── PRESET LIST ── */
+  .preset-list { margin:0 0 20px; padding:0; list-style:none; }
+  .preset-list li { padding:8px 0; border-bottom:1px solid var(--light); font-size:0.86rem; color:#c8ccd8; }
+  .preset-list li:last-child { border-bottom:none; }
 
   /* ── RESULT BOX ── */
   .result-box {
-    background: var(--white);
-    border: 1px solid var(--light);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    margin: 24px 0;
-    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--glass); border:1px solid var(--glass-border);
+    backdrop-filter:blur(10px);
+    border-radius:12px; padding:18px 20px;
+    margin:24px 0; display:flex; gap:14px; align-items:flex-start;
   }
-  .result-box .rb-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
-  .result-box .rb-text { font-size: 0.85rem; }
-  .result-box .rb-text strong { display: block; margin-bottom: 4px; }
+  .result-box .rb-icon { font-size:1.4rem; flex-shrink:0; margin-top:2px; }
+  .result-box .rb-text { font-size:0.85rem; color:#c8ccd8; }
+  .result-box .rb-text strong { display:block; margin-bottom:4px; color:var(--text); }
 
   /* ── CTA ── */
   .cta-block {
-    background: var(--ink); color: var(--white);
-    border-radius: var(--radius);
-    padding: 28px;
-    margin-top: 48px;
-    text-align: center;
+    background: rgba(0,245,212,0.06);
+    border:1px solid rgba(0,245,212,0.2);
+    border-radius:16px; padding:36px 28px;
+    margin-top:48px; text-align:center;
+    backdrop-filter:blur(10px);
   }
   .cta-btn {
-    display: inline-block;
-    background: var(--white); color: var(--ink);
-    padding: 11px 28px; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.9rem; font-weight: bold;
-    text-decoration: none; letter-spacing: 0.04em;
-    transition: background 0.15s, color 0.15s;
-    border: 2px solid var(--white);
+    display:inline-block;
+    background: rgba(0,245,212,0.12);
+    color:var(--cyan); border:1px solid rgba(0,245,212,0.35);
+    padding:12px 32px; border-radius:100px;
+    font-family:'Space Mono',monospace; font-size:0.88rem; font-weight:700;
+    text-decoration:none; letter-spacing:0.06em;
+    transition:all 0.2s;
   }
-  .cta-btn:hover { background: transparent; color: var(--white); }
+  .cta-btn:hover { background:rgba(0,245,212,0.2); box-shadow:0 0 24px rgba(0,245,212,0.2); }
 
   /* ── RELATED ── */
-  .related-wrap {
-    margin-top: 56px;
-    border-top: 1px solid var(--light);
-    padding-top: 28px;
-  }
-  .related-wrap h4 {
-    font-size: 0.75rem; color: var(--mid);
-    letter-spacing: 0.1em; margin-bottom: 14px;
-    text-transform: uppercase;
-  }
-  .related-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .related-wrap { margin-top:48px; border-top:1px solid var(--light); padding-top:28px; }
+  .related-wrap h4 { font-size:0.7rem; color:var(--muted); letter-spacing:0.12em; margin-bottom:14px; text-transform:uppercase; }
+  .related-tools { display:flex; flex-wrap:wrap; gap:8px; }
   .related-tools a {
-    padding: 6px 14px; border: 1px solid #ccc;
-    background: var(--white); border-radius: var(--radius);
-    font-size: 0.8rem; color: var(--ink); text-decoration: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    padding:5px 14px; border:1px solid var(--glass-border);
+    background:var(--glass); border-radius:100px;
+    font-size:0.78rem; color:var(--muted); text-decoration:none;
+    font-family:'Space Mono',monospace;
+    transition:all 0.2s;
   }
-  .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .related-tools a:hover { border-color:rgba(0,245,212,0.3); color:var(--cyan); }
 
-  .article-author {
-    font-size: 0.78rem; color: var(--mid); margin: 10px 0 18px;
-    font-style: normal;
-  }
-  .article-author a { color: var(--mid); text-decoration: underline; }
-  .geo-qa-prose { margin: 2.2rem 0 0; }
-  .geo-qa-prose p { font-size: 0.9rem; line-height: 1.75; color: var(--dark); margin-bottom: 0.5rem; }
+  /* ── GEO Q&A ── */
+  .geo-qa-prose { margin:2.2rem 0 0; }
+  .geo-qa-prose p { font-size:0.86rem; line-height:1.75; color:#c8ccd8; margin-bottom:0.5rem; }
   .geo-qa {
-    margin: 2.5rem 0 0;
-    padding: 1.5rem 1.75rem;
-    background: #f8f8f6;
-    border-left: 3px solid #1a1a1a;
-    border-radius: 0 4px 4px 0;
+    margin:2.5rem 0 0; padding:1.5rem 1.75rem;
+    background:rgba(255,255,255,0.03);
+    border-left:3px solid var(--cyan);
+    border-radius:0 8px 8px 0;
   }
-  .geo-qa h3 {
-    font-size: 1rem; font-weight: 700; margin: 0 0 0.75rem;
-    color: var(--dark);
+  .geo-qa h3 { font-family:'Chakra Petch',sans-serif; font-size:0.95rem; font-weight:700; margin:0 0 0.75rem; color:var(--text); }
+  .geo-qa p { font-size:0.86rem; line-height:1.7; margin:0; color:#c8ccd8; }
+  .geo-qa a, .geo-qa-prose a { color:var(--cyan); }
+
+  /* ── FOOTER ── */
+  footer {
+    position:relative; z-index:1; text-align:center; padding:28px 20px;
+    font-size:0.72rem; color:var(--muted);
+    border-top:1px solid var(--light); margin-top:40px;
+    font-family:'Space Mono',monospace;
   }
-  .geo-qa p { font-size: 0.88rem; line-height: 1.7; margin: 0; color: var(--dark); }
+  footer a { color:var(--cyan); text-decoration:none; }
+
+  /* ── STEP LABEL ── */
+  .prose h3 {
+    /* Override previous rule: border moves to top, becomes a marker line */
+    border-bottom: none;
+    border-top: 1px solid rgba(0,245,212,0.25);
+    padding-bottom: 0;
+    padding-top: 14px;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .step-num {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  /* ── PROSE UL/OL ── */
+  .prose ul, .prose ol {
+    margin: 0 0 16px 20px;
+    font-size: 0.86rem;
+    line-height: 1.9;
+    color: #c8ccd8;
+  }
+  .prose li { margin-bottom: 4px; }
+  .prose li strong { color: var(--text); }
+
+  /* ── SCREENSHOT CAPTION outside wrap ── */
+  .screenshot-caption {
+    padding: 6px 2px 0;
+    background: transparent;
+    border-top: none;
+    font-size: 0.74rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 24px;
+  }
+  .screenshot-wrap {
+    margin: 24px 0 6px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .sc-placeholder { display:none; width:100%; padding:40px 20px; text-align:center; color:var(--muted); font-size:0.75rem; letter-spacing:0.08em; border-radius:12px; background:rgba(255,255,255,0.02); }
+  .sc-placeholder::before { content:'⬜'; display:block; font-size:2rem; margin-bottom:8px; opacity:0.2; }
 </style>
-  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="shortcut icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -255,7 +327,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           "name": "How do I add my logo as a watermark to a PDF?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "1. Open the <a href='watermark_logo.html'>Logo Watermark tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF(s)</strong> — you can load an entire drawing set at once. 3. Upload your logo image (PNG with transparent background works best). 4. Set opacity (0.10–0.25 is typical for drawings), scale and position. 5. Click <strong>Apply logo</strong>. 6. Download the ZIP — each page has the logo embedded as a grayscale watermark."
+            "text": "1. Open the <a href='watermark_logo.html' style="color:var(--cyan);">Logo Watermark tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF(s)</strong> — you can load an entire drawing set at once. 3. Upload your logo image (PNG with transparent background works best). 4. Set opacity (0.10–0.25 is typical for drawings), scale and position. 5. Click <strong>Apply logo</strong>. 6. Download the ZIP — each page has the logo embedded as a grayscale watermark."
           }
         }
       ]
@@ -285,9 +357,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
+<!-- SVG Background -->
+<svg id="bg-svg" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(0,245,212,0.06)"/>
+    </pattern>
+  </defs>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#grid)"/>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#dots)"/>
+</svg>
+<div class="glow-orb orb-1"></div>
+<div class="glow-orb orb-2"></div>
+
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html">▣ SCALEBAR PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
   <div id="lang-switcher">
     <button id="lang-en" onclick="setLang('en')">EN</button>
     <button id="lang-es" onclick="setLang('es')">ES</button>
@@ -298,7 +386,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- BREADCRUMB -->
   <nav class="breadcrumb">
-    <a href="index.html" data-i18n="home">Home</a>
+    <a href="index.html" data-i18n="home" style="color:var(--cyan);">Home</a>
     <span>›</span>
     <span data-i18n="tutorials_label">Tutorials</span>
   </nav>
@@ -306,7 +394,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE HEADER -->
   <header class="article-header">
     <div class="article-meta" data-i18n="article_meta">TUTORIAL — LOGO WATERMARK · BATCH PDF</div>
-    <p class="article-author">Written by <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
+    <p class="article-author">Written by <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener" style="color:var(--cyan);">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
     <h2 data-i18n="article_title">How to add your logo as a watermark to all your plans, without software</h2>
     <p class="lede" data-i18n="article_lede">Sending a full drawing set to a client or contractor and want your studio logo on every sheet. This tutorial shows how to stamp it across all your PDFs at once, with the right opacity and position, entirely in your browser.</p>
   </header>
@@ -314,24 +402,56 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE BODY -->
   <article class="prose">
 
-    <p data-i18n="intro_p1">As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet, as both branding and a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and outputs a ZIP. You can find it <a href="watermark_logo.html" style="color:var(--accent);">here</a>.</p>
+    <p data-i18n="intro_p1">As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet — both for branding and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and packages the result into a ZIP. You can find it <a href="watermark_logo.html" style="color:var(--cyan);">here</a>.</p>
 
-    <p data-i18n="intro_p2">The logo is automatically converted to grayscale before embedding, which keeps it neutral against any drawing background and avoids color conflicts with drawing content.</p>
+    <p data-i18n="intro_p2">The logo is automatically converted to grayscale before embedding, keeping it neutral against any drawing background and avoiding color conflicts with the drawing content.</p>
 
     <!-- STEP 1 -->
-    <h3><span class="step-num" data-i18n="step">STEP</span> <span data-i18n="step1_title">Load your PDFs and your logo image</span></h3>
+    <h3><span class="step-num">STEP 1</span> <span data-i18n="step1_title">Load your PDFs and your logo</span></h3>
 
-    <p data-i18n="step1_p1">Open the <strong>Logo watermark</strong> tool and click <strong>Choose PDF(s)</strong>. You can select an entire drawing set at once — ten, fifty or more files. Once loaded, the button confirms how many PDFs are ready.</p>
+    <p data-i18n="step1_p1">Open the <strong>Logo watermark</strong> tool and click <strong>Choose PDF(s)</strong>. You can load an entire drawing set at once — ten, fifty or more files. Once loaded, the button confirms how many PDFs are ready to process.</p>
 
-    <p data-i18n="step1_p2">Then click <strong>Choose image</strong> and select your logo file. PNG with a transparent background works best. JPG is also accepted. The tool will convert it to grayscale automatically, so the original colors of your logo file do not matter.</p>
+    <p data-i18n="step1_p2">Then click <strong>Choose image</strong> and select your logo file. PNG with a transparent background gives the cleanest result — the logo will appear directly on the drawing without any rectangle around it. JPG is also accepted. The tool converts the image to grayscale automatically, so the original colors of your file do not matter.</p>
 
     <div class="screenshot-wrap">
+      <img id="sc1-img" src="img/tutorial-wlogo-01.png"
+           alt="Logo watermark tool panel with PDFs and logo loaded"
+           style="display:none;"
+           onerror="this.style.display='none';document.getElementById('sc1-placeholder').style.display='block';"
+           onload="this.style.display='block';document.getElementById('sc1-placeholder').style.display='none';"><div id="sc1-placeholder" class="sc-placeholder"></div></div>
+    <div class="screenshot-caption" data-i18n="sc1_caption">The panel after loading a batch of PDFs and a logo file. The button shows the number of files ready to process.</div>
 
-    <h3 style="border:none; padding:0;" data-i18n="tips_title">A few practical notes</h3>
+    <!-- STEP 2 -->
+    <h3><span class="step-num">STEP 2</span> <span data-i18n="step2_title">Set the parameters and apply</span></h3>
 
-    <p data-i18n="tips_p1">PNG logos with a transparent background produce the cleanest result. If your logo has a white background, it will appear as a white rectangle on the drawing. In that case, either use a PNG with transparency, or increase the rotation so the rectangle shape is less noticeable at low opacity.</p>
+    <p data-i18n="step2_p1">Four parameters control how the logo appears on each sheet:</p>
 
-    <p data-i18n="tips_p2">The grayscale conversion uses luminance weighting, so a logo with strong contrast in its original colors will still read clearly after conversion. A logo that is mostly mid-gray at the same luminance level as the drawing background may become harder to read — in that case, try a slightly higher opacity or a corner position.</p>
+    <ul>
+      <li><strong data-i18n="b1_label">Opacity</strong> <span data-i18n="b1_text">— between 0.05 and 1. For working drawings, 0.10 to 0.18 is enough to be readable without interfering with drawing content. For a cover sheet, 0.30 or higher works well.</span></li>
+      <li><strong data-i18n="b2_label">Scale</strong> <span data-i18n="b2_text">— as a percentage of page width. 40% places a centered logo that reads clearly on A1 or A0 sheets. Reduce to 20–25% for a corner logo.</span></li>
+      <li><strong data-i18n="b3_label">Rotation</strong> <span data-i18n="b3_text">— in degrees. A slight diagonal (around −30°) is the standard choice for a central watermark. For corner positions, 0° looks cleaner.</span></li>
+      <li><strong data-i18n="b4_label">Position</strong> <span data-i18n="b4_text">— center, bottom right, top left, top right or bottom left. Center with a diagonal rotation is the default for a discreet full-sheet stamp.</span></li>
+    </ul>
+
+    <p data-i18n="step2_p2">The same settings apply to every page of every PDF in the batch. For different settings on a cover sheet versus the rest of the set, process them as two separate runs.</p>
+
+    <div class="screenshot-wrap">
+      <img id="sc2-img" src="img/tutorial-wlogo-02.png"
+           alt="Logo watermark settings showing opacity, scale, rotation and position controls"
+           style="display:none;"
+           onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';"
+           onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';"><div id="sc2-placeholder" class="sc-placeholder"></div></div>
+    <div class="screenshot-caption" data-i18n="sc2_caption">Typical settings for a discreet central stamp: opacity 0.15, scale 40%, rotation −30°. Click Apply logo to process the batch and download the ZIP.</div>
+
+    <p class="note" data-i18n="tips_combined">For the cleanest result, use a PNG with a transparent background — a white-background logo will appear as a white rectangle on the drawing. If you only have a JPG, increase the rotation slightly so the rectangle shape is less noticeable at low opacity. The grayscale conversion uses luminance weighting, so logos with strong contrast in their original colors will remain legible after conversion.</p>
+
+    <div class="result-box">
+      <div class="rb-icon">✓</div>
+      <div class="rb-text">
+        <strong data-i18n="result_title">The logo is embedded as a PDF image object</strong>
+        <span data-i18n="result_desc">The watermark is not a flattened raster overlay of the whole page. Only the logo image is composited into the content stream, keeping the rest of the PDF data intact. Text, vectors and annotations on the original pages remain selectable and searchable after watermarking.</span>
+      </div>
+    </div>
 
   </article>
 
@@ -344,23 +464,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
       <p itemprop="text" data-i18n-html="geo_a"></p>
     </div>
-    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--mid);margin-top:0.5rem;"></p>
+    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--muted);margin-top:0.5rem;"></p>
   </div>
 
   <!-- CTA -->
   <div class="cta-block">
-    <a href="watermark_logo.html" class="cta-btn" data-i18n="cta_btn">Open Logo Watermark tool →</a>
+    <a href="watermark_logo.html" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Logo Watermark tool →</a>
   </div>
 
   <!-- RELATED TOOLS -->
   <div class="related-wrap">
     <h4 data-i18n="related_title">RELATED TOOLS</h4>
     <div class="related-tools">
-      <a href="watermark_text.html" data-i18n="rel_wtext">Text watermark</a>
-      <a href="scalebar.html" data-i18n="rel_scalebar">Scale bar (m)</a>
-      <a href="vineta.html" data-i18n="rel_vineta">Title block</a>
-      <a href="plan_numbering.html" data-i18n="rel_plannum">Plan numbering</a>
-      <a href="compress.html" data-i18n="rel_compress">Compress PDF</a>
+      <a href="watermark_text.html" data-i18n="rel_wtext" style="color:var(--cyan);">Text watermark</a>
+      <a href="scalebar.html" data-i18n="rel_scalebar" style="color:var(--cyan);">Scale bar (m)</a>
+      <a href="vineta.html" data-i18n="rel_vineta" style="color:var(--cyan);">Title block</a>
+      <a href="plan_numbering.html" data-i18n="rel_plannum" style="color:var(--cyan);">Plan numbering</a>
+      <a href="compress.html" data-i18n="rel_compress" style="color:var(--cyan);">Compress PDF</a>
     </div>
   </div>
 
@@ -374,35 +494,29 @@ const T = {
     article_meta: 'TUTORIAL — LOGO WATERMARK · BATCH PDF',
     article_title: 'How to add your logo as a watermark to all your plans, without software',
     article_lede: 'Sending a full drawing set to a client or contractor and want your studio logo on every sheet. This tutorial shows how to stamp it across all your PDFs at once, with the right opacity and position, entirely in your browser.',
-    intro_p1: 'As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet, as both branding and a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and outputs a ZIP. You can find it <a href="watermark_logo.html" style="color:#1a4db3;">here</a>.',
-    intro_p2: 'The logo is automatically converted to grayscale before embedding, which keeps it neutral against any drawing background and avoids color conflicts with drawing content.',
-    step: 'STEP',
-    step1_title: 'Load your PDFs and your logo image',
-    step1_p1: 'Open the <strong>Logo watermark</strong> tool and click <strong>Choose PDF(s)</strong>. You can select an entire drawing set at once — ten, fifty or more files. Once loaded, the button confirms how many PDFs are ready.',
-    step1_p2: 'Then click <strong>Choose image</strong> and select your logo file. PNG with a transparent background works best. JPG is also accepted. The tool will convert it to grayscale automatically, so the original colors of your logo file do not matter.',
-    sc1_caption: 'The panel after loading several PDFs and a logo file. The button shows the number of PDFs ready.',
-    step2_title: 'Adjust opacity, size, rotation and position',
+    intro_p1: 'As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet — both for branding and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and packages the result into a ZIP. You can find it <a href="watermark_logo.html" style="color:var(--cyan);">here</a>.',
+    intro_p2: 'The logo is automatically converted to grayscale before embedding, keeping it neutral against any drawing background and avoiding color conflicts with the drawing content.',
+    step1_title: 'Load your PDFs and your logo',
+    step1_p1: 'Open the <strong>Logo watermark</strong> tool and click <strong>Choose PDF(s)</strong>. You can load an entire drawing set at once — ten, fifty or more files. Once loaded, the button confirms how many PDFs are ready to process.',
+    step1_p2: 'Then click <strong>Choose image</strong> and select your logo file. PNG with a transparent background gives the cleanest result — the logo will appear directly on the drawing without any rectangle around it. JPG is also accepted. The tool converts the image to grayscale automatically, so the original colors of your file do not matter.',
+    sc1_caption: 'The panel after loading a batch of PDFs and a logo file. The button shows the number of files ready to process.',
+    step2_title: 'Set the parameters and apply',
     step2_p1: 'Four parameters control how the logo appears on each sheet:',
-    b1_label: 'Opacity', b1_text: '— a value between 0.05 and 1. For a background stamp on working drawings, 0.10 to 0.18 is usually enough to be readable without interfering with drawing content. For a title page or cover sheet, 0.30 or higher works well.',
-    b2_label: 'Scale', b2_text: '— as a percentage of the page width. 40% places a centered logo that reads clearly on A1 or A0 sheets. Reduce to 20–25% for a corner logo.',
-    b3_label: 'Rotation', b3_text: '— in degrees. A slight diagonal angle (around -30°) is a common choice for central watermarks. For corner positions, 0° tends to look cleaner.',
-    b4_label: 'Position', b4_text: '— center, bottom right, top left, top right or bottom left. Center with a diagonal rotation is the standard for a discreet full-sheet stamp. Corner positions with 0° rotation work for a persistent logo mark.',
-    step2_p2: 'The same settings apply to every page of every PDF in the batch. If you need different settings for a cover sheet and the rest of the set, process them as two separate runs.',
-    sc2_caption: 'Typical settings for a discreet central stamp: opacity 0.15, scale 40%, rotation -30°, applied to all pages.',
-    step3_title: 'Apply and download the ZIP',
-    step3_p1: 'Click <strong>Apply logo and download ZIP</strong>. Each PDF is processed in turn and packaged into a single ZIP file that downloads automatically. The original file names are preserved so the set stays organised. The entire operation runs in your browser — no files leave your device at any point.',
-    sc3_caption: 'Result: a grayscale studio logo embedded diagonally at low opacity. The drawing content remains fully legible.',
+    b1_label: 'Opacity', b1_text: '— between 0.05 and 1. For working drawings, 0.10 to 0.18 is enough to be readable without interfering with drawing content. For a cover sheet, 0.30 or higher works well.',
+    b2_label: 'Scale', b2_text: '— as a percentage of page width. 40% places a centered logo that reads clearly on A1 or A0 sheets. Reduce to 20–25% for a corner logo.',
+    b3_label: 'Rotation', b3_text: '— in degrees. A slight diagonal (around −30°) is the standard choice for a central watermark. For corner positions, 0° looks cleaner.',
+    b4_label: 'Position', b4_text: '— center, bottom right, top left, top right or bottom left. Center with a diagonal rotation is the default for a discreet full-sheet stamp.',
+    step2_p2: 'The same settings apply to every page of every PDF in the batch. For different settings on a cover sheet versus the rest of the set, process them as two separate runs.',
+    sc2_caption: 'Typical settings for a discreet central stamp: opacity 0.15, scale 40%, rotation −30°. Click Apply logo to process the batch and download the ZIP.',
+    tips_combined: 'For the cleanest result, use a PNG with a transparent background — a white-background logo will appear as a white rectangle on the drawing. If you only have a JPG, increase the rotation slightly so the rectangle shape is less noticeable at low opacity. The grayscale conversion uses luminance weighting, so logos with strong contrast in their original colors will remain legible after conversion.',
     result_title: 'The logo is embedded as a PDF image object',
     result_desc: 'The watermark is not a flattened raster overlay of the whole page. Only the logo image is composited into the content stream, keeping the rest of the PDF data intact. Text, vectors and annotations on the original pages remain selectable and searchable after watermarking.',
-    tips_title: 'A few practical notes',
-    tips_p1: 'PNG logos with a transparent background produce the cleanest result. If your logo has a white background, it will appear as a white rectangle on the drawing. In that case, either use a PNG with transparency, or increase the rotation so the rectangle shape is less noticeable at low opacity.',
-    tips_p2: 'The grayscale conversion uses luminance weighting, so a logo with strong contrast in its original colors will still read clearly after conversion. A logo that is mostly mid-gray at the same luminance level as the drawing background may become harder to read — in that case, try a slightly higher opacity or a corner position.',
     cta_btn: 'Open Logo Watermark tool →',
     related_title: 'RELATED TOOLS',
     rel_wtext: 'Text watermark', rel_scalebar: 'Scale bar (m)',
     rel_vineta: 'Title block', rel_plannum: 'Plan numbering', rel_compress: 'Compress PDF',
     'geo_q': 'In short — how do I stamp my logo across a full PDF drawing set?',
-    'geo_a': 'Open the <a href="watermark_logo.html">Logo Watermark tool</a> at scalebarpdf.com. Load your PDF(s), upload your logo (PNG with transparent background recommended), set opacity between 0.10 and 0.25, choose position, then click <strong>Apply logo</strong>. All pages are stamped and packaged into a single ZIP — nothing is uploaded to any server.',
+    'geo_a': 'Open the <a href="watermark_logo.html" style="color:var(--cyan);">Logo Watermark tool</a> at scalebarpdf.com. Load your PDF(s), upload your logo (PNG with transparent background recommended), set opacity between 0.10 and 0.25, choose position, then click <strong>Apply logo</strong>. All pages are stamped and packaged into a single ZIP — nothing is uploaded to any server.',
     'geo_v': 'Also searched as: <em>add logo to PDF plans batch</em>, <em>PDF logo watermark free online</em>, <em>stamp studio logo on PDF</em>.',
   },
   es: {
@@ -410,35 +524,29 @@ const T = {
     article_meta: 'TUTORIAL — MARCA DE AGUA LOGO · LOTE DE PDFs',
     article_title: 'Cómo añadir tu logo como marca de agua en todos tus planos, sin softwares',
     article_lede: 'Vas a enviar un juego completo de planos a un cliente o constructor y quieres el logo de tu estudio en cada lámina. Este tutorial muestra cómo estamparlo en todos tus PDFs a la vez, con la opacidad y posición correctas, enteramente en el navegador.',
-    intro_p1: 'Como arquitecto necesitaba frecuentemente enviar juegos de planos con el logo del estudio en cada lámina, tanto por identidad de marca como como capa básica de protección ante usos indebidos. Hacerlo hoja a hoja en Acrobat es lento, y la mayoría de herramientas gratuitas raszterizan el resultado o gestionan mal los lotes de múltiples archivos. La herramienta de marca de agua con logo procesa cualquier cantidad de PDFs a la vez y entrega un ZIP. La puedes encontrar <a href="watermark_logo.html" style="color:#1a4db3;">aquí</a>.',
+    intro_p1: 'Como arquitecto necesitaba frecuentemente enviar juegos de planos con el logo del estudio en cada lámina, tanto por identidad de marca como por una capa básica de protección ante usos indebidos. Hacerlo hoja a hoja en Acrobat es lento, y la mayoría de herramientas gratuitas rasterizan el resultado o gestionan mal los lotes de múltiples archivos. La herramienta de marca de agua con logo procesa cualquier cantidad de PDFs a la vez y entrega un ZIP. La puedes encontrar <a href="watermark_logo.html" style="color:var(--cyan);">aquí</a>.',
     intro_p2: 'El logo se convierte automáticamente a escala de grises antes de incrustarse, lo que lo mantiene neutro frente a cualquier fondo de plano y evita conflictos de color con el contenido del dibujo.',
-    step: 'PASO',
-    step1_title: 'Carga tus PDFs y tu imagen de logo',
-    step1_p1: 'Abre la herramienta <strong>Marca de agua logo</strong> y haz clic en <strong>Choose PDF(s)</strong>. Puedes seleccionar un juego completo de planos de una vez: diez, cincuenta o más archivos. Una vez cargados, el botón confirma cuántos PDFs están listos.',
-    step1_p2: 'Luego haz clic en <strong>Choose image</strong> y selecciona tu archivo de logo. PNG con fondo transparente funciona mejor. JPG también se acepta. La herramienta lo convertirá a escala de grises automáticamente, por lo que los colores originales del archivo de logo no importan.',
-    sc1_caption: 'El panel tras cargar varios PDFs y un archivo de logo. El botón muestra el número de PDFs listos.',
-    step2_title: 'Ajusta opacidad, tamaño, rotación y posición',
+    step1_title: 'Carga tus PDFs y tu logo',
+    step1_p1: 'Abre la herramienta <strong>Marca de agua logo</strong> y haz clic en <strong>Choose PDF(s)</strong>. Puedes cargar un juego completo de planos de una vez: diez, cincuenta o más archivos. Una vez cargados, el botón confirma cuántos PDFs están listos para procesar.',
+    step1_p2: 'Luego haz clic en <strong>Choose image</strong> y selecciona tu archivo de logo. PNG con fondo transparente da el resultado más limpio: el logo aparecerá directamente sobre el plano sin ningún rectángulo alrededor. JPG también se acepta. La herramienta convierte la imagen a escala de grises automáticamente, por lo que los colores originales no importan.',
+    sc1_caption: 'El panel tras cargar un lote de PDFs y un archivo de logo. El botón muestra el número de archivos listos para procesar.',
+    step2_title: 'Ajusta los parámetros y aplica',
     step2_p1: 'Cuatro parámetros controlan cómo aparece el logo en cada lámina:',
-    b1_label: 'Opacidad', b1_text: '— un valor entre 0.05 y 1. Para un sello de fondo en planos de trabajo, 0.10 a 0.18 suele ser suficiente para ser legible sin interferir con el contenido del dibujo. Para una portada o carátula, 0.30 o más funciona bien.',
+    b1_label: 'Opacidad', b1_text: '— entre 0.05 y 1. Para planos de trabajo, 0.10 a 0.18 es suficiente para ser legible sin interferir con el contenido del dibujo. Para una portada, 0.30 o más funciona bien.',
     b2_label: 'Escala', b2_text: '— como porcentaje del ancho de página. El 40% coloca un logo centrado que se lee claramente en láminas A1 o A0. Reduce a 20–25% para un logo en esquina.',
-    b3_label: 'Rotación', b3_text: '— en grados. Un ángulo diagonal suave (alrededor de -30°) es una elección habitual para marcas de agua centrales. Para posiciones en esquina, 0° tiende a verse más limpio.',
-    b4_label: 'Posición', b4_text: '— centro, esquina inferior derecha, superior izquierda, superior derecha o inferior izquierda. Centro con rotación diagonal es el estándar para un sello discreto de hoja completa. Las posiciones en esquina con 0° funcionan para una marca de logo persistente.',
-    step2_p2: 'Los mismos ajustes se aplican a cada página de cada PDF del lote. Si necesitas ajustes diferentes para una portada y el resto del juego, procésalos en dos operaciones separadas.',
-    sc2_caption: 'Ajustes típicos para un sello central discreto: opacidad 0.15, escala 40%, rotación -30°, aplicado a todas las páginas.',
-    step3_title: 'Aplica y descarga el ZIP',
-    step3_p1: 'Haz clic en <strong>Apply logo and download ZIP</strong>. Cada PDF se procesa por turno y se empaqueta en un único archivo ZIP que se descarga automáticamente. Los nombres de archivo originales se conservan para que el juego se mantenga organizado. Toda la operación se ejecuta en tu navegador: ningún archivo sale de tu dispositivo en ningún momento.',
-    sc3_caption: 'Resultado: un logo de estudio en escala de grises incrustado en diagonal a baja opacidad. El contenido del plano permanece completamente legible.',
+    b3_label: 'Rotación', b3_text: '— en grados. Un ángulo diagonal suave (alrededor de −30°) es la elección estándar para marcas de agua centrales. Para posiciones en esquina, 0° se ve más limpio.',
+    b4_label: 'Posición', b4_text: '— centro, esquina inferior derecha, superior izquierda, superior derecha o inferior izquierda. Centro con rotación diagonal es el estándar para un sello discreto de hoja completa.',
+    step2_p2: 'Los mismos ajustes se aplican a cada página de cada PDF del lote. Si necesitas ajustes distintos para una portada y el resto del juego, procésalos en dos operaciones separadas.',
+    sc2_caption: 'Ajustes típicos para un sello central discreto: opacidad 0.15, escala 40%, rotación −30°. Haz clic en Apply logo para procesar el lote y descargar el ZIP.',
+    tips_combined: 'Para el resultado más limpio, usa un PNG con fondo transparente: un logo con fondo blanco aparecerá como un rectángulo blanco sobre el plano. Si solo tienes JPG, aumenta la rotación ligeramente para que la forma rectangular sea menos perceptible a baja opacidad. La conversión a escala de grises usa ponderación de luminancia, por lo que los logos con alto contraste en sus colores originales seguirán siendo legibles tras la conversión.',
     result_title: 'El logo se incrusta como objeto imagen PDF',
     result_desc: 'La marca de agua no es una superposición rasterizada de toda la página. Solo la imagen del logo se compone en el flujo de contenido, manteniendo intactos el resto de los datos del PDF. El texto, los vectores y las anotaciones de las páginas originales siguen siendo seleccionables y buscables tras añadir la marca de agua.',
-    tips_title: 'Algunas notas prácticas',
-    tips_p1: 'Los logos PNG con fondo transparente producen el resultado más limpio. Si tu logo tiene fondo blanco, aparecerá como un rectángulo blanco sobre el plano. En ese caso, usa un PNG con transparencia, o aumenta la rotación para que la forma rectangular sea menos perceptible a baja opacidad.',
-    tips_p2: 'La conversión a escala de grises usa ponderación de luminancia, por lo que un logo con alto contraste en sus colores originales seguirá leyéndose con claridad tras la conversión. Un logo que sea principalmente gris medio a la misma luminancia que el fondo del plano puede resultar más difícil de leer: en ese caso prueba una opacidad ligeramente mayor o una posición en esquina.',
     cta_btn: 'Abrir herramienta Marca de agua logo →',
     related_title: 'HERRAMIENTAS RELACIONADAS',
     rel_wtext: 'Marca de agua texto', rel_scalebar: 'Escala gráfica (m)',
     rel_vineta: 'Viñeta / Carátula', rel_plannum: 'Numeración de planos', rel_compress: 'Comprimir PDF',
     'geo_q': 'En pocas palabras, ¿cómo añado mi logo a todos mis planos PDF?',
-    'geo_a': 'Abre la <a href="watermark_logo.html">herramienta Marca de agua logo</a> en scalebarpdf.com. Carga tus PDFs, sube tu logo (se recomienda PNG con fondo transparente), ajusta la opacidad entre 0,10 y 0,25, elige la posición y haz clic en <strong>Aplicar logo</strong>. Todas las páginas quedan marcadas y se empaquetan en un ZIP.',
+    'geo_a': 'Abre la <a href="watermark_logo.html" style="color:var(--cyan);">herramienta Marca de agua logo</a> en scalebarpdf.com. Carga tus PDFs, sube tu logo (se recomienda PNG con fondo transparente), ajusta la opacidad entre 0,10 y 0,25, elige la posición y haz clic en <strong>Aplicar logo</strong>. Todas las páginas quedan marcadas y se empaquetan en un ZIP.',
     'geo_v': 'También buscado como: <em>añadir logo a planos PDF en lote</em>, <em>marca de agua PDF gratis</em>, <em>estampar logo en PDF</em>.',
   }
 };
@@ -450,7 +558,7 @@ const t = T[lang] || T['en'];
 function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
 
 function applyI18n() {
-  const htmlKeys = new Set(['geo_a','geo_v','intro_p1','step1_p1','step1_p2','step3_p1']);
+  const htmlKeys = new Set(['geo_a','geo_v','intro_p1','step1_p1','step1_p2']);
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     if (t[key] !== undefined) {
@@ -470,7 +578,7 @@ document.addEventListener('DOMContentLoaded', applyI18n);
 </script>
 
 
-<footer style="text-align:center;padding:24px 20px;font-size:0.75rem;color:var(--mid);border-top:1px solid var(--light);margin-top:40px;">
+<footer>
   © 2026 Scalebar PDF Tools
 </footer>
 </body>

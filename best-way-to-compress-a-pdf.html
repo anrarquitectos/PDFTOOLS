@@ -17,206 +17,268 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta property="og:title" content="The Best Way to Compress a PDF">
 <meta property="og:description" content="What actually reduces file size, when each method is appropriate, and why running Ghostscript in your browser can be the most accessible option.">
 <meta property="og:type" content="article">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f8f8f6;
-    --white: #ffffff;
-    --ink: #1a1a1a;
-    --mid: #555;
-    --light: #e8e8e4;
-    --ok: #2d6a2d;
+    --bg: #080b12;
+    --white: #e8eaf6;
+    --ink: #e8eaf6;
+    --mid: #6b7080;
+    --light: rgba(255,255,255,0.08);
+    --ok: #00f5d4;
     --radius: 4px;
-    --accent: #1a4db3;
+    --accent: #00f5d4;
+    --dark: #e8eaf6;
+    --text: #e8eaf6;
+    --muted: #6b7080;
+    --cyan: #00f5d4;
+    --magenta: #f700ff;
     --max: 720px;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.1);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'Courier New', Courier, monospace;
-    background: var(--bg); color: var(--ink);
+    font-family: 'Space Mono','Courier New',monospace;
+    background: var(--bg); color: var(--text);
     font-size: 14px; line-height: 1.7;
+    overflow-x: hidden;
   }
+
+  /* ── BACKGROUND ── */
+  #bg-svg { position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+  .glow-orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
+  .orb-1 { width:620px; height:620px; background:var(--cyan); top:-200px; left:-160px; opacity:0.15; }
+  .orb-2 { width:280px; height:280px; background:var(--magenta); bottom:-60px; right:-80px; opacity:0.1; }
 
   /* ── TOP BAR ── */
   #topbar {
-    background: var(--ink); color: var(--white);
-    padding: 12px 28px;
-    display: flex; align-items: center; justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
+    background: rgba(8,11,18,0.92); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--light); color: var(--text);
+    padding: 0 32px; height: 53px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
   }
-  #topbar h1 { font-size: 1rem; letter-spacing: 0.12em; font-weight: normal; }
-  #topbar a { color: inherit; text-decoration: none; }
+  #topbar h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.95rem; letter-spacing: 0.12em; font-weight: 700;
+    line-height: 1; display: flex; align-items: center;
+  }
+  #topbar h1 a { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:13px; }
+  #topbar h1 a .logo-accent { color:var(--cyan); }
 
   /* ── LANG SWITCHER ── */
-  #lang-switcher { display: flex; gap: 4px; }
+  #lang-switcher { display:flex; gap:4px; }
   #lang-switcher button {
-    background: none; border: 1px solid #444; color: #aaa;
-    padding: 2px 7px; font-size: 0.72rem; border-radius: 3px;
-    cursor: pointer; font-family: inherit;
-    transition: color 0.15s, border-color 0.15s;
+    background:none; border:1px solid rgba(255,255,255,0.15); color:var(--muted);
+    padding:3px 9px; font-size:0.7rem; border-radius:100px;
+    cursor:pointer; font-family:inherit; letter-spacing:0.08em; transition:all 0.2s;
   }
-  #lang-switcher button:hover { color: #fff; border-color: #fff; }
-  #lang-switcher button.active { color: #fff; border-color: #fff; }
+  #lang-switcher button:hover, #lang-switcher button.active { border-color:var(--cyan); color:var(--cyan); }
 
   /* ── LAYOUT ── */
   .page-wrap {
-    max-width: var(--max);
-    margin: 0 auto;
-    padding: 48px 24px 80px;
+    max-width: var(--max); margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative; z-index: 1;
   }
 
   /* ── BREADCRUMB ── */
-  .breadcrumb {
-    font-size: 0.75rem; color: var(--mid);
-    margin-bottom: 32px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .breadcrumb a { color: var(--mid); text-decoration: none; }
-  .breadcrumb a:hover { color: var(--ink); }
-  .breadcrumb span { opacity: 0.5; }
+  .breadcrumb { font-size:0.75rem; color:var(--muted); margin-bottom:32px; display:flex; align-items:center; gap:6px; }
+  .breadcrumb a { color:var(--muted); text-decoration:none; }
+  .breadcrumb a:hover { color:var(--cyan); }
+  .breadcrumb span { opacity:0.5; }
 
   /* ── ARTICLE HEADER ── */
   .article-header { margin-bottom: 40px; }
-  .article-meta {
-    font-size: 0.75rem; color: var(--mid);
-    margin-bottom: 14px; letter-spacing: 0.05em;
-  }
+  .article-meta { font-size:0.7rem; color:var(--cyan); margin-bottom:14px; letter-spacing:0.12em; }
   .article-header h2 {
-    font-size: 1.6rem; font-weight: normal;
-    letter-spacing: 0.02em; line-height: 1.3;
-    margin-bottom: 16px;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 1.5rem; font-weight: 700;
+    letter-spacing: 0.01em; line-height: 1.25;
+    margin-bottom: 16px; color: var(--text);
   }
   .article-header .lede {
-    font-size: 0.95rem; color: var(--mid);
-    line-height: 1.7; max-width: 600px;
-    border-left: 3px solid var(--ink);
-    padding-left: 16px;
+    font-size: 0.9rem; color: #8fa8c4; line-height: 1.75; max-width: 600px;
+    border-left: 3px solid var(--cyan); padding-left: 16px;
   }
+  .article-author { font-size:0.78rem; color:var(--muted); margin:10px 0 18px; font-style:normal; }
+  .article-author a { color:var(--muted); text-decoration:underline; }
+  .article-author a:hover { color:var(--cyan); }
 
   /* ── PROSE ── */
   .prose { max-width: var(--max); }
   .prose h3 {
-    font-size: 1rem; font-weight: bold;
+    font-family: 'Chakra Petch', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
     margin: 36px 0 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--light);
-    letter-spacing: 0.04em;
+     letter-spacing: 0.04em;
+    color: var(--text);
   }
-  .prose p { margin-bottom: 16px; font-size: 0.88rem; color: var(--ink); }
+  .prose p { margin-bottom:16px; font-size:0.86rem; color:#c8ccd8; }
   .prose p.note {
-    background: var(--white); border: 1px solid var(--light);
-    border-left: 3px solid var(--accent);
+    background: rgba(0,245,212,0.05); border: 1px solid rgba(0,245,212,0.2);
+    border-left: 3px solid var(--cyan);
     padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0;
-    color: var(--mid); font-size: 0.82rem; margin-bottom: 20px;
+    color: #8fa8c4; font-size:0.82rem; margin-bottom:20px;
   }
-  .prose strong { color: var(--ink); }
+  .prose strong { color:var(--text); }
+  .prose em { color: #8fa8c4; }
+  .prose a { color: var(--cyan); }
+  .prose code { background:rgba(0,245,212,0.08); padding:1px 5px; border-radius:3px; color:var(--cyan); font-size:0.85em; }
 
   /* ── COMPARISON TABLE ── */
-  .compare-table {
-    width: 100%; border-collapse: collapse;
-    margin: 20px 0 28px; font-size: 0.82rem;
-  }
+  .compare-table { width:100%; border-collapse:collapse; margin:20px 0 28px; font-size:0.82rem; }
   .compare-table th {
-    text-align: left; padding: 8px 12px;
-    background: var(--ink); color: var(--white);
-    font-weight: normal; letter-spacing: 0.06em;
-    font-size: 0.75rem;
+    text-align:left; padding:8px 12px;
+    background: rgba(0,245,212,0.12); color:var(--cyan);
+    font-weight:600; letter-spacing:0.08em; font-size:0.72rem;
+    border-bottom: 1px solid rgba(0,245,212,0.2);
   }
-  .compare-table td {
-    padding: 9px 12px; border-bottom: 1px solid var(--light);
-    vertical-align: top;
-  }
-  .compare-table tr:last-child td { border-bottom: none; }
-  .compare-table tr:nth-child(even) td { background: var(--white); }
-  .tag {
-    display: inline-block; font-size: 0.7rem; padding: 1px 6px;
-    border-radius: 2px; margin-right: 2px; letter-spacing: 0.04em;
-  }
-  .tag-good { background: #e8f4e8; color: var(--ok); }
-  .tag-bad  { background: #f4e8e8; color: #8b1a1a; }
-  .tag-mid  { background: #f0f0e8; color: #5a5a00; }
+  .compare-table td { padding:9px 12px; border-bottom:1px solid var(--light); vertical-align:top; color:#c8ccd8; }
+  .compare-table tr:last-child td { border-bottom:none; }
+  .compare-table tr:nth-child(even) td { background:rgba(255,255,255,0.02); }
+  .tag { display:inline-block; font-size:0.72rem; font-weight:700; margin-right:2px; letter-spacing:0.04em; font-family:'Space Mono',monospace; }
+  .tag-good { color:var(--cyan); }
+  .tag-bad { color:#ff4d6d; }
+  .tag-mid { color:#ffe600; }
 
   /* ── SCREENSHOT ── */
   .screenshot-wrap {
-    margin: 24px 0 28px;
-    border: 1px solid var(--light);
-    border-radius: var(--radius);
-    overflow: hidden;
+    margin:24px 0 28px; border:1px solid var(--glass-border);
+    border-radius:12px; overflow:hidden; backdrop-filter:blur(10px);
   }
-  .screenshot-wrap img { display: block; width: 100%; height: auto; }
+  .screenshot-wrap img { display:block; width:100%; height:auto; }
   .screenshot-caption {
-    padding: 8px 14px; background: #f2f2f0;
-    border-top: 1px solid var(--light);
-    font-size: 0.75rem; color: var(--mid); font-style: italic;
+    padding:8px 14px; background:rgba(255,255,255,0.04);
+    border-top:1px solid var(--light);
+    font-size:0.75rem; color:var(--muted); font-style:italic;
   }
+
+  /* ── PRESET LIST ── */
+  .preset-list { margin:0 0 20px; padding:0; list-style:none; }
+  .preset-list li { padding:8px 0; border-bottom:1px solid var(--light); font-size:0.86rem; color:#c8ccd8; }
+  .preset-list li:last-child { border-bottom:none; }
 
   /* ── RESULT BOX ── */
   .result-box {
-    background: var(--white); border: 1px solid var(--light);
-    border-radius: var(--radius); padding: 18px 20px;
-    margin: 24px 0; display: flex; gap: 14px; align-items: flex-start;
+    background: var(--glass); border:1px solid var(--glass-border);
+    backdrop-filter:blur(10px);
+    border-radius:12px; padding:18px 20px;
+    margin:24px 0; display:flex; gap:14px; align-items:flex-start;
   }
-  .result-box .rb-icon { font-size: 1.4rem; flex-shrink: 0; margin-top: 2px; }
-  .result-box .rb-text { font-size: 0.85rem; }
-  .result-box .rb-text strong { display: block; margin-bottom: 4px; }
+  .result-box .rb-icon { font-size:1.4rem; flex-shrink:0; margin-top:2px; }
+  .result-box .rb-text { font-size:0.85rem; color:#c8ccd8; }
+  .result-box .rb-text strong { display:block; margin-bottom:4px; color:var(--text); }
 
   /* ── CTA ── */
   .cta-block {
-    background: var(--ink); color: var(--white);
-    border-radius: var(--radius); padding: 28px;
-    margin-top: 48px; text-align: center;
+    background: rgba(0,245,212,0.06);
+    border:1px solid rgba(0,245,212,0.2);
+    border-radius:16px; padding:36px 28px;
+    margin-top:48px; text-align:center;
+    backdrop-filter:blur(10px);
   }
   .cta-btn {
-    display: inline-block; background: var(--white); color: var(--ink);
-    padding: 11px 28px; border-radius: var(--radius);
-    font-family: inherit; font-size: 0.9rem; font-weight: bold;
-    text-decoration: none; letter-spacing: 0.04em;
-    transition: background 0.15s, color 0.15s;
-    border: 2px solid var(--white);
+    display:inline-block;
+    background: rgba(0,245,212,0.12);
+    color:var(--cyan); border:1px solid rgba(0,245,212,0.35);
+    padding:12px 32px; border-radius:100px;
+    font-family:'Space Mono',monospace; font-size:0.88rem; font-weight:700;
+    text-decoration:none; letter-spacing:0.06em;
+    transition:all 0.2s;
   }
-  .cta-btn:hover { background: transparent; color: var(--white); }
+  .cta-btn:hover { background:rgba(0,245,212,0.2); box-shadow:0 0 24px rgba(0,245,212,0.2); }
 
   /* ── RELATED ── */
-  .related-wrap {
-    margin-top: 56px; border-top: 1px solid var(--light); padding-top: 28px;
-  }
-  .related-wrap h4 {
-    font-size: 0.75rem; color: var(--mid);
-    letter-spacing: 0.1em; margin-bottom: 14px; text-transform: uppercase;
-  }
-  .related-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .related-wrap { margin-top:48px; border-top:1px solid var(--light); padding-top:28px; }
+  .related-wrap h4 { font-size:0.7rem; color:var(--muted); letter-spacing:0.12em; margin-bottom:14px; text-transform:uppercase; }
+  .related-tools { display:flex; flex-wrap:wrap; gap:8px; }
   .related-tools a {
-    padding: 6px 14px; border: 1px solid #ccc;
-    background: var(--white); border-radius: var(--radius);
-    font-size: 0.8rem; color: var(--ink); text-decoration: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    padding:5px 14px; border:1px solid var(--glass-border);
+    background:var(--glass); border-radius:100px;
+    font-size:0.78rem; color:var(--muted); text-decoration:none;
+    font-family:'Space Mono',monospace;
+    transition:all 0.2s;
   }
-  .related-tools a:hover { border-color: var(--ink); box-shadow: 2px 2px 0 var(--ink); }
+  .related-tools a:hover { border-color:rgba(0,245,212,0.3); color:var(--cyan); }
 
-  .article-author {
-    font-size: 0.78rem; color: var(--mid); margin: 10px 0 18px;
-    font-style: normal;
-  }
-  .article-author a { color: var(--mid); text-decoration: underline; }
-  .geo-qa-prose { margin: 2.2rem 0 0; }
-  .geo-qa-prose p { font-size: 0.9rem; line-height: 1.75; color: var(--dark); margin-bottom: 0.5rem; }
+  /* ── GEO Q&A ── */
+  .geo-qa-prose { margin:2.2rem 0 0; }
+  .geo-qa-prose p { font-size:0.86rem; line-height:1.75; color:#c8ccd8; margin-bottom:0.5rem; }
   .geo-qa {
-    margin: 2.5rem 0 0;
-    padding: 1.5rem 1.75rem;
-    background: #f8f8f6;
-    border-left: 3px solid #1a1a1a;
-    border-radius: 0 4px 4px 0;
+    margin:2.5rem 0 0; padding:1.5rem 1.75rem;
+    background:rgba(255,255,255,0.03);
+    border-left:3px solid var(--cyan);
+    border-radius:0 8px 8px 0;
   }
-  .geo-qa h3 {
-    font-size: 1rem; font-weight: 700; margin: 0 0 0.75rem;
-    color: var(--dark);
+  .geo-qa h3 { font-family:'Chakra Petch',sans-serif; font-size:0.95rem; font-weight:700; margin:0 0 0.75rem; color:var(--text); }
+  .geo-qa p { font-size:0.86rem; line-height:1.7; margin:0; color:#c8ccd8; }
+  .geo-qa a, .geo-qa-prose a { color:var(--cyan); }
+
+  /* ── FOOTER ── */
+  footer {
+    position:relative; z-index:1; text-align:center; padding:28px 20px;
+    font-size:0.72rem; color:var(--muted);
+    border-top:1px solid var(--light); margin-top:40px;
+    font-family:'Space Mono',monospace;
   }
-  .geo-qa p { font-size: 0.88rem; line-height: 1.7; margin: 0; color: var(--dark); }
+  footer a { color:var(--cyan); text-decoration:none; }
+
+  /* ── STEP LABEL ── */
+  .prose h3 {
+    /* Override previous rule: border moves to top, becomes a marker line */
+    border-bottom: none;
+    border-top: 1px solid rgba(0,245,212,0.25);
+    padding-bottom: 0;
+    padding-top: 14px;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .step-num {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  /* ── PROSE UL/OL ── */
+  .prose ul, .prose ol {
+    margin: 0 0 16px 20px;
+    font-size: 0.86rem;
+    line-height: 1.9;
+    color: #c8ccd8;
+  }
+  .prose li { margin-bottom: 4px; }
+  .prose li strong { color: var(--text); }
+
+  /* ── SCREENSHOT CAPTION outside wrap ── */
+  .screenshot-caption {
+    padding: 6px 2px 0;
+    background: transparent;
+    border-top: none;
+    font-size: 0.74rem;
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 24px;
+  }
+  .screenshot-wrap {
+    margin: 24px 0 6px;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
 </style>
-  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="shortcut icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="shortcut icon" href="favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -262,7 +324,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           "name": "What is the best way to compress a PDF?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "For image-heavy PDFs (scanned drawings, photos): use Ghostscript-based compression — it resamples embedded images and produces dramatically smaller files. 1. Open the <a href='compress.html'>Compress PDF tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF</strong> and load your file. 3. Choose a preset: <em>eBook</em> (150 DPI) for screen sharing, <em>Printer</em> (300 DPI) for office printing. 4. Click <strong>Compress</strong>. 5. Download the result. For text-only PDFs, the file is already small — no compression needed."
+            "text": "For image-heavy PDFs (scanned drawings, photos): open the Compress PDF tool at scalebarpdf.com. Click Choose PDF and load your file. Choose a preset: eBook (150 DPI) for screen sharing, Printer (300 DPI) for office printing. Click Compress. Download the result. For text-only PDFs, the file is already small — no compression needed."
           }
         }
       ]
@@ -292,9 +354,25 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
+<!-- SVG Background -->
+<svg id="bg-svg" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.5" fill="rgba(0,245,212,0.06)"/>
+    </pattern>
+  </defs>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#grid)"/>
+  <rect x="0" y="0" width="100%" height="100%" fill="url(#dots)"/>
+</svg>
+<div class="glow-orb orb-1"></div>
+<div class="glow-orb orb-2"></div>
+
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html">▣ SCALEBAR PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
   <div id="lang-switcher">
     <button id="lang-en" onclick="setLang('en')">EN</button>
     <button id="lang-es" onclick="setLang('es')">ES</button>
@@ -304,14 +382,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <div class="page-wrap">
 
   <nav class="breadcrumb">
-    <a href="index.html" data-i18n="home">Home</a>
+    <a href="index.html" data-i18n="home" style="color:var(--cyan);">Home</a>
     <span>›</span>
     <span data-i18n="tutorials_label">Tutorials</span>
   </nav>
 
   <header class="article-header">
     <div class="article-meta" data-i18n="article_meta">GUIDE — PDF COMPRESSION · WORKFLOWS</div>
-    <p class="article-author">Written by <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
+    <p class="article-author">Written by <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener" style="color:var(--cyan);">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
     <h2 data-i18n="article_title">The best way to compress a PDF — and why it depends on what you are sending</h2>
     <p class="lede" data-i18n="article_lede">There is no single correct answer. A PDF going to a client for screen review needs a different approach than one going to a print bureau. This guide breaks down what actually reduces file size, where common free tools fall short, and when a browser-based Ghostscript compressor makes more sense than anything you would install.</p>
   </header>
@@ -384,15 +462,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="screenshot-wrap">
       <img id="sc1-img" src="img/tutorial-compress-01.png"
         alt="Compress tool panel showing the four presets with Screen, eBook, Printer and Prepress options"
->
+></div>
       <div class="screenshot-caption" data-i18n="sc1_caption">The four presets map directly to Ghostscript's -dPDFSETTINGS values. Custom mode exposes DPI and JPEG quality as separate controls.</div>
-    </div>
 
     <h3 data-i18n="h_presets">Choosing the right preset</h3>
 
     <p data-i18n="presets_p1">The four presets cover the common scenarios directly:</p>
 
-    <ul style="margin: 0 0 16px 20px; font-size:0.88rem; line-height:2;">
+    <ul >
       <li><strong data-i18n="preset_screen_label">Screen (72 DPI)</strong> <span data-i18n="preset_screen_text">— use for files that will only ever be viewed on screen, never printed. Presentation PDFs, reference documents sent to clients for comment, files attached to emails where size matters and nobody will print them.</span></li>
       <li><strong data-i18n="preset_ebook_label">eBook (150 DPI)</strong> <span data-i18n="preset_ebook_text">— the most useful preset for general practice. Good for sharing by email or through a project platform, acceptable for printing on a standard office laser printer. The default for a reason.</span></li>
       <li><strong data-i18n="preset_printer_label">Printer (300 DPI)</strong> <span data-i18n="preset_printer_text">— use when the file will be printed at scale on a large-format plotter. Retains sufficient image resolution for A0 printing while still reducing file size meaningfully compared to the original.</span></li>
@@ -410,9 +487,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="screenshot-wrap">
       <img id="sc2-img" src="img/tutorial-compress-02.png"
         alt="Status area after compression showing original and compressed file size"
->
+></div>
       <div class="screenshot-caption" data-i18n="sc2_caption">After compression, the status area shows the original size, the compressed size and the reduction percentage.</div>
-    </div>
 
     <h3 data-i18n="h_limits">When it is not the right tool</h3>
 
@@ -426,7 +502,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div itemprop="acceptedAnswer" itemscope itemtype="https://schema.org/Answer">
       <p itemprop="text" data-i18n-html="geo_a"></p>
     </div>
-    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--mid);margin-top:0.5rem;"></p>
+    <p data-i18n-html="geo_v" style="font-size:0.82rem;color:var(--muted);margin-top:0.5rem;"></p>
   </div>
 
   </article>
@@ -436,18 +512,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- CTA -->
   <div class="cta-block">
-    <a href="compress.html" class="cta-btn" data-i18n="cta_btn">Open Compress PDF tool →</a>
+    <a href="compress.html" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Compress PDF tool →</a>
   </div>
 
   <!-- RELATED TOOLS -->
   <div class="related-wrap">
     <h4 data-i18n="related_title">RELATED TOOLS</h4>
     <div class="related-tools">
-      <a href="scalebar.html" data-i18n="rel_scalebar">Scale bar (m)</a>
-      <a href="watermark_logo.html" data-i18n="rel_wlogo">Logo watermark</a>
-      <a href="convert.html" data-i18n="rel_convert">PDF to images</a>
-      <a href="split.html" data-i18n="rel_split">Split PDF</a>
-      <a href="merge.html" data-i18n="rel_merge">Merge PDFs</a>
+      <a href="scalebar.html" data-i18n="rel_scalebar" style="color:var(--cyan);">Scale bar (m)</a>
+      <a href="watermark_logo.html" data-i18n="rel_wlogo" style="color:var(--cyan);">Logo watermark</a>
+      <a href="convert.html" data-i18n="rel_convert" style="color:var(--cyan);">PDF to images</a>
+      <a href="split.html" data-i18n="rel_split" style="color:var(--cyan);">Split PDF</a>
+      <a href="merge.html" data-i18n="rel_merge" style="color:var(--cyan);">Merge PDFs</a>
     </div>
   </div>
 
@@ -505,7 +581,7 @@ const T = {
     rel_scalebar: 'Scale bar (m)', rel_wlogo: 'Logo watermark',
     rel_convert: 'PDF to images', rel_split: 'Split PDF', rel_merge: 'Merge PDFs',
     'geo_q': 'So, what is the best way to compress a PDF?',
-    'geo_a': 'For image-heavy PDFs (scanned drawings, photos): use the <a href="compress.html">Compress PDF tool</a> at scalebarpdf.com. Load the file, choose <em>eBook</em> (150 DPI) for screen sharing or <em>Printer</em> (300 DPI) for office printing, then click <strong>Compress</strong>. The Ghostscript engine resamples embedded images and typically reduces file size by 60–90%. For text-only PDFs, no compression is needed.',
+    'geo_a': 'For image-heavy PDFs (scanned drawings, photos): use the <a href="compress.html" style="color:var(--cyan);">Compress PDF tool</a> at scalebarpdf.com. Load the file, choose <em>eBook</em> (150 DPI) for screen sharing or <em>Printer</em> (300 DPI) for office printing, then click <strong>Compress</strong>. The Ghostscript engine resamples embedded images and typically reduces file size by 60–90%. For text-only PDFs, no compression is needed.',
     'geo_v': 'Also searched as: <em>compress PDF without losing quality</em>, <em>reduce PDF file size free</em>, <em>compress architectural drawings PDF</em>.',
   },
   es: {
@@ -557,7 +633,7 @@ const T = {
     rel_scalebar: 'Escala gráfica (m)', rel_wlogo: 'Marca de agua logo',
     rel_convert: 'PDF a imágenes', rel_split: 'Dividir PDF', rel_merge: 'Unir PDFs',
     'geo_q': 'Entonces, ¿cuál es la mejor forma de comprimir un PDF?',
-    'geo_a': 'Para PDFs con imágenes (planos escaneados, fotos): usa la <a href="compress.html">herramienta Comprimir PDF</a> en scalebarpdf.com. Carga el archivo, elige <em>eBook</em> (150 PPP) para compartir en pantalla o <em>Impresora</em> (300 PPP) para impresión, y haz clic en <strong>Comprimir</strong>. El motor Ghostscript remuestrea las imágenes y típicamente reduce el tamaño un 60–90%. Para PDFs de solo texto, no hace falta compresión.',
+    'geo_a': 'Para PDFs con imágenes (planos escaneados, fotos): usa la <a href="compress.html" style="color:var(--cyan);">herramienta Comprimir PDF</a> en scalebarpdf.com. Carga el archivo, elige <em>eBook</em> (150 PPP) para compartir en pantalla o <em>Impresora</em> (300 PPP) para impresión, y haz clic en <strong>Comprimir</strong>. El motor Ghostscript remuestrea las imágenes y típicamente reduce el tamaño un 60–90%. Para PDFs de solo texto, no hace falta compresión.',
     'geo_v': 'También buscado como: <em>comprimir PDF sin perder calidad</em>, <em>reducir tamaño de PDF gratis</em>, <em>comprimir planos arquitectónicos PDF</em>.',
   }
 };
@@ -585,7 +661,7 @@ document.addEventListener('DOMContentLoaded', applyI18n);
 </script>
 
 
-<footer style="text-align:center;padding:24px 20px;font-size:0.75rem;color:var(--mid);border-top:1px solid var(--light);margin-top:40px;">
+<footer>
   © 2026 Scalebar PDF Tools
 </footer>
 </body>
