@@ -12,7 +12,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="canonical" href="https://scalebarpdf.com/watermark_logo">
 <title>Add a Logo Watermark to a PDF — Scalebar PDF Tools</title>
-<meta name="description" content="Embed your studio logo as a grayscale watermark on PDF pages. Adjustable opacity, scale and position. Runs entirely in your browser.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -50,7 +49,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .view { display:none; }
   .view.active { display:block; }
 
-  #view-home { max-width:1080px; margin:0 auto; padding:14px 12px 40px; position:relative; z-index:1; }
+  #view-home { max-width:1080px; margin:0 auto; padding:40px 12px; position:relative; z-index:1; }
   .home-header { margin-bottom:32px; }
   .home-header h2 { font-family:'Chakra Petch',sans-serif; font-size:1.8rem; font-weight:700; letter-spacing:0.01em; margin-bottom:8px; }
   .home-header p { font-size:0.82rem; color:#8fa8c4; line-height:1.7; max-width:600px; }
@@ -254,11 +253,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   footer a { color:var(--cyan); text-decoration:none; }
   footer a:hover { text-decoration:underline; }
 </style>
-  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="shortcut icon" href="favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-  <link rel="manifest" href="site.webmanifest" />
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -308,7 +307,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
 <div id="view-home" class="view" style="display:none!important">
-  <div style="max-width:1080px; margin:0 auto; padding:14px 12px 40px; position:relative; z-index:1;">
+  <div style="max-width:1080px; margin:0 auto; padding:40px 12px; position:relative; z-index:1;">
 
     <div class="home-header">
       <h2>Scalebar PDF Tools — 100% free</h2>
@@ -473,6 +472,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
 <div id="view-tool" class="view">
+  <div style="max-width:860px; margin:0 auto; padding:14px 12px 40px; position:relative; z-index:1;">
 
     <div id="working-banner">
       <span>✓</span>
@@ -623,7 +623,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="tool-choose-wrap" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
         <button type="button" id="tool-choose-btn"
           onclick="document.getElementById('tool-choose-file').click()"
-         >
+          style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
           <span data-i18n="btn_choose_pdfs">Choose PDF(s)</span>
         </button>
         <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;" multiple>
@@ -1623,6 +1623,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="other-tools-strip" id="other-tools-strip"></div>
     </div>
   </div>
+</div>
 
 <!-- ── PATCH FULLSCREEN EDITOR ── -->
 <div id="patch-fullscreen">
@@ -1746,7 +1747,7 @@ function updateTopBar() {
     ? `${currentFileName} [modified ×${modificationHistory.length}]`
     : currentFileName;
   document.getElementById('file-indicator').innerHTML = `File: <span>${label}</span>`;
-  const _bcf = document.getElementById('btn-change-file'); if (_bcf) _bcf.style.display = 'inline-block';
+  document.getElementById('btn-change-file').style.display = 'inline-block';
   persistFile();
 }
 
@@ -1814,7 +1815,7 @@ function resetToHome() {
   currentBuffer = null; currentFileName = ''; modificationHistory = [];
   try { sessionStorage.removeItem('sb_file'); sessionStorage.removeItem('sb_name'); } catch(e){}
   document.getElementById('file-indicator').textContent = 'No file loaded';
-  const _bcf2 = document.getElementById('btn-change-file'); if (_bcf2) _bcf2.style.display = 'none';
+  document.getElementById('btn-change-file').style.display = 'none';
   document.getElementById('working-banner').classList.remove('show');
   goHome();
 }
@@ -2916,7 +2917,7 @@ document.getElementById('i2p-dl').addEventListener('click', () => {
   if (img2pdfBytes) download(img2pdfBytes, 'images.pdf');
 });
 
-// ─── 11. PATCH / REDACT ───────────────────────────────────────────────────
+// ─── 11. PATCH / REDACT ──────────────────���────────────────────────────────
 // ─── 11. PATCH / REDACT ─────────────────────────────────────────────────────
 
 const SNAP_RADIUS = 22;  // px — generous snap for first vertex close
@@ -3940,22 +3941,21 @@ function resetToHome() {
 }
 (function(){
   const inp=document.getElementById('tool-choose-file');
-  if(inp) inp.addEventListener('change', e=>{
-    const n=e.target.files.length;
-    const span=document.getElementById('tool-choose-name');
-    if(span) span.textContent=n? n+' file'+(n>1?'s':'')+' selected':'';
-    const btn=document.getElementById('tool-choose-btn');
-    if(btn) btn.textContent=n? '\u2713 '+n+' PDF'+(n>1?'s':'')+' ready':'Choose PDF(s)';
+  if(inp) inp.addEventListener('change',async e=>{
+    const file=e.target.files[0]; if(!file) return;
+    await loadPDF(file); _updateChooseBtn(file.name);
   });
   document.addEventListener('dragover',e=>e.preventDefault());
-  document.addEventListener('drop',e=>{
+  document.addEventListener('drop',async e=>{
     e.preventDefault();
-    const pdfs=[...(e.dataTransfer.files||[])].filter(f=>f.type==='application/pdf');
-    if(!pdfs.length) return;
-    const inp=document.getElementById('tool-choose-file');
-    if(inp){const dt=new DataTransfer();pdfs.forEach(f=>dt.items.add(f));inp.files=dt.files;inp.dispatchEvent(new Event('change'));}
+    const file=[...(e.dataTransfer.files||[])].find(f=>f.type==='application/pdf');
+    if(file){await loadPDF(file);_updateChooseBtn(file.name);}
   });
 })();
+function _updateChooseBtn(name){
+  const btn=document.getElementById('tool-choose-btn'),span=document.getElementById('tool-choose-name');
+  if(btn) btn.textContent='\u2713 PDF loaded'; if(span) span.textContent=name;
+}
 
 // ── i18n ─────────────────────────────────────────────────────────────────
 const _TL = {
