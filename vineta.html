@@ -10,9 +10,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="canonical" href="https://scalebarpdf.com/vineta">
 <title>Add an Architectural Title Block to a PDF — Scalebar PDF Tools</title>
-<meta name="description" content="Add an architectural title block to a PDF drawing — project name, plan number, scale, signatures and north arrow. Native vector content.">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -50,7 +48,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .view { display:none; }
   .view.active { display:block; }
 
-  #view-home { max-width:1080px; margin:0 auto; padding:14px 12px 40px; position:relative; z-index:1; }
+  #view-home { max-width:1080px; margin:0 auto; padding:40px 12px; position:relative; z-index:1; }
   .home-header { margin-bottom:32px; }
   .home-header h2 { font-family:'Chakra Petch',sans-serif; font-size:1.8rem; font-weight:700; letter-spacing:0.01em; margin-bottom:8px; }
   .home-header p { font-size:0.82rem; color:#8fa8c4; line-height:1.7; max-width:600px; }
@@ -254,11 +252,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   footer a { color:var(--cyan); text-decoration:none; }
   footer a:hover { text-decoration:underline; }
 </style>
-  <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="shortcut icon" href="favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-  <link rel="manifest" href="site.webmanifest" />
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
@@ -284,7 +282,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
+<h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
@@ -308,7 +306,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
 <div id="view-home" class="view" style="display:none!important">
-  <div style="max-width:1080px; margin:0 auto; padding:14px 12px 40px; position:relative; z-index:1;">
+  <div style="max-width:1080px; margin:0 auto; padding:40px 12px; position:relative; z-index:1;">
 
     <div class="home-header">
       <h2>Scalebar PDF Tools — 100% free</h2>
@@ -473,6 +471,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
 <div id="view-tool" class="view">
+  <div style="max-width:860px; margin:0 auto; padding:14px 12px 40px; position:relative; z-index:1;">
 
     <div id="working-banner">
       <span>✓</span>
@@ -1265,7 +1264,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="tool-choose-wrap" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
         <button type="button" id="tool-choose-btn"
           onclick="document.getElementById('tool-choose-file').click()"
-         >
+          style="background:#2563eb;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
           <span data-i18n="btn_choose_pdf">Choose PDF</span>
         </button>
         <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;">
@@ -1657,6 +1656,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="other-tools-strip" id="other-tools-strip"></div>
     </div>
   </div>
+</div>
 
 <!-- ── PATCH FULLSCREEN EDITOR ── -->
 <div id="patch-fullscreen">
@@ -1686,7 +1686,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-// ─── PDF.js lazy load ─────────────────────────────────────────────────────
+// ─── PDF.js lazy load ─���───────────────────────────────────────────────────
 const pdfjsScript = document.createElement('script');
 pdfjsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
 document.head.appendChild(pdfjsScript);
@@ -1780,7 +1780,7 @@ function updateTopBar() {
     ? `${currentFileName} [modified ×${modificationHistory.length}]`
     : currentFileName;
   document.getElementById('file-indicator').innerHTML = `File: <span>${label}</span>`;
-  const _bcf = document.getElementById('btn-change-file'); if (_bcf) _bcf.style.display = 'inline-block';
+  document.getElementById('btn-change-file').style.display = 'inline-block';
   persistFile();
 }
 
@@ -1848,7 +1848,7 @@ function resetToHome() {
   currentBuffer = null; currentFileName = ''; modificationHistory = [];
   try { sessionStorage.removeItem('sb_file'); sessionStorage.removeItem('sb_name'); } catch(e){}
   document.getElementById('file-indicator').textContent = 'No file loaded';
-  const _bcf2 = document.getElementById('btn-change-file'); if (_bcf2) _bcf2.style.display = 'none';
+  document.getElementById('btn-change-file').style.display = 'none';
   document.getElementById('working-banner').classList.remove('show');
   goHome();
 }
@@ -3832,7 +3832,7 @@ document.querySelectorAll('.sb-style-btn').forEach(btn => {
 
 // ─── BATCH WATERMARK HELPERS (moved into wt-btn / wl-btn handlers above) ───
 
-// ─── 14. PLAN NUMBERING ────────────────────────────────────────────────────
+// ─── 14. PLAN NUMBERING ─────────────────────��──────────────────────────────
 document.getElementById('pn-btn').addEventListener('click', async () => {
   const files = (document.getElementById('tool-choose-file') || document.getElementById('pn-files') || {files:[]}).files;
   if (!files.length) { status('pn-status', 'Choose at least one PDF file.', 'err'); return; }
