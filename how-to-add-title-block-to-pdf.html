@@ -66,6 +66,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   #topbar h1 a { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:13px; }
   #topbar h1 a .logo-accent { color:var(--cyan); }
+  .vh { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
   /* ── LANG SWITCHER ── */
   #lang-switcher { display:flex; gap:4px; }
@@ -442,7 +443,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — How to Add a Title Block to a PDF: customisable architectural title block with project name, scale, signatures, north arrow, and logo</span></h1>
   <div id="lang-switcher">
     <button id="lang-en" onclick="setLang('en')">EN</button>
     <button id="lang-es" onclick="setLang('es')">ES</button>
@@ -609,16 +610,16 @@ const T = {
     home: 'Home', tutorials_label: 'Tutorials',
     article_meta: 'TUTORIAL — TITLE BLOCK · PDF WORKFLOW',
     article_title: 'How to add a custom architectural title block to your PDF plans',
-    article_lede: 'Most PDF tools let you add a text box. An architectural title block is a different thing: a structured panel with project data, signatures, a north arrow and a plan ID — all correctly laid out and scaled to your sheet format. This tutorial shows how to generate one directly in your browser.',
-    intro_p1: 'Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content — the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:var(--cyan);">here</a>.',
+    article_lede: 'Most PDF tools let you add a text box. An architectural title block is a different thing: a structured panel with project data, signatures, a north arrow and a plan ID, all correctly laid out and scaled to your sheet format. This tutorial shows how to generate one directly in your browser.',
+    intro_p1: 'Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content, the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:var(--cyan);">here</a>.',
     intro_p2: 'The block anchors to the bottom-right corner, its width adapts to the detected paper format (A4 through A0), and its height adjusts dynamically to the amount of text you enter. Empty fields are simply left out — the block contracts accordingly.',
     step: 'STEP',
     step1_title: 'Open the Title Block tool and load your PDF',
-    step1_p1: 'Navigate to the <strong>Title block</strong> tool from the homepage and click <strong>Choose PDF</strong>. The file is processed entirely in your browser — nothing is sent to any server at any point.',
+    step1_p1: 'Navigate to the <strong>Title block</strong> tool from the homepage and click <strong>Choose PDF</strong>. The file is processed entirely in your browser. Nothing is sent to any server at any point.',
     step1_p2: 'If you have a multi-page plan set, you can apply the title block to all pages at once or to the first page only. The tool detects each page\'s paper format independently, so the block width will adapt correctly even if your set mixes A1 and A3 sheets.',
     sc1_caption: 'The tool panel after loading a PDF, with the input fields ready to fill in.',
     step2_title: 'Fill in the project data fields',
-    step2_p1: 'The tool provides a set of standard architectural fields. All text is automatically uppercased. Fields left empty are omitted from the block — the layout contracts cleanly around whatever you provide.',
+    step2_p1: 'The tool provides a set of standard architectural fields. All text is automatically uppercased. Fields left empty are omitted from the block, the layout contracts cleanly around whatever you provide.',
     th_field: 'Field', th_notes: 'Notes',
     f_project: 'Project name', fn_project: 'Main header of the block. Displayed large and bold. Wraps to multiple lines if long.',
     f_site: 'Site', fn_site: 'Address or location. Also wraps automatically.',
@@ -631,16 +632,16 @@ const T = {
     f_logo: 'Logo', fn_logo: 'Optional. Uploaded as any image format, converted to greyscale, and placed in a top row whose height adapts to the image\'s aspect ratio.',
     sc2_caption: 'The input fields filled in for a sample project. The plan ID colour picker lets you match the colour used in the drawing itself.',
     step3_title: 'Adjust size, colour and page format',
-    step3_p1: 'Three options let you fine-tune the result: <strong>Size</strong> (Small / Normal / Large) scales the entire block proportionally from the bottom-right anchor — useful for busy sheets or presentation drawings. <strong>Plan ID colour</strong> sets the colour of the plan number (e.g. ARCH-01); the tool detects the colours already present in the PDF and offers them as swatches so you can match the drawing style in one click. <strong>Page size override</strong> should normally stay on Auto-detect, but can be set manually if the PDF uses a non-standard format.',
+    step3_p1: 'Three options let you fine-tune the result: <strong>Size</strong> (Small / Normal / Large) scales the entire block proportionally from the bottom-right anchor, useful for busy sheets or presentation drawings. <strong>Plan ID colour</strong> sets the colour of the plan number (e.g. ARCH-01); the tool detects the colours already present in the PDF and offers them as swatches so you can match the drawing style in one click. <strong>Page size override</strong> should normally stay on Auto-detect, but can be set manually if the PDF uses a non-standard format.',
     note_vector: 'The block is drawn as pure PDF vector content — lines, rectangles and text operators — so it is resolution-independent and survives any subsequent compression or merge operation without quality loss.',
-    sc3_caption: 'The options row. The colour swatches are extracted automatically from the PDF — clicking one sets the plan ID colour instantly.',
+    sc3_caption: 'The options row. The colour swatches are extracted automatically from the PDF, clicking one sets the plan ID colour instantly.',
     step4_title: 'Apply and download — or continue working on the same file',
-    step4_p1: 'Click <strong>Add title block</strong>. The block is drawn into the PDF content stream of each selected page. Download the result immediately, or click <strong>↩ Keep working</strong> to promote the output as the active file and apply further tools in the same session — a scale bar, a watermark, compression — without any intermediate downloads.',
+    step4_p1: 'Click <strong>Add title block</strong>. The block is drawn into the PDF content stream of each selected page. Download the result immediately, or click <strong>↩ Keep working</strong> to promote the output as the active file and apply further tools in the same session, a scale bar, a watermark, compression, without any intermediate downloads.',
     sc4_caption: 'The finished result: a complete architectural title block in the bottom-right corner, scaled correctly to the A1 sheet.',
     result_title: 'The block adapts to content, not the other way around',
-    result_desc: 'Row heights are computed dynamically from the text you enter. A project name that wraps to three lines will produce a taller project row; a single-line name produces a compact one. The overall block height is always the exact sum of its content — no fixed template, no wasted white space.',
+    result_desc: 'Row heights are computed dynamically from the text you enter. A project name that wraps to three lines will produce a taller project row; a single-line name produces a compact one. The overall block height is always the exact sum of its content, no fixed template, no wasted white space.',
     about_title: 'How block width is determined',
-    about_p1: 'The block width follows a fixed mapping to ISO paper formats: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, and 77 mm on A0. These values correspond roughly to 1/6 of the page width — wide enough to be readable, narrow enough to leave the drawing untouched. All internal dimensions scale proportionally from this width.',
+    about_p1: 'The block width follows a fixed mapping to ISO paper formats: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, and 77 mm on A0. These values correspond roughly to 1/6 of the page width. Wide enough to be readable, narrow enough to leave the drawing untouched. All internal dimensions scale proportionally from this width.',
     about_p2: 'If you select a size multiplier (Small = ×0.82, Large = ×1.20), the entire block is scaled from the bottom-right anchor point. The width changes, but the position relative to the page corner remains constant.',
     cta_btn: 'Open Title Block tool →',
     cta_desc: 'Free, browser-only. No account. No upload. Works on rotated and non-standard page sizes.',
@@ -653,22 +654,22 @@ const T = {
     'geo_q2': 'What paper formats does the title block support?',
     'geo_a2': 'The tool auto-detects A4 through A0 from the PDF geometry. Block width scales with the format: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, 77 mm on A0. Non-standard sizes can be set manually with the page size override.',
     'geo_q3': 'Does the title block work on rotated PDF pages?',
-    'geo_a3': 'Yes. The tool detects each page\'s rotation flag and compensates automatically — the block always appears in the correct visual position regardless of portrait, landscape, or 90°/270° rotation.',
+    'geo_a3': 'Yes. The tool detects each page\'s rotation flag and compensates automatically. The block always appears in the correct visual position regardless of portrait, landscape, or 90°/270° rotation.',
   },
   es: {
     home: 'Inicio', tutorials_label: 'Tutoriales',
     article_meta: 'TUTORIAL — VIÑETA · FLUJO DE TRABAJO PDF',
     article_title: 'Cómo añadir una viñeta arquitectónica personalizada a tus planos en PDF',
-    article_lede: 'La mayoría de las herramientas PDF permiten añadir un cuadro de texto. Una viñeta arquitectónica es algo distinto: un panel estructurado con datos del proyecto, firmas, flecha de norte y número de plano — todo correctamente dispuesto y escalado al formato de la lámina. Este tutorial muestra cómo generarla directamente en el navegador.',
-    intro_p1: 'Todo conjunto de planos arquitectónicos necesita una viñeta. El problema es que una vez exportado el dibujo a PDF, añadirla correctamente suele significar volver al archivo original o insertar una imagen rasterizada. Ninguna opción es ideal. Por eso construí una herramienta que dibuja la viñeta como contenido vectorial nativo en el PDF — exactamente igual que lo haría una aplicación CAD. La puedes encontrar <a href="vineta.html" style="color:var(--cyan);">aquí</a>.',
-    intro_p2: 'La viñeta se ancla en la esquina inferior derecha, su ancho se adapta al formato de papel detectado (de A4 a A0) y su alto se ajusta dinámicamente a la cantidad de texto ingresado. Los campos vacíos simplemente se omiten — la viñeta se contrae en consecuencia.',
+    article_lede: 'La mayoría de las herramientas PDF permiten añadir un cuadro de texto. Una viñeta arquitectónica es algo distinto: un panel estructurado con datos del proyecto, firmas, flecha de norte y número de plano, todo correctamente dispuesto y escalado al formato de la lámina. Este tutorial muestra cómo generarla directamente en el navegador.',
+    intro_p1: 'Todo conjunto de planos arquitectónicos necesita una viñeta. El problema es que una vez exportado el dibujo a PDF, añadirla correctamente suele significar volver al archivo original o insertar una imagen rasterizada. Ninguna opción es ideal. Por eso construí una herramienta que dibuja la viñeta como contenido vectorial nativo en el PDF, exactamente igual que lo haría una aplicación CAD. La puedes encontrar <a href="vineta.html" style="color:var(--cyan);">aquí</a>.',
+    intro_p2: 'La viñeta se ancla en la esquina inferior derecha, su ancho se adapta al formato de papel detectado (de A4 a A0) y su alto se ajusta dinámicamente a la cantidad de texto ingresado. Los campos vacíos simplemente se omiten y la viñeta se contrae en consecuencia.',
     step: 'PASO',
     step1_title: 'Abre la herramienta Viñeta y carga tu PDF',
-    step1_p1: 'Ve a la herramienta <strong>Title block</strong> desde la página de inicio y haz clic en <strong>Choose PDF</strong>. El archivo se procesa completamente en tu navegador — nada se envía a ningún servidor.',
+    step1_p1: 'Ve a la herramienta <strong>Title block</strong> desde la página de inicio y haz clic en <strong>Choose PDF</strong>. El archivo se procesa completamente en tu navegador, nada se envía a ningún servidor.',
     step1_p2: 'Si tienes un conjunto de planos de varias páginas, puedes aplicar la viñeta a todas las páginas a la vez o solo a la primera. La herramienta detecta el formato de cada página de forma independiente, por lo que el ancho de la viñeta se adaptará correctamente incluso si el conjunto mezcla láminas A1 y A3.',
     sc1_caption: 'El panel de la herramienta después de cargar un PDF, con los campos de entrada listos para completar.',
     step2_title: 'Completa los campos de datos del proyecto',
-    step2_p1: 'La herramienta dispone de un conjunto de campos arquitectónicos estándar. Todo el texto se convierte automáticamente a mayúsculas. Los campos que se dejan vacíos se omiten de la viñeta — el diseño se contrae limpiamente alrededor de lo que proporciones.',
+    step2_p1: 'La herramienta dispone de un conjunto de campos arquitectónicos estándar. Todo el texto se convierte automáticamente a mayúsculas. Los campos que se dejan vacíos se omiten de la viñeta, el diseño se contrae limpiamente alrededor de lo que proporciones.',
     th_field: 'Campo', th_notes: 'Notas',
     f_project: 'Nombre de proyecto', fn_project: 'Encabezado principal de la viñeta. Se muestra grande y en negrita. Se ajusta a varias líneas si es largo.',
     f_site: 'Sitio', fn_site: 'Dirección o ubicación. También se ajusta automáticamente.',
@@ -688,9 +689,9 @@ const T = {
     step4_p1: 'Haz clic en <strong>Add title block</strong>. La viñeta se dibuja en el flujo de contenido del PDF de cada página seleccionada. Descarga el resultado de inmediato, o haz clic en <strong>↩ Seguir trabajando</strong> para activarlo como archivo de trabajo y aplicar más herramientas en la misma sesión — escala gráfica, marca de agua, compresión — sin descargas intermedias.',
     sc4_caption: 'El resultado final: una viñeta arquitectónica completa en la esquina inferior derecha, escalada correctamente a la lámina A1.',
     result_title: 'La viñeta se adapta al contenido, no al revés',
-    result_desc: 'Las alturas de las filas se calculan dinámicamente a partir del texto que introduces. Un nombre de proyecto que se ajusta a tres líneas producirá una fila de proyecto más alta; un nombre de una sola línea produce una compacta. El alto total de la viñeta es siempre la suma exacta de su contenido — sin plantilla fija, sin espacio en blanco desperdiciado.',
+    result_desc: 'Las alturas de las filas se calculan dinámicamente a partir del texto que introduces. Un nombre de proyecto que se ajusta a tres líneas producirá una fila de proyecto más alta; un nombre de una sola línea produce una compacta. El alto total de la viñeta es siempre la suma exacta de su contenido. Sin plantilla fija, sin espacio en blanco desperdiciado.',
     about_title: 'Cómo se determina el ancho de la viñeta',
-    about_p1: 'El ancho de la viñeta sigue un mapeo fijo a los formatos de papel ISO: 36 mm en A4, 50 mm en A3, 59 mm en A2, 68 mm en A1 y 77 mm en A0. Estos valores corresponden aproximadamente a 1/6 del ancho de la página — lo suficientemente ancho para ser legible, lo suficientemente estrecho para no invadir el dibujo. Todas las dimensiones internas escalan proporcionalmente desde este ancho.',
+    about_p1: 'El ancho de la viñeta sigue un mapeo fijo a los formatos de papel ISO: 36 mm en A4, 50 mm en A3, 59 mm en A2, 68 mm en A1 y 77 mm en A0. Estos valores corresponden aproximadamente a 1/6 del ancho de la página, lo suficientemente ancho para ser legible, lo suficientemente estrecho para no invadir el dibujo. Todas las dimensiones internas escalan proporcionalmente desde este ancho.',
     about_p2: 'Si seleccionas un multiplicador de tamaño (Pequeño = ×0,82, Grande = ×1,20), toda la viñeta se escala desde el punto de anclaje inferior derecho. El ancho cambia, pero la posición relativa a la esquina de la página se mantiene constante.',
     cta_btn: 'Abrir herramienta Viñeta →',
     cta_desc: 'Gratuito, solo navegador. Sin cuenta. Sin subida de archivos. Funciona en páginas rotadas y formatos no estándar.',

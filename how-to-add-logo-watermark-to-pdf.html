@@ -65,6 +65,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   #topbar h1 a { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:13px; }
   #topbar h1 a .logo-accent { color:var(--cyan); }
+  .vh { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
   /* ── LANG SWITCHER ── */
   #lang-switcher { display:flex; gap:4px; }
@@ -375,7 +376,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — How to Add a Logo Watermark to a PDF: batch stamp your studio brand across architectural plan sets, with opacity and rotation control</span></h1>
   <div id="lang-switcher">
     <button id="lang-en" onclick="setLang('en')">EN</button>
     <button id="lang-es" onclick="setLang('es')">ES</button>
@@ -396,13 +397,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="article-meta" data-i18n="article_meta">TUTORIAL — LOGO WATERMARK · BATCH PDF</div>
     <p class="article-author">Written by <a href="https://www.linkedin.com/in/06nicolasaraya" target="_blank" rel="author noopener" style="color:var(--cyan);">Nicolás Araya</a> — Architect and developer of Scalebar PDF Tools</p>
     <h2 data-i18n="article_title">How to add your logo as a watermark to all your plans, without software</h2>
-    <p class="lede" data-i18n="article_lede">Sending a full drawing set to a client or contractor and want your studio logo on every sheet. This tutorial shows how to stamp it across all your PDFs at once, with the right opacity and position, entirely in your browser.</p>
+    <div class="lede" data-i18n-html="article_lede">Sending a full drawing set to a client or contractor and want your studio logo on every sheet. This tutorial shows how to stamp it across all your PDFs at once, with the right opacity and position, entirely in your browser.</div>
   </header>
 
   <!-- ARTICLE BODY -->
   <article class="prose">
 
-    <p data-i18n="intro_p1">As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet — both for branding and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and packages the result into a ZIP. You can find it <a href="watermark_logo.html" style="color:var(--cyan);">here</a>.</p>
+    <p data-i18n="intro_p1">As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet, both for branding and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and packages the result into a ZIP. You can find it <a href="watermark_logo.html" style="color:var(--cyan);">here</a>.</p>
 
     <p data-i18n="intro_p2">The logo is automatically converted to grayscale before embedding, keeping it neutral against any drawing background and avoiding color conflicts with the drawing content.</p>
 
@@ -422,7 +423,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="screenshot-caption" data-i18n="sc1_caption">The panel after loading a batch of PDFs and a logo file. The button shows the number of files ready to process.</div>
 
     <!-- STEP 2 -->
-    <h3><span class="step-num">STEP 2</span> <span data-i18n="step2_title">Set the parameters and apply</span></h3>
+    <h3><span class="step-num">STEP 2</span> <span data-i18n="step2_title">Configure the parameters</span></h3>
 
     <p data-i18n="step2_p1">Four parameters control how the logo appears on each sheet:</p>
 
@@ -441,9 +442,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
            style="display:none;"
            onerror="this.style.display='none';document.getElementById('sc2-placeholder').style.display='block';"
            onload="this.style.display='block';document.getElementById('sc2-placeholder').style.display='none';"><div id="sc2-placeholder" class="sc-placeholder"></div></div>
-    <div class="screenshot-caption" data-i18n="sc2_caption">Typical settings for a discreet central stamp: opacity 0.15, scale 40%, rotation −30°. Click Apply logo to process the batch and download the ZIP.</div>
+    <div class="screenshot-caption" data-i18n="sc2_caption">Settings panel with typical values for a discreet central stamp: opacity 0.15, scale 40%, rotation −30°.</div>
 
     <p class="note" data-i18n="tips_combined">For the cleanest result, use a PNG with a transparent background — a white-background logo will appear as a white rectangle on the drawing. If you only have a JPG, increase the rotation slightly so the rectangle shape is less noticeable at low opacity. The grayscale conversion uses luminance weighting, so logos with strong contrast in their original colors will remain legible after conversion.</p>
+
+    <!-- STEP 3 -->
+    <h3><span class="step-num">STEP 3</span> <span data-i18n="step3_title">Export the result</span></h3>
+
+    <p data-i18n="step3_p1">Once the parameters are set, click <strong>Apply logo</strong>. The tool processes all pages of every PDF in the batch and generates a ZIP with the resulting files, ready to download.</p>
+
+    <div class="screenshot-wrap">
+      <img id="sc3-img" src="img/tutorial-wlogo-03.png"
+           alt="PDF with studio logo embedded as grayscale watermark"
+           style="display:none;"
+           onerror="this.style.display='none';document.getElementById('sc3-placeholder').style.display='block';"
+           onload="this.style.display='block';document.getElementById('sc3-placeholder').style.display='none';"><div id="sc3-placeholder" class="sc-placeholder"></div></div>
+    <div class="screenshot-caption" data-i18n="sc3_caption">The resulting PDF with the studio logo embedded as a grayscale watermark.</div>
 
     <div class="result-box">
       <div class="rb-icon">✓</div>
@@ -493,22 +507,25 @@ const T = {
     home: 'Home', tutorials_label: 'Tutorials',
     article_meta: 'TUTORIAL — LOGO WATERMARK · BATCH PDF',
     article_title: 'How to add your logo as a watermark to all your plans, without software',
-    article_lede: 'Sending a full drawing set to a client or contractor and want your studio logo on every sheet. This tutorial shows how to stamp it across all your PDFs at once, with the right opacity and position, entirely in your browser.',
-    intro_p1: 'As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet — both for branding and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and packages the result into a ZIP. You can find it <a href="watermark_logo.html" style="color:var(--cyan);">here</a>.',
+    article_lede: 'Sending a full drawing set to a client or contractor and want your studio\'s logo on every sheet?<br><br>This tutorial shows how to stamp it across all your PDFs at once, with the right opacity and position, without needing to open any application.',
+    intro_p1: 'As an architect I often needed to send drawing sets with my own logo on every sheet — both to give the files my identity and mark, and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. So I ended up building a page that processes any number of PDFs at once and delivers a ZIP with the watermarks. You can find it <a href="watermark_logo.html" style="color:var(--cyan);">here</a>.',
     intro_p2: 'The logo is automatically converted to grayscale before embedding, keeping it neutral against any drawing background and avoiding color conflicts with the drawing content.',
     step1_title: 'Load your PDFs and your logo',
-    step1_p1: 'Open the <strong>Logo watermark</strong> tool and click <strong>Choose PDF(s)</strong>. You can load an entire drawing set at once — ten, fifty or more files. Once loaded, the button confirms how many PDFs are ready to process.',
-    step1_p2: 'Then click <strong>Choose image</strong> and select your logo file. PNG with a transparent background gives the cleanest result — the logo will appear directly on the drawing without any rectangle around it. JPG is also accepted. The tool converts the image to grayscale automatically, so the original colors of your file do not matter.',
+    step1_p1: 'Open the <strong>Logo watermark</strong> tool and click <strong>Choose PDF(s)</strong>. You can load an entire drawing set at once — ten, fifty files, as many as you need. Once loaded, the button confirms how many PDFs are ready to process.',
+    step1_p2: 'Then click <strong>Choose image</strong> and select your logo file. I recommend using a PNG with a transparent background, as it gives the cleanest result — the logo will appear directly on the drawing without any rectangle around it. JPG files also work fine. The tool automatically converts the image to grayscale, so the original colors don\'t matter.',
     sc1_caption: 'The panel after loading a batch of PDFs and a logo file. The button shows the number of files ready to process.',
-    step2_title: 'Set the parameters and apply',
+    step2_title: 'Configure the parameters',
     step2_p1: 'Four parameters control how the logo appears on each sheet:',
     b1_label: 'Opacity', b1_text: '— between 0.05 and 1. For working drawings, 0.10 to 0.18 is enough to be readable without interfering with drawing content. For a cover sheet, 0.30 or higher works well.',
     b2_label: 'Scale', b2_text: '— as a percentage of page width. 40% places a centered logo that reads clearly on A1 or A0 sheets. Reduce to 20–25% for a corner logo.',
     b3_label: 'Rotation', b3_text: '— in degrees. A slight diagonal (around −30°) is the standard choice for a central watermark. For corner positions, 0° looks cleaner.',
     b4_label: 'Position', b4_text: '— center, bottom right, top left, top right or bottom left. Center with a diagonal rotation is the default for a discreet full-sheet stamp.',
-    step2_p2: 'The same settings apply to every page of every PDF in the batch. For different settings on a cover sheet versus the rest of the set, process them as two separate runs.',
-    sc2_caption: 'Typical settings for a discreet central stamp: opacity 0.15, scale 40%, rotation −30°. Click Apply logo to process the batch and download the ZIP.',
-    tips_combined: 'For the cleanest result, use a PNG with a transparent background — a white-background logo will appear as a white rectangle on the drawing. If you only have a JPG, increase the rotation slightly so the rectangle shape is less noticeable at low opacity. The grayscale conversion uses luminance weighting, so logos with strong contrast in their original colors will remain legible after conversion.',
+    step2_p2: 'The same settings apply to every page of every PDF in the batch. If you need different settings for a cover sheet and the rest of the set, process them as two separate runs.',
+    sc2_caption: 'Settings panel with typical values for a discreet central stamp: opacity 0.15, scale 40%, rotation −30°.',
+    step3_title: 'Export the result',
+    step3_p1: 'Once the parameters are set, click <strong>Apply logo</strong>. The tool processes all pages of every PDF in the batch and generates a ZIP with the resulting files, ready to download.',
+    sc3_caption: 'The resulting PDF with the studio logo embedded as a grayscale watermark.',
+    tips_combined: 'For the cleanest result, use a PNG with a transparent background — a white-background logo will appear as a white rectangle on the drawing. If you only have a JPG, increase the rotation slightly so the rectangular shape is less noticeable at low opacity. The grayscale conversion uses luminance weighting, so logos with high contrast in their original colors will remain legible after conversion.',
     result_title: 'The logo is embedded as a PDF image object',
     result_desc: 'The watermark is not a flattened raster overlay of the whole page. Only the logo image is composited into the content stream, keeping the rest of the PDF data intact. Text, vectors and annotations on the original pages remain selectable and searchable after watermarking.',
     cta_btn: 'Open Logo Watermark tool →',
@@ -516,28 +533,31 @@ const T = {
     rel_wtext: 'Text watermark', rel_scalebar: 'Scale bar (m)',
     rel_vineta: 'Title block', rel_plannum: 'Plan numbering', rel_compress: 'Compress PDF',
     'geo_q': 'In short — how do I stamp my logo across a full PDF drawing set?',
-    'geo_a': 'Open the <a href="watermark_logo.html" style="color:var(--cyan);">Logo Watermark tool</a> at scalebarpdf.com. Load your PDF(s), upload your logo (PNG with transparent background recommended), set opacity between 0.10 and 0.25, choose position, then click <strong>Apply logo</strong>. All pages are stamped and packaged into a single ZIP — nothing is uploaded to any server.',
-    'geo_v': 'Also searched as: <em>add logo to PDF plans batch</em>, <em>PDF logo watermark free online</em>, <em>stamp studio logo on PDF</em>.',
+    'geo_a': 'Open the <a href="watermark_logo.html" style="color:var(--cyan);">Logo Watermark tool</a> at scalebarpdf.com. Load your PDFs, upload your logo (PNG with transparent background recommended), set opacity between 0.10 and 0.25, choose position, then click <strong>Apply logo</strong>. All pages are stamped and packaged into a single ZIP — nothing is uploaded to any server.',
+    'geo_v': 'Also searched as: <em>add logo to PDF plans batch</em>, <em>free PDF logo watermark</em>, <em>stamp logo on PDF</em>.',
   },
   es: {
     home: 'Inicio', tutorials_label: 'Tutoriales',
     article_meta: 'TUTORIAL — MARCA DE AGUA LOGO · LOTE DE PDFs',
-    article_title: 'Cómo añadir tu logo como marca de agua en todos tus planos, sin softwares',
-    article_lede: 'Vas a enviar un juego completo de planos a un cliente o constructor y quieres el logo de tu estudio en cada lámina. Este tutorial muestra cómo estamparlo en todos tus PDFs a la vez, con la opacidad y posición correctas, enteramente en el navegador.',
-    intro_p1: 'Como arquitecto necesitaba frecuentemente enviar juegos de planos con el logo del estudio en cada lámina, tanto por identidad de marca como por una capa básica de protección ante usos indebidos. Hacerlo hoja a hoja en Acrobat es lento, y la mayoría de herramientas gratuitas rasterizan el resultado o gestionan mal los lotes de múltiples archivos. La herramienta de marca de agua con logo procesa cualquier cantidad de PDFs a la vez y entrega un ZIP. La puedes encontrar <a href="watermark_logo.html" style="color:var(--cyan);">aquí</a>.',
+    article_title: 'Cómo añadir tu logo como marca de agua en todos tus planos, sin programas',
+    article_lede: '¿Vas a enviar un juego completo de planos a un cliente o constructor y quieres el logo de tu oficina o empresa en cada lámina?<br><br>Este tutorial muestra cómo estamparlo en todos tus PDFs a la vez, con la opacidad y posición correctas, sin la necesidad de abrir ninguna aplicación.',
+    intro_p1: 'Como arquitecto necesitaba frecuentemente enviar juegos de planos con mi propio logo en cada lámina, tanto por darle mi identidad y sello a los archivos como por la necesidad de protección ante usos indebidos. Hacerlo hoja a hoja en Acrobat es lento, y la mayoría de herramientas gratuitas rasterizan el resultado o gestionan mal los lotes de múltiples archivos. Ante esto, terminé creando una página que procesa cualquier cantidad de PDFs a la vez y entrega un ZIP con las marcas de agua. La puedes encontrar <a href="watermark_logo.html" style="color:var(--cyan);">aquí</a>.',
     intro_p2: 'El logo se convierte automáticamente a escala de grises antes de incrustarse, lo que lo mantiene neutro frente a cualquier fondo de plano y evita conflictos de color con el contenido del dibujo.',
     step1_title: 'Carga tus PDFs y tu logo',
-    step1_p1: 'Abre la herramienta <strong>Marca de agua logo</strong> y haz clic en <strong>Choose PDF(s)</strong>. Puedes cargar un juego completo de planos de una vez: diez, cincuenta o más archivos. Una vez cargados, el botón confirma cuántos PDFs están listos para procesar.',
-    step1_p2: 'Luego haz clic en <strong>Choose image</strong> y selecciona tu archivo de logo. PNG con fondo transparente da el resultado más limpio: el logo aparecerá directamente sobre el plano sin ningún rectángulo alrededor. JPG también se acepta. La herramienta convierte la imagen a escala de grises automáticamente, por lo que los colores originales no importan.',
+    step1_p1: 'Abre la herramienta <strong>Marca de agua logo</strong> y haz clic en <strong>Choose PDF(s)</strong>. Puedes cargar un juego completo de planos de una vez: diez, cincuenta archivos, los que quieras. Una vez cargados, el botón confirma cuántos PDFs están listos para procesar.',
+    step1_p2: 'Luego haz clic en <strong>Choose image</strong> y selecciona tu archivo de logo. Recomiendo elegir un PNG con fondo transparente, porque da el resultado más limpio: el logo aparecerá directamente sobre el plano sin ningún rectángulo alrededor. Archivos JPG también funcionan sin problemas. La herramienta convierte la imagen a escala de grises automáticamente, por lo que los colores originales no importan.',
     sc1_caption: 'El panel tras cargar un lote de PDFs y un archivo de logo. El botón muestra el número de archivos listos para procesar.',
-    step2_title: 'Ajusta los parámetros y aplica',
+    step2_title: 'Ajusta los parámetros',
     step2_p1: 'Cuatro parámetros controlan cómo aparece el logo en cada lámina:',
     b1_label: 'Opacidad', b1_text: '— entre 0.05 y 1. Para planos de trabajo, 0.10 a 0.18 es suficiente para ser legible sin interferir con el contenido del dibujo. Para una portada, 0.30 o más funciona bien.',
     b2_label: 'Escala', b2_text: '— como porcentaje del ancho de página. El 40% coloca un logo centrado que se lee claramente en láminas A1 o A0. Reduce a 20–25% para un logo en esquina.',
     b3_label: 'Rotación', b3_text: '— en grados. Un ángulo diagonal suave (alrededor de −30°) es la elección estándar para marcas de agua centrales. Para posiciones en esquina, 0° se ve más limpio.',
     b4_label: 'Posición', b4_text: '— centro, esquina inferior derecha, superior izquierda, superior derecha o inferior izquierda. Centro con rotación diagonal es el estándar para un sello discreto de hoja completa.',
     step2_p2: 'Los mismos ajustes se aplican a cada página de cada PDF del lote. Si necesitas ajustes distintos para una portada y el resto del juego, procésalos en dos operaciones separadas.',
-    sc2_caption: 'Ajustes típicos para un sello central discreto: opacidad 0.15, escala 40%, rotación −30°. Haz clic en Apply logo para procesar el lote y descargar el ZIP.',
+    sc2_caption: 'Panel de ajustes con valores típicos para un sello central discreto: opacidad 0.15, escala 40%, rotación −30°.',
+    step3_title: 'Exporta el resultado',
+    step3_p1: 'Una vez configurados los parámetros, haz clic en <strong>Apply logo</strong>. La herramienta procesará todas las páginas de cada PDF del lote y generará un ZIP con los archivos resultantes, listos para descargar.',
+    sc3_caption: 'El PDF resultante con el logo de la oficina incrustado como marca de agua en escala de grises.',
     tips_combined: 'Para el resultado más limpio, usa un PNG con fondo transparente: un logo con fondo blanco aparecerá como un rectángulo blanco sobre el plano. Si solo tienes JPG, aumenta la rotación ligeramente para que la forma rectangular sea menos perceptible a baja opacidad. La conversión a escala de grises usa ponderación de luminancia, por lo que los logos con alto contraste en sus colores originales seguirán siendo legibles tras la conversión.',
     result_title: 'El logo se incrusta como objeto imagen PDF',
     result_desc: 'La marca de agua no es una superposición rasterizada de toda la página. Solo la imagen del logo se compone en el flujo de contenido, manteniendo intactos el resto de los datos del PDF. El texto, los vectores y las anotaciones de las páginas originales siguen siendo seleccionables y buscables tras añadir la marca de agua.',
@@ -558,7 +578,7 @@ const t = T[lang] || T['en'];
 function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
 
 function applyI18n() {
-  const htmlKeys = new Set(['geo_a','geo_v','intro_p1','step1_p1','step1_p2']);
+  const htmlKeys = new Set(['geo_a','geo_v','intro_p1','step1_p1','step1_p2','step3_p1']);
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
     if (t[key] !== undefined) {
