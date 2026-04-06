@@ -21,6 +21,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     --cyan: #00f5d4; --magenta: #f700ff; --yellow: #ffe600;
     --radius: 4px; --glass: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.1);
   }
+
+  /* Visually hidden — visible to screen readers and search engines, invisible on screen */
+  .vh {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Space Mono','Courier New',monospace; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; overflow-x: hidden; }
 
@@ -252,6 +259,82 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   footer { position:relative; z-index:1; text-align:center; padding:28px 20px; font-size:0.72rem; color:var(--muted); border-top:1px solid var(--light); margin-top:40px; font-family:'Space Mono',monospace; }
   footer a { color:var(--cyan); text-decoration:none; }
   footer a:hover { text-decoration:underline; }
+
+  /* ── LINE WIDTH HISTOGRAM ─────────────────────────────────────────────── */
+  /* Container: flex row, children bottom-aligned on a shared baseline. */
+  .lw-histogram {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding-bottom: 30px;         /* reserve space below bars for labels */
+    overflow-x: auto;
+    scrollbar-width: thin;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 6px;
+    position: relative;
+  }
+  /* Each column: bar sits at the bottom of the chart area, label is absolutely
+     positioned below the baseline so it never affects bar alignment. */
+  .lw-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;    /* bar sticks to the bottom */
+    flex-shrink: 0;
+    cursor: pointer;
+    padding: 2px 1px 0;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .lw-bar-wrap:hover { background: rgba(255,255,255,0.06); border-radius: 3px 3px 0 0; }
+  .lw-bar-wrap.in-range .lw-bar     { background: var(--cyan); }
+  .lw-bar-wrap.in-range .lw-bar-lbl { color: var(--cyan); }
+  /* The colored bar — height set inline by JS (proportional to count). */
+  .lw-bar {
+    width: 100%;
+    min-height: 3px;
+    background: rgba(255,255,255,0.22);
+    border-radius: 2px 2px 0 0;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  /* Label: absolutely positioned below the bar area so all bar-bottoms align. */
+  .lw-bar-lbl {
+    position: absolute;
+    bottom: -30px;                /* sits in the padding-bottom reserved space */
+    left: 0; right: 0;
+    font-size: 0.58rem;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.25;
+    white-space: nowrap;
+    transition: color 0.15s;
+    pointer-events: none;
+  }
+  /* ── LINE WIDTH PRESET BUTTONS ─────────────────────────────────────────── */
+  .lw-preset-btn {
+    padding: 4px 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.72rem;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  .lw-preset-btn:hover {
+    border-color: rgba(0,245,212,0.4);
+    color: var(--cyan);
+    background: rgba(0,245,212,0.06);
+  }
+  .lw-preset-btn.active {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0,245,212,0.12);
+  }
 </style>
   <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -283,7 +366,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Scale all line weights in a PDF — thicker or thinner, in-browser, free</span></h1>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
@@ -568,13 +651,176 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
       </div>
 
-    <div id="other-tools-section"><h3>Other tools</h3><div class="other-tools-strip" id="other-tools-strip"></div></div>
+    <div id="other-tools-section"><h3 data-i18n="other_tools_heading">Other tools</h3><div class="other-tools-strip" id="other-tools-strip"></div></div>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+        integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+        integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+(function () {
+
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: {
+    no_file: 'No file loaded',
+    'donation_title': 'File ready — tools like this take time to build.',
+    'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
+    'donation_btn':   'Support on Ko-fi',
+    'donation_dismiss': 'no thanks',
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'banner_working': 'Working on modified file',
+    'btn_dl': 'Download',
+    'btn_keep': 'Keep working with this version',
+    'lw_h2': 'Change line weights in a PDF',
+    'lw_desc': 'Scans all vector content streams for the <code>w</code> (setlinewidth) PDF operator, shows a histogram of all values found, and replaces those in a selected range via Ghostscript — guaranteeing the changes are applied to the rendered output.',
+    'lw_scan_btn': 'Scan line widths',
+    'lw_hist_label': 'Width distribution — click a bar to select that range:',
+    'lw_label_min': 'Min (pt):',
+    'lw_label_max': 'Max (pt):',
+    'lw_label_new': 'Replace with (pt):',
+    'lw_label_pages': 'Apply to pages:',
+    'lw_hairline': 'Include hairline (width\xa0=\xa00)',
+    'lw_btn': 'Apply line width change',
+    'other_tools_heading': 'OTHER TOOLS — same file',
+    'tool_name_compress': 'Compress PDF',
+    'tool_name_vineta': 'Title block',
+    'tool_name_patch': 'Patch / Redact',
+    'tool_name_scalebar': 'Scale bar (m)',
+    'tool_name_scalebar_ft': 'Scale bar (ft)',
+    'tool_name_watermark_logo': 'Logo watermark',
+    'tool_name_watermark_text': 'Text watermark',
+    'tool_name_crop': 'Resize to format',
+    'tool_name_reorder': 'Reorder & remove pages',
+    'tool_name_split': 'Split PDF',
+    'tool_name_merge': 'Merge PDFs',
+    'tool_name_convert': 'Convert to images',
+    'tool_name_img2pdf': 'Image to PDF',
+    'tool_name_plan_numbering': 'Plan numbering',
+    'tool_name_revision_cloud': 'Revision cloud',
+    'tool_name_grid': 'Page grid',
+    'tool_name_ocr': 'OCR — searchable PDF',
+    'tool_name_pdfa': 'Convert to PDF/A',
+    'tool_name_linewidth': 'Line weight',
+    'tool_name_text_note': 'Text note',
+    'tool_desc_compress': 'Ghostscript-powered compression with full control over DPI and quality.',
+    'tool_desc_vineta': 'Architectural title block with project name, plan number, scale, signatures and north arrow.',
+    'tool_desc_patch': 'Draw a white polygon over any area to cover content — with optional permanent flattening.',
+    'tool_desc_scalebar': 'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.',
+    'tool_desc_scalebar_ft': 'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.',
+    'tool_desc_watermark_logo': 'Embed your studio logo in grayscale with adjustable opacity and rotation.',
+    'tool_desc_watermark_text': 'Add semi-transparent text across pages — customizable size, color and position.',
+    'tool_desc_crop': 'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.',
+    'tool_desc_reorder': "Drag pages to rearrange them and remove any you don't need.",
+    'tool_desc_split': 'Select break points between pages and export each section as a separate PDF.',
+    'tool_desc_merge': 'Upload multiple PDFs, rearrange them and combine into one.',
+    'tool_desc_convert': 'Export each page as PNG or JPG at the resolution you need.',
+    'tool_desc_img2pdf': 'Convert one or more images (JPG, PNG) into a PDF document.',
+    'tool_desc_plan_numbering': 'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.',
+    'tool_desc_revision_cloud': 'Add an architectural revision cloud with numbered triangle marker to PDF pages.',
+    'tool_desc_grid': 'Add a reference grid to PDF pages — specify spacing or number of divisions.',
+    'tool_desc_ocr': 'Run optical character recognition to make scanned PDFs searchable and selectable.',
+    'tool_desc_pdfa': 'Convert any PDF to PDF/A-1b for long-term archiving and compliance.',
+    'tool_desc_linewidth': 'Globally scale all line widths in a PDF — thicker or thinner in one step.',
+    'tool_desc_text_note': 'Add a plain-text annotation box to any page — font, size, color and position.',
+  },
+  es: {
+    no_file: 'Sin archivo cargado',
+    'donation_title': 'Archivo listo — herramientas como esta llevan tiempo de desarrollo.',
+    'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
+    'donation_btn':   'Apoyar en Ko-fi',
+    'donation_dismiss': 'no, gracias',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl': 'Descargar',
+    'btn_keep': 'Seguir trabajando con esta versión',
+    'lw_h2': 'Cambia el grosor de líneas en un PDF',
+    'lw_desc': 'Escanea todos los flujos de contenido vectorial buscando el operador PDF <code>w</code> (setlinewidth), muestra un histograma de todos los valores encontrados y reemplaza los de un rango seleccionado mediante Ghostscript — garantizando que los cambios se aplican al resultado renderizado.',
+    'lw_scan_btn': 'Escanear grosores de línea',
+    'lw_hist_label': 'Distribución de grosores — haz clic en una barra para seleccionar ese rango:',
+    'lw_label_min': 'Mín (pt):',
+    'lw_label_max': 'Máx (pt):',
+    'lw_label_new': 'Reemplazar por (pt):',
+    'lw_label_pages': 'Aplicar a páginas:',
+    'lw_hairline': 'Incluir hairline (grosor\xa0=\xa00)',
+    'lw_btn': 'Aplicar cambio de grosor',
+    'other_tools_heading': 'OTRAS HERRAMIENTAS — mismo archivo',
+    'tool_name_compress': 'Comprimir PDF',
+    'tool_name_vineta': 'Viñeta / carátula',
+    'tool_name_patch': 'Parche / Redactar',
+    'tool_name_scalebar': 'Barra de escala (m)',
+    'tool_name_scalebar_ft': 'Barra de escala (ft)',
+    'tool_name_watermark_logo': 'Marca de agua — logo',
+    'tool_name_watermark_text': 'Marca de agua — texto',
+    'tool_name_crop': 'Ajustar formato',
+    'tool_name_reorder': 'Reordenar y eliminar páginas',
+    'tool_name_split': 'Dividir PDF',
+    'tool_name_merge': 'Unir PDFs',
+    'tool_name_convert': 'Convertir a imágenes',
+    'tool_name_img2pdf': 'Imagen a PDF',
+    'tool_name_plan_numbering': 'Numeración de planos',
+    'tool_name_revision_cloud': 'Nube de revisión',
+    'tool_name_grid': 'Grilla de página',
+    'tool_name_ocr': 'OCR — PDF buscable',
+    'tool_name_pdfa': 'Convertir a PDF/A',
+    'tool_name_linewidth': 'Peso de línea',
+    'tool_name_text_note': 'Nota de texto',
+    'tool_desc_compress': 'Compresión con Ghostscript y control total sobre DPI y calidad.',
+    'tool_desc_vineta': 'Carátula arquitectónica con nombre de proyecto, número de plano, escala, firmas y norte.',
+    'tool_desc_patch': 'Dibuja un polígono blanco sobre cualquier área para ocultar contenido — con aplanado permanente opcional.',
+    'tool_desc_scalebar': 'Agrega una barra de escala métrica. Se auto-dimensiona según el formato y la escala del dibujo.',
+    'tool_desc_scalebar_ft': 'Agrega una barra de escala imperial en pies. Se auto-dimensiona según el formato y la escala del dibujo.',
+    'tool_desc_watermark_logo': 'Incrusta el logo de tu estudio en escala de grises con opacidad y rotación ajustables.',
+    'tool_desc_watermark_text': 'Agrega texto semitransparente en las páginas — tamaño, color y posición personalizables.',
+    'tool_desc_crop': 'Ajusta las páginas a A0–A4, Carta o Legal — con orientación automática o forzada.',
+    'tool_desc_reorder': 'Arrastra páginas para reordenarlas y elimina las que no necesites.',
+    'tool_desc_split': 'Selecciona puntos de corte entre páginas y exporta cada sección como PDF separado.',
+    'tool_desc_merge': 'Sube varios PDFs, reorganízalos y combínalos en uno.',
+    'tool_desc_convert': 'Exporta cada página como PNG o JPG a la resolución que necesites.',
+    'tool_desc_img2pdf': 'Convierte una o más imágenes (JPG, PNG) en un documento PDF.',
+    'tool_desc_plan_numbering': 'Estampa números de plano secuenciales en múltiples PDFs por lote. Descarga en ZIP.',
+    'tool_desc_revision_cloud': 'Agrega una nube de revisión arquitectónica con marcador de triángulo numerado.',
+    'tool_desc_grid': 'Agrega una grilla de referencia a las páginas PDF — define el espaciado o número de divisiones.',
+    'tool_desc_ocr': 'Ejecuta reconocimiento óptico de caracteres para hacer PDFs escaneados buscables.',
+    'tool_desc_pdfa': 'Convierte cualquier PDF a PDF/A-1b para archivo de largo plazo y cumplimiento normativo.',
+    'tool_desc_linewidth': 'Escala globalmente todos los anchos de línea de un PDF — más gruesos o más delgados.',
+    'tool_desc_text_note': 'Agrega un cuadro de texto en cualquier página — fuente, tamaño, color y posición.',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
+
 let _pdfjsReady=null;
 function ensurePdfjs(){
   if(_pdfjsReady)return _pdfjsReady;
@@ -625,7 +871,8 @@ const homeGrid = document.getElementById('home-tools-grid');
 TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  const _tk=t.id.replace(/-/g,'_');
+  card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (_T['tool_name_'+_tk]||t.name) + '</h3><p>' + (_T['tool_desc_'+_tk]||t.desc) + '</p>';
   card.onclick = () => {
     if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
     else { openTool(t.id); }
@@ -753,7 +1000,7 @@ function buildOtherTools(currentId) {
   TOOLS.filter(t => t.id !== currentId).forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'other-btn';
-    btn.textContent = `${t.icon} ${t.name}`;
+    btn.textContent = t.icon + ' ' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name);
     btn.onclick = () => { window.location.href = t.file; };
     strip.appendChild(btn);
   });
@@ -961,6 +1208,8 @@ function updateHist(){
 ['lw-min','lw-max'].forEach(id=>document.getElementById(id).addEventListener('input',updateHist));
 document.getElementById('lw-also-zero').addEventListener('change',updateHist);
 document.querySelectorAll('.lw-preset-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.lw-preset-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
   const mn=btn.dataset.min,mx=btn.dataset.max,az=btn.dataset.zero;
   if(mn!==undefined)document.getElementById('lw-min').value=mn;
   if(mx!==undefined)document.getElementById('lw-max').value=mx;
@@ -1127,80 +1376,6 @@ function _updateChooseBtn(name){
   if(btn)btn.textContent='✓ PDF loaded';if(span)span.textContent=name;
 }
 
-// ── i18n ─────────────────────────────────────────────────────────────────
-const _TL = {
-  en: {
-    no_file: 'No file loaded',
-    'donation_title': 'File ready — tools like this take time to build.',
-    'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
-    'donation_btn':   'Support on Ko-fi',
-    'donation_dismiss': 'no thanks',
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
-    'btn_home': '← Home',
-    'btn_choose_pdf': 'Choose PDF',
-    'banner_working': 'Working on modified file',
-    'btn_dl': 'Download',
-    'btn_keep': 'Keep working with this version',
-    'lw_h2': 'Change line weights in a PDF',
-    'lw_desc': 'Scans all vector content streams for the <code>w</code> (setlinewidth) PDF operator, shows a histogram of all values found, and replaces those in a selected range via Ghostscript — guaranteeing the changes are applied to the rendered output.',
-    'lw_scan_btn': 'Scan line widths',
-    'lw_hist_label': 'Width distribution — click a bar to select that range:',
-    'lw_label_min': 'Min (pt):',
-    'lw_label_max': 'Max (pt):',
-    'lw_label_new': 'Replace with (pt):',
-    'lw_label_pages': 'Apply to pages:',
-    'lw_hairline': 'Include hairline (width\xa0=\xa00)',
-    'lw_btn': 'Apply line width change',
-  },
-  es: {
-    no_file: 'Sin archivo cargado',
-    'donation_title': 'Archivo listo — herramientas como esta llevan tiempo de desarrollo.',
-    'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
-    'donation_btn':   'Apoyar en Ko-fi',
-    'donation_dismiss': 'no, gracias',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
-    'btn_home': '← Inicio',
-    'btn_choose_pdf': 'Elegir PDF',
-    'banner_working': 'Trabajando con versión modificada',
-    'btn_dl': 'Descargar',
-    'btn_keep': 'Seguir trabajando con esta versión',
-    'lw_h2': 'Cambia el grosor de líneas en un PDF',
-    'lw_desc': 'Escanea todos los flujos de contenido vectorial buscando el operador PDF <code>w</code> (setlinewidth), muestra un histograma de todos los valores encontrados y reemplaza los de un rango seleccionado mediante Ghostscript — garantizando que los cambios se aplican al resultado renderizado.',
-    'lw_scan_btn': 'Escanear grosores de línea',
-    'lw_hist_label': 'Distribución de grosores — haz clic en una barra para seleccionar ese rango:',
-    'lw_label_min': 'Mín (pt):',
-    'lw_label_max': 'Máx (pt):',
-    'lw_label_new': 'Reemplazar por (pt):',
-    'lw_label_pages': 'Aplicar a páginas:',
-    'lw_hairline': 'Incluir hairline (grosor\xa0=\xa00)',
-    'lw_btn': 'Aplicar cambio de grosor',
-  }
-};
-const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
-const _T  = _TL[_lg] || _TL['en'];
-function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
-function applyToolI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
-  });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
-  });
-  const fi = document.getElementById('file-indicator');
-  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
-  const btn = document.getElementById('lang-' + _lg);
-  if (btn) btn.classList.add('active');
-}
-function toggleTpFaq(btn) {
-  const ans = btn.nextElementSibling;
-  const open = ans.classList.contains('open');
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
-  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
-}
-document.addEventListener('DOMContentLoaded', applyToolI18n);
 
 
 // ─── COLOR PALETTE ──────────────────────────────────────────────────────────
@@ -1333,6 +1508,20 @@ openTool = function(id) {
 };
 
 document.addEventListener('DOMContentLoaded', cpInit);
+
+// ── GLOBAL EXPORTS — only these names are reachable from window / HTML onclick= ──
+// currentBuffer and all other state stay private inside the IIFE.
+window.resetToHome    = resetToHome;
+window.scrollGrid     = scrollGrid;
+window.setLang        = setLang;
+window.applyToolI18n  = applyToolI18n;
+window.toggleTpFaq    = toggleTpFaq;
+window.cpOpenPicker   = cpOpenPicker;
+window.cpOnPick       = cpOnPick;
+window.cpEyeDropper   = cpEyeDropper;
+window.openTool       = openTool;
+
+})(); // end IIFE
 
 </script>
 

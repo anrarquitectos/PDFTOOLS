@@ -22,6 +22,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     --cyan: #00f5d4; --magenta: #f700ff; --yellow: #ffe600;
     --radius: 4px; --glass: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.1);
   }
+.vh {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Space Mono','Courier New',monospace; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; overflow-x: hidden; }
 
@@ -284,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Convert PDF pages to images — export as PNG or JPG, in-browser, free</span></h1>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
@@ -1620,7 +1625,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <!-- ── OTHER TOOLS STRIP ── -->
     <div id="other-tools-section">
-      <h3>OTHER TOOLS — same file</h3>
+      <h3 data-i18n="other_tools_heading">OTHER TOOLS — same file</h3>
       <div class="other-tools-strip" id="other-tools-strip"></div>
     </div>
   </div>
@@ -1650,9 +1655,195 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <!-- SCRIPTS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script id="compress-worker-src" type="text/js-worker">
+const PDFLIB_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+let gsInstance   = null;
+let pdfLibLoaded = false;
+
+async function loadGS() {
+  if (gsInstance) return gsInstance;
+  const { default: initGS } = await import(GS_CDN + '/gs.mjs');
+  const gs = await initGS({
+    locateFile: function(f) { return GS_CDN + '/' + f; },
+    print: function() {}, printErr: function() {}
+  });
+  if (!gs || !gs.FS || !gs.callMain) throw new Error('Ghostscript module loaded but API is missing.');
+  gsInstance = gs;
+  return gs;
+}
+
+function ensurePdfLib() {
+  if (pdfLibLoaded) return;
+  importScripts(PDFLIB_CDN);
+  pdfLibLoaded = true;
+}
+
+self.onmessage = async function(e) {
+  var buffer = e.data.buffer, preset = e.data.preset,
+      dpi = e.data.dpi, quality = e.data.quality;
+  try {
+    self.postMessage({ type: 'status', msg: 'Loading Ghostscript engine…', cls: 'run' });
+    var gs = await loadGS();
+    self.postMessage({ type: 'progress', value: 88 });
+    self.postMessage({ type: 'status', msg: 'Compressing…', cls: 'run' });
+    gs.FS.writeFile('input.pdf', new Uint8Array(buffer));
+    var args = ['-dBATCH','-dNOPAUSE','-dSAFER','-dQUIET',
+                '-sDEVICE=pdfwrite','-dCompatibilityLevel=1.5','-dAutoRotatePages=/None'];
+    if (preset === 'custom') {
+      args.push('-dColorImageResolution='+dpi,'-dGrayImageResolution='+dpi,
+        '-dMonoImageResolution=300','-dColorImageDownsampleType=/Bicubic',
+        '-dGrayImageDownsampleType=/Bicubic','-dAutoFilterColorImages=false',
+        '-dColorImageFilter=/DCTEncode','-dJPEGQ='+quality);
+    } else { args.push('-dPDFSETTINGS=/'+preset); }
+    args.push('-sOutputFile=output.pdf','input.pdf');
+    gs.callMain(args);
+    var out = gs.FS.readFile('output.pdf');
+    try { gs.FS.unlink('input.pdf'); gs.FS.unlink('output.pdf'); } catch(_) {}
+    self.postMessage({ type: 'progress', value: 100 });
+    self.postMessage(
+      { type: 'done', buffer: out.buffer, origSize: buffer.byteLength },
+      [out.buffer]
+    );
+  } catch(gsErr) {
+    try {
+      self.postMessage({ type: 'status', msg: 'Ghostscript unavailable — applying pdf-lib fallback…', cls: 'run' });
+      ensurePdfLib();
+      var pdfDoc = await PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+      pdfDoc.setTitle(''); pdfDoc.setAuthor(''); pdfDoc.setSubject('');
+      pdfDoc.setKeywords([]); pdfDoc.setProducer(''); pdfDoc.setCreator('');
+      pdfDoc.getPages().forEach(function(p) {
+        try { p.node.delete(PDFLib.PDFName.of('Annots')); } catch(_) {}
+      });
+      try { pdfDoc.catalog.delete(PDFLib.PDFName.of('Metadata')); } catch(_) {}
+      var saved = await pdfDoc.save({ useObjectStreams: true, addDefaultPage: false });
+      self.postMessage(
+        { type: 'done', buffer: saved.buffer, origSize: buffer.byteLength, fallback: true },
+        [saved.buffer]
+      );
+    } catch(fbErr) { self.postMessage({ type: 'error', msg: fbErr.message }); }
+  }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+(function () {
+// ── i18n — must be first so the home grid can use _T on load ──────────────
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: {
+    'other_tools_heading': 'OTHER TOOLS — same file',
+    'tool_name_compress':        'Compress PDF',
+    'tool_name_vineta':          'Title block',
+    'tool_name_patch':           'Patch / Redact',
+    'tool_name_scalebar':        'Scale bar (m)',
+    'tool_name_scalebar_ft':     'Scale bar (ft)',
+    'tool_name_watermark_logo':  'Logo watermark',
+    'tool_name_watermark_text':  'Text watermark',
+    'tool_name_crop':            'Resize to format',
+    'tool_name_reorder':         'Reorder & remove pages',
+    'tool_name_split':           'Split PDF',
+    'tool_name_merge':           'Merge PDFs',
+    'tool_name_convert':         'Convert to images',
+    'tool_name_img2pdf':         'Image to PDF',
+    'tool_name_plan_numbering':  'Plan numbering',
+    'tool_name_revision_cloud':  'Revision cloud',
+    'tool_name_grid':            'Page grid',
+    'tool_name_ocr':             'OCR — searchable PDF',
+    'tool_name_pdfa':            'Convert to PDF/A',
+    'tool_name_linewidth':       'Line weight',
+    'tool_name_text_note':       'Text note',
+    'tool_name_add_image':       'Add image',
+    no_file: 'No file loaded',
+    'donation_title': 'File ready — tools like this take time to build.',
+    'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
+    'donation_btn':   'Support on Ko-fi',
+    'donation_dismiss': 'no thanks',
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'banner_working': 'Working on modified file',
+    'btn_dl_zip': 'Download ZIP',
+    'cv_desc': 'Renders each page of your PDF as a PNG or JPG image. Choose between low (~72 DPI), medium (~150 DPI) and high (~220 DPI) resolution. All pages are packaged into a single ZIP for download.',
+    'cv_h2': 'Convert PDF pages to images',
+    'cv_label_fmt': 'Format:',
+    'cv_label_res': 'Resolution:',
+    'cv_res_low': 'Low (~72 DPI)',
+    'cv_res_med': 'Medium (~150 DPI)',
+    'cv_res_hi': 'High (~220 DPI)',
+    'cv_btn': 'Render pages',
+  },
+  es: {
+    'other_tools_heading': 'OTRAS HERRAMIENTAS — mismo archivo',
+    'tool_name_compress':        'Comprimir PDF',
+    'tool_name_vineta':          'Viñeta / carátula',
+    'tool_name_patch':           'Parche / Redactar',
+    'tool_name_scalebar':        'Barra de escala (m)',
+    'tool_name_scalebar_ft':     'Barra de escala (ft)',
+    'tool_name_watermark_logo':  'Marca de agua — logo',
+    'tool_name_watermark_text':  'Marca de agua — texto',
+    'tool_name_crop':            'Ajustar formato',
+    'tool_name_reorder':         'Reordenar y eliminar páginas',
+    'tool_name_split':           'Dividir PDF',
+    'tool_name_merge':           'Unir PDFs',
+    'tool_name_convert':         'Convertir a imágenes',
+    'tool_name_img2pdf':         'Imagen a PDF',
+    'tool_name_plan_numbering':  'Numeración de planos',
+    'tool_name_revision_cloud':  'Nube de revisión',
+    'tool_name_grid':            'Grilla de página',
+    'tool_name_ocr':             'OCR — PDF buscable',
+    'tool_name_pdfa':            'Convertir a PDF/A',
+    'tool_name_linewidth':       'Peso de línea',
+    'tool_name_text_note':       'Nota de texto',
+    'tool_name_add_image':       'Añadir imagen',
+    no_file: 'Sin archivo cargado',
+    'donation_title': 'Archivo listo — herramientas como esta llevan tiempo de desarrollo.',
+    'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
+    'donation_btn':   'Apoyar en Ko-fi',
+    'donation_dismiss': 'no, gracias',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl_zip': 'Descargar ZIP',
+    'cv_desc': 'Renderiza cada página del PDF como imagen PNG o JPG. Elige entre resolución baja (~72 PPP), media (~150 PPP) o alta (~220 PPP). Todas las páginas se empaquetan en un ZIP para descargar.',
+    'cv_h2': 'Convierte páginas PDF a imágenes',
+    'cv_label_fmt': 'Formato:',
+    'cv_label_res': 'Resolución:',
+    'cv_res_low': 'Baja (~72 DPI)',
+    'cv_res_med': 'Media (~150 DPI)',
+    'cv_res_hi': 'Alta (~220 DPI)',
+    'cv_btn': 'Renderizar páginas',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  // file indicator placeholder
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  // active lang button
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
+
 // ─── PDF.js lazy load ─────────────────────────────────────────────────────
 const pdfjsScript = document.createElement('script');
 pdfjsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
@@ -1691,14 +1882,21 @@ let currentBuffer = null;
 let currentFileName = '';
 let activeToolId = null;
 let modificationHistory = [];
-let gsInstance = null; // Ghostscript WASM singleton
+let gsWorker = null;
+function getCompressWorker() {
+  if (gsWorker) return gsWorker;
+  const src  = document.getElementById('compress-worker-src').textContent;
+  const blob = new Blob([src], { type: 'application/javascript' });
+  gsWorker   = new Worker(URL.createObjectURL(blob));
+  return gsWorker;
+}
 
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
 TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (_T['tool_name_'+t.id.replace(/-/g,'_')]||t.name) + '</h3><p>' + (_T['tool_desc_'+t.id.replace(/-/g,'_')]||t.desc) + '</p>';
   card.onclick = () => {
     if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
     else { openTool(t.id); }
@@ -1826,7 +2024,7 @@ function buildOtherTools(currentId) {
   TOOLS.filter(t => t.id !== currentId).forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'other-btn';
-    btn.textContent = `${t.icon} ${t.name}`;
+    btn.textContent = t.icon + ' ' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name);
     btn.onclick = () => { window.location.href = t.file; };
     strip.appendChild(btn);
   });
@@ -1887,132 +2085,58 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
 });
 
 // Correct package: @jspawn/ghostscript-wasm@0.0.2 (ESM, needs locateFile for .wasm resolution)
-const GS_CDN = 'https://cdn.jsdelivr.net/npm/@jspawn/ghostscript-wasm@0.0.2';
-
-async function loadGhostscript() {
-  if (gsInstance) return gsInstance;
-
-  const progressWrap = document.getElementById('gs-progress-wrap');
-  const progressBar  = document.getElementById('gs-progress-bar');
-  progressWrap.classList.add('show');
-  progressBar.style.width = '0%';
-
-  let fakeProgress = 0;
-  const tick = setInterval(() => {
-    fakeProgress = Math.min(fakeProgress + Math.random() * 2.5, 82);
-    progressBar.style.width = fakeProgress + '%';
-  }, 400);
-
-  try {
-    // Dynamic ESM import — the only reliable way to load this package in-browser
-    const { default: initGhostscript } = await import(`${GS_CDN}/gs.mjs`);
-
-    clearInterval(tick);
-    progressBar.style.width = '88%';
-
-    // locateFile tells Emscripten where the .wasm binary lives
-    const gs = await initGhostscript({
-      locateFile: file => `${GS_CDN}/${file}`,
-      print:    () => {},
-      printErr: () => {}
-    });
-
-    if (!gs || !gs.FS || !gs.callMain) throw new Error('Ghostscript module loaded but API is missing.');
-
-    progressBar.style.width = '100%';
-    setTimeout(() => progressWrap.classList.remove('show'), 500);
-    gsInstance = gs;
-    return gs;
-
-  } catch(err) {
-    clearInterval(tick);
-    progressWrap.classList.remove('show');
-    throw new Error('Could not load Ghostscript engine. (' + err.message + ')');
-  }
-}
 
 let compressedBytes = null;
-document.getElementById('c-btn').addEventListener('click', async () => {
+document.getElementById('c-btn').addEventListener('click', function() {
   if (!currentBuffer) return;
   document.getElementById('c-btn').disabled = true;
-  document.getElementById('c-dl').disabled = true;
+  document.getElementById('c-dl').disabled  = true;
   document.getElementById('c-apply').disabled = true;
+  const progressWrap = document.getElementById('gs-progress-wrap');
+  const progressBar  = document.getElementById('gs-progress-bar');
   status('c-status', 'Loading Ghostscript engine…', 'run');
-  try {
-    const gs = await loadGhostscript();
-    status('c-status', 'Compressing…', 'run');
+  if (progressWrap) { progressWrap.classList.add('show'); progressBar.style.width = '0%'; }
 
-    const inputData = new Uint8Array(currentBuffer);
-    // Write input file to GS virtual filesystem
-    gs.FS.writeFile('input.pdf', inputData);
+  const preset = selectedPreset;
+  const dpi    = parseInt((document.getElementById('gs-dpi')||{}).value) || 150;
+  const q      = parseInt((document.getElementById('gs-quality')||{}).value) || 75;
 
-    const args = [
-      '-dBATCH', '-dNOPAUSE', '-dSAFER', '-dQUIET',
-      '-sDEVICE=pdfwrite',
-      '-dCompatibilityLevel=1.5',
-      '-dAutoRotatePages=/None',   // preserve original page orientation
-    ];
+  const transferBuffer = currentBuffer.slice(0);
+  const worker = getCompressWorker();
 
-    if (selectedPreset === 'custom') {
-      const dpi = parseInt(document.getElementById('gs-dpi').value) || 150;
-      const q   = parseInt(document.getElementById('gs-quality').value) || 75;
-      args.push(
-        `-dColorImageResolution=${dpi}`,
-        `-dGrayImageResolution=${dpi}`,
-        '-dMonoImageResolution=300',
-        '-dColorImageDownsampleType=/Bicubic',
-        '-dGrayImageDownsampleType=/Bicubic',
-        '-dAutoFilterColorImages=false',
-        '-dColorImageFilter=/DCTEncode',
-        `-dJPEGQ=${q}`
-      );
-    } else {
-      args.push(`-dPDFSETTINGS=/${selectedPreset}`);
+  worker.onmessage = function(e) {
+    const msg = e.data;
+    if (msg.type === 'status') {
+      status('c-status', msg.msg, msg.cls);
+    } else if (msg.type === 'progress') {
+      if (progressBar) progressBar.style.width = msg.value + '%';
+      if (msg.value >= 100 && progressWrap) setTimeout(() => progressWrap.classList.remove('show'), 500);
+    } else if (msg.type === 'done') {
+      compressedBytes = msg.buffer;
+      const origKB = (msg.origSize / 1024).toFixed(1);
+      const compKB = (compressedBytes.byteLength / 1024).toFixed(1);
+      const pct    = (((msg.origSize - compressedBytes.byteLength) / msg.origSize) * 100).toFixed(1);
+      const label  = preset === 'custom' ? ('custom ' + dpi + ' DPI') : preset;
+      const note   = msg.fallback ? ' [pdf-lib fallback]' : '';
+      status('c-status', 'Original: ' + origKB + ' KB → Compressed: ' + compKB + ' KB (−' + pct + '%) [' + label + ']' + note, 'ok');
+      document.getElementById('c-dl').disabled    = false;
+      document.getElementById('c-apply').disabled = false;
+      document.getElementById('c-btn').disabled   = false;
+      showDonationBanner && showDonationBanner();
+    } else if (msg.type === 'error') {
+      status('c-status', 'Error: ' + msg.msg, 'err');
+      document.getElementById('c-btn').disabled = false;
     }
-
-    args.push('-sOutputFile=output.pdf', 'input.pdf');
-    gs.callMain(args);
-
-    const outputData = gs.FS.readFile('output.pdf');
-    compressedBytes = outputData.buffer;
-
-    // Clean up GS virtual FS
-    try { gs.FS.unlink('input.pdf'); gs.FS.unlink('output.pdf'); } catch(_) {}
-
-    const origKB  = (currentBuffer.byteLength / 1024).toFixed(1);
-    const compKB  = (compressedBytes.byteLength / 1024).toFixed(1);
-    const pct     = (((currentBuffer.byteLength - compressedBytes.byteLength) / currentBuffer.byteLength) * 100).toFixed(1);
-    const presetLabel = selectedPreset === 'custom' ? `custom ${document.getElementById('gs-dpi').value} DPI` : selectedPreset;
-    status('c-status', `Original: ${origKB} KB → Compressed: ${compKB} KB (−${pct}%) [${presetLabel}]`, 'ok');
-    document.getElementById('c-dl').disabled = false;
-    document.getElementById('c-apply').disabled = false;
-  } catch(e) {
-    // If GS failed to load, fall back to pdf-lib metadata-strip compression
-    if (e.message.includes('Could not load')) {
-      status('c-status', 'Ghostscript unavailable — applying pdf-lib fallback compression…', 'run');
-      try {
-        const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
-        pdfDoc.setTitle(''); pdfDoc.setAuthor(''); pdfDoc.setSubject('');
-        pdfDoc.setKeywords([]); pdfDoc.setProducer(''); pdfDoc.setCreator('');
-        pdfDoc.getPages().forEach(p => { try { p.node.delete(PDFLib.PDFName.of('Annots')); } catch(_){} });
-        try { pdfDoc.catalog.delete(PDFLib.PDFName.of('Metadata')); } catch(_){}
-        compressedBytes = await pdfDoc.save({ useObjectStreams: true, addDefaultPage: false });
-        const origKB = (currentBuffer.byteLength/1024).toFixed(1);
-        const compKB = (compressedBytes.byteLength/1024).toFixed(1);
-        const pct    = (((currentBuffer.byteLength - compressedBytes.byteLength)/currentBuffer.byteLength)*100).toFixed(1);
-        status('c-status', `Fallback compression: ${origKB} KB → ${compKB} KB (−${pct}%). For stronger compression, check your connection and retry.`, 'ok');
-        document.getElementById('c-dl').disabled = false;
-        document.getElementById('c-apply').disabled = false;
-      } catch(e2) { status('c-status', 'Error: ' + e2.message, 'err'); }
-    } else {
-      status('c-status', 'Error: ' + e.message, 'err');
-    }
-  } finally {
+  };
+  worker.onerror = function(err) {
+    status('c-status', 'Worker error: ' + err.message, 'err');
+    try { gsWorker.terminate(); } catch(_) {}
+    gsWorker = null;
     document.getElementById('c-btn').disabled = false;
-  }
+  };
+  worker.postMessage({ buffer: transferBuffer, preset: preset, dpi: dpi, quality: q }, [transferBuffer]);
 });
-document.getElementById('c-dl').addEventListener('click', () => { if (compressedBytes) download(compressedBytes, nameSuffix('_compressed')); });
-document.getElementById('c-apply').addEventListener('click', () => { if (compressedBytes) applyAsActive(compressedBytes, 'Compress', 'c-status', 'c-apply'); });
+
 
 // ─── 2. CONVERT TO IMAGES ─────────────────────────────────────────────────
 let renderedCanvases = [];
@@ -3967,76 +4091,6 @@ function _updateChooseBtn(name){
   if(btn) btn.textContent='\u2713 PDF loaded'; if(span) span.textContent=name;
 }
 
-// ── i18n ─────────────────────────────────────────────────────────────────
-const _TL = {
-  en: {
-    no_file: 'No file loaded',
-    'donation_title': 'File ready — tools like this take time to build.',
-    'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
-    'donation_btn':   'Support on Ko-fi',
-    'donation_dismiss': 'no thanks',
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
-    'btn_home': '← Home',
-    'btn_choose_pdf': 'Choose PDF',
-    'banner_working': 'Working on modified file',
-    'btn_dl_zip': 'Download ZIP',
-    'cv_desc': 'Renders each page of your PDF as a PNG or JPG image. Choose between low (~72 DPI), medium (~150 DPI) and high (~220 DPI) resolution. All pages are packaged into a single ZIP for download.',
-    'cv_h2': 'Convert PDF pages to images',
-    'cv_label_fmt': 'Format:',
-    'cv_label_res': 'Resolution:',
-    'cv_res_low': 'Low (~72 DPI)',
-    'cv_res_med': 'Medium (~150 DPI)',
-    'cv_res_hi': 'High (~220 DPI)',
-    'cv_btn': 'Render pages',
-  },
-  es: {
-    no_file: 'Sin archivo cargado',
-    'donation_title': 'Archivo listo — herramientas como esta llevan tiempo de desarrollo.',
-    'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
-    'donation_btn':   'Apoyar en Ko-fi',
-    'donation_dismiss': 'no, gracias',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
-    'btn_home': '← Inicio',
-    'btn_choose_pdf': 'Elegir PDF',
-    'banner_working': 'Trabajando con versión modificada',
-    'btn_dl_zip': 'Descargar ZIP',
-    'cv_desc': 'Renderiza cada página del PDF como imagen PNG o JPG. Elige entre resolución baja (~72 PPP), media (~150 PPP) o alta (~220 PPP). Todas las páginas se empaquetan en un ZIP para descargar.',
-    'cv_h2': 'Convierte páginas PDF a imágenes',
-    'cv_label_fmt': 'Formato:',
-    'cv_label_res': 'Resolución:',
-    'cv_res_low': 'Baja (~72 DPI)',
-    'cv_res_med': 'Media (~150 DPI)',
-    'cv_res_hi': 'Alta (~220 DPI)',
-    'cv_btn': 'Renderizar páginas',
-  }
-};
-const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
-const _T  = _TL[_lg] || _TL['en'];
-function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
-function applyToolI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
-  });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
-  });
-  // file indicator placeholder
-  const fi = document.getElementById('file-indicator');
-  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
-  // active lang button
-  const btn = document.getElementById('lang-' + _lg);
-  if (btn) btn.classList.add('active');
-}
-function toggleTpFaq(btn) {
-  const ans = btn.nextElementSibling;
-  const open = ans.classList.contains('open');
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
-  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
-}
-document.addEventListener('DOMContentLoaded', applyToolI18n);
 
 
 // ─── COLOR PALETTE ──────────────────────────────────────────────────────────
@@ -4159,6 +4213,21 @@ openTool = function(id) {
 
 document.addEventListener('DOMContentLoaded', cpInit);
 
+
+// currentBuffer and all other state stay private inside the IIFE.
+window.resetToHome = resetToHome;
+window.scrollGrid = scrollGrid;
+window.setLang = setLang;
+window.applyToolI18n = applyToolI18n;
+window.toggleTpFaq = toggleTpFaq;
+window.cpOpenPicker = cpOpenPicker;
+window.cpOnPick = cpOnPick;
+window.cpEyeDropper = cpEyeDropper;
+window.openTool = openTool;
+window.onImgFilesSelected = onImgFilesSelected;
+window.onMergeFilesSelected = onMergeFilesSelected;
+
+})(); // end IIFE
 </script>
 
 <footer>

@@ -62,44 +62,95 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .orb-2 { width: 280px; height: 280px; background: var(--magenta); bottom: -60px; right: -80px; opacity: 0.1; }
 
   /* ── TOP BAR ── */
-  #topbar {
-    background: rgba(8,11,18,0.92);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    padding: 0 32px; height: 53px;
-    display: flex; align-items: center;
-    justify-content: space-between;
-    position: sticky; top: 0; z-index: 100;
-  }
-  #topbar h1 {
-    font-family: 'Space Mono', monospace;
-    font-size: 0.95rem; letter-spacing: 0.12em; font-weight: 700;
-    line-height: 1; display: flex; align-items: center;
-  }
-  #topbar h1 a { color: inherit; text-decoration: none; display:inline-flex; align-items:center; gap:13px; }
-  #topbar h1 a .logo-accent { color: var(--cyan); }
-  #file-indicator {
-    font-size: 0.75rem; color: var(--muted);
-    max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  #file-indicator span { color: var(--cyan); }
-  #btn-change-file {
-    background: none; border: 1px solid rgba(255,255,255,0.2); color: var(--muted);
-    padding: 4px 12px; cursor: pointer; font-family: inherit;
-    font-size: 0.72rem; border-radius: 100px; transition: all 0.2s;
-    letter-spacing: 0.05em;
-  }
-  #btn-change-file:hover { border-color: var(--cyan); color: var(--cyan); }
+#topbar {
+  background: rgba(8,11,18,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  padding: 0 32px;
+  height: 53px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
 
-  #lang-switcher { display: flex; gap: 4px; margin-left: 12px; }
-  #lang-switcher button {
-    background: none; border: 1px solid rgba(255,255,255,0.15);
-    color: var(--muted); padding: 3px 9px; font-size: 0.7rem;
-    border-radius: 100px; cursor: pointer; font-family: inherit;
-    letter-spacing: 0.08em; transition: all 0.2s;
-  }
-  #lang-switcher button:hover { border-color: var(--cyan); color: var(--cyan); }
+#topbar .site-logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+#topbar .site-logo a {
+  color: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+}
+
+#topbar .site-logo a .logo-accent {
+  color: var(--cyan);
+}
+
+#file-indicator {
+  font-size: 0.75rem;
+  color: var(--muted);
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#file-indicator span { color: var(--cyan); }
+
+#btn-change-file {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: var(--muted);
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.72rem;
+  border-radius: 100px;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+
+#btn-change-file:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+#lang-switcher {
+  display: flex;
+  gap: 4px;
+  margin-left: 12px;
+}
+
+#lang-switcher button {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--muted);
+  padding: 3px 9px;
+  font-size: 0.7rem;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.08em;
+  transition: all 0.2s;
+}
+
+#lang-switcher button:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
 
   /* ── VIEWS ── */
   .view { display: none; }
@@ -571,6 +622,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     border-radius: 6px !important;
   }
   .sb-style-btn:hover { border-color: rgba(0,245,212,0.3) !important; }
+  .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 </style>
   <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -602,7 +664,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
+  <div class="site-logo">
+  <a href="/">
+    <img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;">
+    <span class="logo-accent">SCALEBAR</span> PDF TOOLS
+  </a>
+</div>
   <div id="file-indicator" style="display:none"></div>
   <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
   <div id="lang-switcher">
@@ -610,6 +677,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button onclick="setLang('es')" id="lang-es">ES</button>
   </div>
 </div>
+
+<h1 class="sr-only">
+  Free browser-based PDF tools for architects, engineers and technical professionals
+  to add scale bars and title blocks, compress, merge, split and edit plans locally.
+</h1>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
 <div id="view-home" class="view active">

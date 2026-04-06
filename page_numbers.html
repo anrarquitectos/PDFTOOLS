@@ -21,6 +21,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     --cyan: #00f5d4; --magenta: #f700ff; --yellow: #ffe600;
     --radius: 4px; --glass: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.1);
   }
+  .vh {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Space Mono','Courier New',monospace; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; overflow-x: hidden; }
 
@@ -283,7 +288,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Add page numbers to a PDF</span></h1>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
@@ -1652,7 +1657,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <!-- ── OTHER TOOLS STRIP ── -->
     <div id="other-tools-section">
-      <h3>OTHER TOOLS — same file</h3>
+      <h3 data-i18n="other_tools_heading">OTHER TOOLS — same file</h3>
       <div class="other-tools-strip" id="other-tools-strip"></div>
     </div>
   </div>
@@ -1682,9 +1687,230 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <!-- SCRIPTS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"
+        integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+        integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+(function () {
+
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: {
+    no_file: 'No file loaded',
+    'donation_title': 'File compressed — tools like this take time to build.',
+    'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
+    'donation_btn':   'Support on Ko-fi',
+    'donation_dismiss': 'no thanks',
+    'faq_compress_q': 'How does the Compress tool work?',
+    'faq_compress_a': "It uses Ghostscript compiled to WebAssembly, running entirely in your browser. You can choose from four presets — <em>Screen</em> (72 dpi, smallest), <em>eBook</em> (150 dpi), <em>Printer</em> (300 dpi), and <em>Prepress</em> (high quality) — or switch to <strong>Custom</strong> mode to set your own DPI and JPEG quality. The presets map directly to Ghostscript's <code>-dPDFSETTINGS</code> options. If the WASM engine fails to initialise, the tool falls back to a metadata-strip compression using pdf-lib.",
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'banner_working': 'Working on modified file',
+    'btn_dl_pdf': 'Download PDF',
+    'btn_keep': 'Keep working with this version',
+    'pn2_h2': 'Add page numbers to a PDF',
+    'pn2_desc': 'Adds a page number to each page as native PDF vector text. Supports Bates numbering with custom prefix and zero-padding. Choose format, position, font size, colour and starting number.',
+    'pn2_label_format': 'Format:',
+    'pn2_label_start': 'Start at number:',
+    'pn2_label_pos': 'Position:',
+    'pn2_label_margin': 'Margin from edge (mm):',
+    'pn2_label_size': 'Font size (pt):',
+    'pn2_label_color': 'Colour:',
+    'pn2_label_opacity': 'Opacity (0–1):',
+    'pn2_label_prefix': 'Prefix (optional):',
+    'pn2_label_suffix': 'Suffix (optional):',
+    'pn2_label_skip': 'Skip pages (e.g. 1,2):',
+    'pn2_label_pages': 'Apply to:',
+    'pn2_pages_all': 'All pages',
+    'pn2_pages_odd': 'Odd pages only',
+    'pn2_pages_even': 'Even pages only',
+    'pn2_pages_range': 'Page range',
+    'pn2_label_from': 'From page:',
+    'pn2_label_to': 'To page:',
+    'pn2_btn': 'Add page numbers',
+    'cp_label_preset': 'Compression preset:',
+    'cp_pre_screen_n': 'Screen',
+    'cp_pre_screen_d': '72 DPI · smallest file / digital viewing only',
+    'cp_pre_ebook_n': 'eBook',
+    'cp_pre_ebook_d': '150 DPI · good balance / email & web sharing',
+    'cp_pre_printer_n': 'Printer',
+    'cp_pre_printer_d': '300 DPI · high quality / office printing',
+    'cp_pre_prepress_n': 'Prepress',
+    'cp_pre_prepress_d': '300 DPI · color-safe / professional print',
+    'cp_pre_custom_n': 'Custom',
+    'cp_pre_custom_d': 'manual DPI / & quality control',
+    'cp_label_dpi': 'Image DPI (color & grayscale):',
+    'cp_label_qual': 'JPEG quality (1–100):',
+    'cp_gs_note': 'The Ghostscript engine will be downloaded the first time you compress a file (~30 MB).',
+    'cp_btn': 'Compress',
+
+    'other_tools_heading': 'OTHER TOOLS — same file',
+    'tool_name_compress': 'Compress PDF',
+    'tool_name_vineta': 'Title block',
+    'tool_name_patch': 'Patch / Redact',
+    'tool_name_scalebar': 'Scale bar (m)',
+    'tool_name_scalebar_ft': 'Scale bar (ft)',
+    'tool_name_watermark_logo': 'Logo watermark',
+    'tool_name_watermark_text': 'Text watermark',
+    'tool_name_crop': 'Resize to format',
+    'tool_name_reorder': 'Reorder & remove pages',
+    'tool_name_split': 'Split PDF',
+    'tool_name_merge': 'Merge PDFs',
+    'tool_name_convert': 'Convert to images',
+    'tool_name_img2pdf': 'Image to PDF',
+    'tool_name_plan_numbering': 'Plan numbering',
+    'tool_name_revision_cloud': 'Revision cloud',
+    'tool_name_grid': 'Page grid',
+    'tool_name_ocr': 'OCR — searchable PDF',
+    'tool_name_pdfa': 'Convert to PDF/A',
+    'tool_name_linewidth': 'Line weight',
+    'tool_name_text_note': 'Text note',
+    'tool_desc_compress': 'Ghostscript-powered compression with full control over DPI and quality.',
+    'tool_desc_vineta': 'Architectural title block with project name, plan number, scale, signatures and north arrow.',
+    'tool_desc_patch': 'Draw a white polygon over any area to cover content — with optional permanent flattening.',
+    'tool_desc_scalebar': 'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.',
+    'tool_desc_scalebar_ft': 'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.',
+    'tool_desc_watermark_logo': 'Embed your studio logo in grayscale with adjustable opacity and rotation.',
+    'tool_desc_watermark_text': 'Add semi-transparent text across pages — customizable size, color and position.',
+    'tool_desc_crop': 'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.',
+    'tool_desc_reorder': "Drag pages to rearrange them and remove any you don't need.",
+    'tool_desc_split': 'Select break points between pages and export each section as a separate PDF.',
+    'tool_desc_merge': 'Upload multiple PDFs, rearrange them and combine into one.',
+    'tool_desc_convert': 'Export each page as PNG or JPG at the resolution you need.',
+    'tool_desc_img2pdf': 'Convert one or more images (JPG, PNG) into a PDF document.',
+    'tool_desc_plan_numbering': 'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.',
+    'tool_desc_revision_cloud': 'Add an architectural revision cloud with numbered triangle marker to PDF pages.',
+    'tool_desc_grid': 'Add a reference grid to PDF pages — specify spacing or number of divisions.',
+    'tool_desc_ocr': 'Run optical character recognition to make scanned PDFs searchable and selectable.',
+    'tool_desc_pdfa': 'Convert any PDF to PDF/A-1b for long-term archiving and compliance.',
+    'tool_desc_linewidth': 'Globally scale all line widths in a PDF — thicker or thinner in one step.',
+    'tool_desc_text_note': 'Add a plain-text annotation box to any page — font, size, color and position.',
+  },
+  es: {
+    no_file: 'Sin archivo cargado',
+    'donation_title': 'Archivo comprimido — herramientas como esta llevan tiempo de desarrollo.',
+    'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
+    'donation_btn':   'Apoyar en Ko-fi',
+    'donation_dismiss': 'no, gracias',
+    'faq_compress_q': '¿Cómo funciona la herramienta de compresión?',
+    'faq_compress_a': 'Usa Ghostscript compilado a WebAssembly, ejecutándose completamente en tu navegador. Puedes elegir entre cuatro presets — <em>Screen</em> (72 ppp, más pequeño), <em>eBook</em> (150 ppp), <em>Printer</em> (300 ppp) y <em>Prepress</em> (alta calidad) — o cambiar al modo <strong>Custom</strong> para configurar tu propio DPI y calidad JPEG. Los presets corresponden directamente a las opciones <code>-dPDFSETTINGS</code> de Ghostscript. Si el motor WASM no se inicializa, la herramienta recurre a una compresión de extracción de metadatos con pdf-lib.',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl_pdf': 'Descargar PDF',
+    'btn_keep': 'Seguir trabajando con esta versión',
+    'pn2_h2': 'Añade números de página a un PDF',
+    'pn2_desc': 'Añade un número de página como texto vectorial nativo. Compatible con numeración Bates mediante prefijo y relleno de ceros. Elige formato, posición, tamaño, color y número inicial.',
+    'pn2_label_format': 'Formato:',
+    'pn2_label_start': 'Empezar en el número:',
+    'pn2_label_pos': 'Posición:',
+    'pn2_label_margin': 'Margen desde el borde (mm):',
+    'pn2_label_size': 'Tamaño de fuente (pt):',
+    'pn2_label_color': 'Color:',
+    'pn2_label_opacity': 'Opacidad (0–1):',
+    'pn2_label_prefix': 'Prefijo (opcional):',
+    'pn2_label_suffix': 'Sufijo (opcional):',
+    'pn2_label_skip': 'Omitir páginas (ej. 1,2):',
+    'pn2_label_pages': 'Aplicar a:',
+    'pn2_pages_all': 'Todas las páginas',
+    'pn2_pages_odd': 'Solo páginas impares',
+    'pn2_pages_even': 'Solo páginas pares',
+    'pn2_pages_range': 'Rango de páginas',
+    'pn2_label_from': 'Desde la página:',
+    'pn2_label_to': 'Hasta la página:',
+    'pn2_btn': 'Añadir números de página',
+    'cp_label_preset': 'Preset de compresión:',
+    'cp_pre_screen_n': 'Screen',
+    'cp_pre_screen_d': '72 DPI · archivo mínimo / solo visualización digital',
+    'cp_pre_ebook_n': 'eBook',
+    'cp_pre_ebook_d': '150 DPI · buen equilibrio / email y web',
+    'cp_pre_printer_n': 'Printer',
+    'cp_pre_printer_d': '300 DPI · alta calidad / impresión de oficina',
+    'cp_pre_prepress_n': 'Prepress',
+    'cp_pre_prepress_d': '300 DPI · color seguro / impresión profesional',
+    'cp_pre_custom_n': 'Custom',
+    'cp_pre_custom_d': 'DPI manual / control de calidad',
+    'cp_label_dpi': 'DPI de imagen (color y escala de grises):',
+    'cp_label_qual': 'Calidad JPEG (1–100):',
+    'cp_gs_note': 'El motor Ghostscript se descargará la primera vez que comprimas un archivo (~30 MB).',
+    'cp_btn': 'Comprimir',
+
+    'other_tools_heading': 'OTRAS HERRAMIENTAS — mismo archivo',
+    'tool_name_compress': 'Comprimir PDF',
+    'tool_name_vineta': 'Viñeta / carátula',
+    'tool_name_patch': 'Parche / Redactar',
+    'tool_name_scalebar': 'Barra de escala (m)',
+    'tool_name_scalebar_ft': 'Barra de escala (ft)',
+    'tool_name_watermark_logo': 'Marca de agua — logo',
+    'tool_name_watermark_text': 'Marca de agua — texto',
+    'tool_name_crop': 'Ajustar formato',
+    'tool_name_reorder': 'Reordenar y eliminar páginas',
+    'tool_name_split': 'Dividir PDF',
+    'tool_name_merge': 'Unir PDFs',
+    'tool_name_convert': 'Convertir a imágenes',
+    'tool_name_img2pdf': 'Imagen a PDF',
+    'tool_name_plan_numbering': 'Numeración de planos',
+    'tool_name_revision_cloud': 'Nube de revisión',
+    'tool_name_grid': 'Grilla de página',
+    'tool_name_ocr': 'OCR — PDF buscable',
+    'tool_name_pdfa': 'Convertir a PDF/A',
+    'tool_name_linewidth': 'Peso de línea',
+    'tool_name_text_note': 'Nota de texto',
+    'tool_desc_compress': 'Compresión con Ghostscript y control total sobre DPI y calidad.',
+    'tool_desc_vineta': 'Carátula arquitectónica con nombre de proyecto, número de plano, escala, firmas y norte.',
+    'tool_desc_patch': 'Dibuja un polígono blanco sobre cualquier área para ocultar contenido — con aplanado permanente opcional.',
+    'tool_desc_scalebar': 'Agrega una barra de escala métrica. Se auto-dimensiona según el formato y la escala del dibujo.',
+    'tool_desc_scalebar_ft': 'Agrega una barra de escala imperial en pies. Se auto-dimensiona según el formato y la escala del dibujo.',
+    'tool_desc_watermark_logo': 'Incrusta el logo de tu estudio en escala de grises con opacidad y rotación ajustables.',
+    'tool_desc_watermark_text': 'Agrega texto semitransparente en las páginas — tamaño, color y posición personalizables.',
+    'tool_desc_crop': 'Ajusta las páginas a A0–A4, Carta o Legal — con orientación automática o forzada.',
+    'tool_desc_reorder': 'Arrastra páginas para reordenarlas y elimina las que no necesites.',
+    'tool_desc_split': 'Selecciona puntos de corte entre páginas y exporta cada sección como PDF separado.',
+    'tool_desc_merge': 'Sube varios PDFs, reorgánizalos y combinálos en uno.',
+    'tool_desc_convert': 'Exporta cada página como PNG o JPG a la resolución que necesites.',
+    'tool_desc_img2pdf': 'Convierte una o más imágenes (JPG, PNG) en un documento PDF.',
+    'tool_desc_plan_numbering': 'Estampa números de plano secuenciales en múltiples PDFs por lote. Descarga en ZIP.',
+    'tool_desc_revision_cloud': 'Agrega una nube de revisión arquitectónica con marcador de triángulo numerado.',
+    'tool_desc_grid': 'Agrega una grilla de referencia a las páginas PDF — define el espaciado o número de divisiones.',
+    'tool_desc_ocr': 'Ejecuta reconocimiento óptico de caracteres para hacer PDFs escaneados buscables.',
+    'tool_desc_pdfa': 'Convierte cualquier PDF a PDF/A-1b para archivo de largo plazo y cumplimiento normativo.',
+    'tool_desc_linewidth': 'Escala globalmente todos los anchos de línea de un PDF — más gruesos o más delgados.',
+    'tool_desc_text_note': 'Agrega un cuadro de texto en cualquier página — fuente, tamaño, color y posición.',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  // file indicator placeholder
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  // active lang button
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
+
 // ─── PDF.js lazy load ─────────────────────────────────────────────────────
 const pdfjsScript = document.createElement('script');
 pdfjsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
@@ -1859,7 +2085,7 @@ function buildOtherTools(currentId) {
   TOOLS.filter(t => t.id !== currentId).forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'other-btn';
-    btn.textContent = `${t.icon} ${t.name}`;
+    btn.textContent = `${t.icon} ${_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name}`;
     btn.onclick = () => { window.location.href = t.file; };
     strip.appendChild(btn);
   });
@@ -3994,137 +4220,6 @@ function _updateChooseBtn(name){
   if(btn) btn.textContent='\u2713 PDF loaded'; if(span) span.textContent=name;
 }
 
-// ── i18n ─────────────────────────────────────────────────────────────────
-const _TL = {
-  en: {
-    no_file: 'No file loaded',
-    'donation_title': 'File compressed — tools like this take time to build.',
-    'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
-    'donation_btn':   'Support on Ko-fi',
-    'donation_dismiss': 'no thanks',
-    'faq_compress_q': 'How does the Compress tool work?',
-    'faq_compress_a': "It uses Ghostscript compiled to WebAssembly, running entirely in your browser. You can choose from four presets — <em>Screen</em> (72 dpi, smallest), <em>eBook</em> (150 dpi), <em>Printer</em> (300 dpi), and <em>Prepress</em> (high quality) — or switch to <strong>Custom</strong> mode to set your own DPI and JPEG quality. The presets map directly to Ghostscript's <code>-dPDFSETTINGS</code> options. If the WASM engine fails to initialise, the tool falls back to a metadata-strip compression using pdf-lib.",
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
-    'btn_home': '← Home',
-    'btn_choose_pdf': 'Choose PDF',
-    'banner_working': 'Working on modified file',
-    'btn_dl_pdf': 'Download PDF',
-    'btn_keep': 'Keep working with this version',
-    'pn2_h2': 'Add page numbers to a PDF',
-    'pn2_desc': 'Adds a page number to each page as native PDF vector text. Supports Bates numbering with custom prefix and zero-padding. Choose format, position, font size, colour and starting number.',
-    'pn2_label_format': 'Format:',
-    'pn2_label_start': 'Start at number:',
-    'pn2_label_pos': 'Position:',
-    'pn2_label_margin': 'Margin from edge (mm):',
-    'pn2_label_size': 'Font size (pt):',
-    'pn2_label_color': 'Colour:',
-    'pn2_label_opacity': 'Opacity (0–1):',
-    'pn2_label_prefix': 'Prefix (optional):',
-    'pn2_label_suffix': 'Suffix (optional):',
-    'pn2_label_skip': 'Skip pages (e.g. 1,2):',
-    'pn2_label_pages': 'Apply to:',
-    'pn2_pages_all': 'All pages',
-    'pn2_pages_odd': 'Odd pages only',
-    'pn2_pages_even': 'Even pages only',
-    'pn2_pages_range': 'Page range',
-    'pn2_label_from': 'From page:',
-    'pn2_label_to': 'To page:',
-    'pn2_btn': 'Add page numbers',
-    'cp_label_preset': 'Compression preset:',
-    'cp_pre_screen_n': 'Screen',
-    'cp_pre_screen_d': '72 DPI · smallest file / digital viewing only',
-    'cp_pre_ebook_n': 'eBook',
-    'cp_pre_ebook_d': '150 DPI · good balance / email & web sharing',
-    'cp_pre_printer_n': 'Printer',
-    'cp_pre_printer_d': '300 DPI · high quality / office printing',
-    'cp_pre_prepress_n': 'Prepress',
-    'cp_pre_prepress_d': '300 DPI · color-safe / professional print',
-    'cp_pre_custom_n': 'Custom',
-    'cp_pre_custom_d': 'manual DPI / & quality control',
-    'cp_label_dpi': 'Image DPI (color & grayscale):',
-    'cp_label_qual': 'JPEG quality (1–100):',
-    'cp_gs_note': 'The Ghostscript engine will be downloaded the first time you compress a file (~30 MB).',
-    'cp_btn': 'Compress',
-  },
-  es: {
-    no_file: 'Sin archivo cargado',
-    'donation_title': 'Archivo comprimido — herramientas como esta llevan tiempo de desarrollo.',
-    'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
-    'donation_btn':   'Apoyar en Ko-fi',
-    'donation_dismiss': 'no, gracias',
-    'faq_compress_q': '¿Cómo funciona la herramienta de compresión?',
-    'faq_compress_a': 'Usa Ghostscript compilado a WebAssembly, ejecutándose completamente en tu navegador. Puedes elegir entre cuatro presets — <em>Screen</em> (72 ppp, más pequeño), <em>eBook</em> (150 ppp), <em>Printer</em> (300 ppp) y <em>Prepress</em> (alta calidad) — o cambiar al modo <strong>Custom</strong> para configurar tu propio DPI y calidad JPEG. Los presets corresponden directamente a las opciones <code>-dPDFSETTINGS</code> de Ghostscript. Si el motor WASM no se inicializa, la herramienta recurre a una compresión de extracción de metadatos con pdf-lib.',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
-    'btn_home': '← Inicio',
-    'btn_choose_pdf': 'Elegir PDF',
-    'banner_working': 'Trabajando con versión modificada',
-    'btn_dl_pdf': 'Descargar PDF',
-    'btn_keep': 'Seguir trabajando con esta versión',
-    'pn2_h2': 'Añade números de página a un PDF',
-    'pn2_desc': 'Añade un número de página como texto vectorial nativo. Compatible con numeración Bates mediante prefijo y relleno de ceros. Elige formato, posición, tamaño, color y número inicial.',
-    'pn2_label_format': 'Formato:',
-    'pn2_label_start': 'Empezar en el número:',
-    'pn2_label_pos': 'Posición:',
-    'pn2_label_margin': 'Margen desde el borde (mm):',
-    'pn2_label_size': 'Tamaño de fuente (pt):',
-    'pn2_label_color': 'Color:',
-    'pn2_label_opacity': 'Opacidad (0–1):',
-    'pn2_label_prefix': 'Prefijo (opcional):',
-    'pn2_label_suffix': 'Sufijo (opcional):',
-    'pn2_label_skip': 'Omitir páginas (ej. 1,2):',
-    'pn2_label_pages': 'Aplicar a:',
-    'pn2_pages_all': 'Todas las páginas',
-    'pn2_pages_odd': 'Solo páginas impares',
-    'pn2_pages_even': 'Solo páginas pares',
-    'pn2_pages_range': 'Rango de páginas',
-    'pn2_label_from': 'Desde la página:',
-    'pn2_label_to': 'Hasta la página:',
-    'pn2_btn': 'Añadir números de página',
-    'cp_label_preset': 'Preset de compresión:',
-    'cp_pre_screen_n': 'Screen',
-    'cp_pre_screen_d': '72 DPI · archivo mínimo / solo visualización digital',
-    'cp_pre_ebook_n': 'eBook',
-    'cp_pre_ebook_d': '150 DPI · buen equilibrio / email y web',
-    'cp_pre_printer_n': 'Printer',
-    'cp_pre_printer_d': '300 DPI · alta calidad / impresión de oficina',
-    'cp_pre_prepress_n': 'Prepress',
-    'cp_pre_prepress_d': '300 DPI · color seguro / impresión profesional',
-    'cp_pre_custom_n': 'Custom',
-    'cp_pre_custom_d': 'DPI manual / control de calidad',
-    'cp_label_dpi': 'DPI de imagen (color y escala de grises):',
-    'cp_label_qual': 'Calidad JPEG (1–100):',
-    'cp_gs_note': 'El motor Ghostscript se descargará la primera vez que comprimas un archivo (~30 MB).',
-    'cp_btn': 'Comprimir',
-  }
-};
-const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
-const _T  = _TL[_lg] || _TL['en'];
-function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
-function applyToolI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
-  });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
-  });
-  // file indicator placeholder
-  const fi = document.getElementById('file-indicator');
-  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
-  // active lang button
-  const btn = document.getElementById('lang-' + _lg);
-  if (btn) btn.classList.add('active');
-}
-function toggleTpFaq(btn) {
-  const ans = btn.nextElementSibling;
-  const open = ans.classList.contains('open');
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
-  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
-}
-document.addEventListener('DOMContentLoaded', applyToolI18n);
-
 
 // ─── COLOR PALETTE ──────────────────────────────────────────────────────────
 const CP_KEY = 'sb_color_palette';
@@ -4252,8 +4347,22 @@ openTool = function(id) {
   }
 };
 
-document.addEventListener('DOMContentLoaded', cpInit);
 
+// ── GLOBAL EXPORTS — only these names are reachable from window / HTML onclick= ──
+// currentBuffer and all other state stay private inside the IIFE.
+window.resetToHome          = resetToHome;
+window.scrollGrid           = scrollGrid;
+window.setLang              = setLang;
+window.applyToolI18n        = applyToolI18n;
+window.toggleTpFaq          = toggleTpFaq;
+window.cpOpenPicker         = cpOpenPicker;
+window.cpOnPick             = cpOnPick;
+window.cpEyeDropper         = cpEyeDropper;
+window.openTool             = openTool;
+window.onMergeFilesSelected = onMergeFilesSelected;
+window.onImgFilesSelected   = onImgFilesSelected;
+
+})(); // end IIFE
 </script>
 
 <footer>

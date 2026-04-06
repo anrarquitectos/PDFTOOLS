@@ -23,6 +23,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Space Mono','Courier New',monospace; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; overflow-x: hidden; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
   #bg-svg { position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; }
   .glow-orb { position:fixed; border-radius:50%; filter:blur(100px); pointer-events:none; z-index:0; }
@@ -260,6 +261,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link rel="manifest" href="/site.webmanifest" />
 </head>
 <body>
+<h1 class="sr-only">Add a Text Watermark to PDF Files — Free Online Tool</h1>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MP6GRD3F"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -1649,6 +1651,60 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </div>
 
+<!-- GS WORKER SOURCE — type is intentionally non-executable; loaded via Blob URL -->
+<script type="text/js-worker" id="gs-worker-src">
+const GS_CDN = 'https://cdn.jsdelivr.net/npm/@jspawn/ghostscript-wasm@0.0.2';
+let gsInstance = null;
+
+self.onmessage = async function(e) {
+  var preset  = e.data.preset;
+  var dpi     = e.data.dpi;
+  var quality = e.data.quality;
+  var buffer  = e.data.buffer;
+  try {
+    self.postMessage({ type: 'status', msg: 'Loading Ghostscript engine\u2026' });
+    if (!gsInstance) {
+      var mod = await import(GS_CDN + '/gs.mjs');
+      gsInstance = await mod.default({
+        locateFile: function(f) { return GS_CDN + '/' + f; },
+        print:    function() {},
+        printErr: function() {}
+      });
+      if (!gsInstance || !gsInstance.FS || !gsInstance.callMain) {
+        throw new Error('Ghostscript module loaded but API is missing.');
+      }
+    }
+    self.postMessage({ type: 'status', msg: 'Compressing\u2026' });
+    gsInstance.FS.writeFile('input.pdf', new Uint8Array(buffer));
+    var args = [
+      '-dBATCH', '-dNOPAUSE', '-dSAFER', '-dQUIET',
+      '-sDEVICE=pdfwrite', '-dCompatibilityLevel=1.5', '-dAutoRotatePages=/None'
+    ];
+    if (preset === 'custom') {
+      args.push(
+        '-dColorImageResolution=' + dpi,
+        '-dGrayImageResolution='  + dpi,
+        '-dMonoImageResolution=300',
+        '-dColorImageDownsampleType=/Bicubic',
+        '-dGrayImageDownsampleType=/Bicubic',
+        '-dAutoFilterColorImages=false',
+        '-dColorImageFilter=/DCTEncode',
+        '-dJPEGQ=' + quality
+      );
+    } else {
+      args.push('-dPDFSETTINGS=/' + preset);
+    }
+    args.push('-sOutputFile=output.pdf', 'input.pdf');
+    gsInstance.callMain(args);
+    var out = gsInstance.FS.readFile('output.pdf');
+    try { gsInstance.FS.unlink('input.pdf'); gsInstance.FS.unlink('output.pdf'); } catch(_) {}
+    self.postMessage({ type: 'done', buffer: out.buffer }, [out.buffer]);
+  } catch(err) {
+    self.postMessage({ type: 'error', message: 'Could not load Ghostscript engine. (' + err.message + ')' });
+  }
+};
+</script>
+
 <!-- SCRIPTS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -1691,7 +1747,7 @@ let currentBuffer = null;
 let currentFileName = '';
 let activeToolId = null;
 let modificationHistory = [];
-let gsInstance = null; // Ghostscript WASM singleton
+let gsWorker = null; // Ghostscript isolated Web Worker
 
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
@@ -1873,7 +1929,7 @@ const PAGE_SIZES = {
   A1:[1683.78,2383.94], A0:[2383.94,3370.39], LETTER:[612,792], LEGAL:[612,1008]
 };
 
-// ─── 1. COMPRESS — GHOSTSCRIPT WASM ──────────────────────────────────────
+// ─── 1. COMPRESS — GHOSTSCRIPT WASM (isolated Worker) ────────────────────
 let selectedPreset = 'ebook';
 
 document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -1886,109 +1942,71 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
   });
 });
 
-// Correct package: @jspawn/ghostscript-wasm@0.0.2 (ESM, needs locateFile for .wasm resolution)
-const GS_CDN = 'https://cdn.jsdelivr.net/npm/@jspawn/ghostscript-wasm@0.0.2';
+// Lazily create (and reuse) a classic Worker that loads GS via dynamic import()
+// inside its own isolated scope — the CDN module never touches main-thread memory.
+function getGsWorker() {
+  if (gsWorker) return gsWorker;
+  const src  = document.getElementById('gs-worker-src').textContent;
+  const blob = new Blob([src], { type: 'application/javascript' });
+  gsWorker   = new Worker(URL.createObjectURL(blob)); // classic worker — no {type:'module'}
+  return gsWorker;
+}
 
-async function loadGhostscript() {
-  if (gsInstance) return gsInstance;
+let compressedBytes = null;
+document.getElementById('c-btn').addEventListener('click', async () => {
+  if (!currentBuffer) return;
+  document.getElementById('c-btn').disabled  = true;
+  document.getElementById('c-dl').disabled   = true;
+  document.getElementById('c-apply').disabled = true;
+  status('c-status', 'Loading Ghostscript engine…', 'run');
 
   const progressWrap = document.getElementById('gs-progress-wrap');
   const progressBar  = document.getElementById('gs-progress-bar');
   progressWrap.classList.add('show');
   progressBar.style.width = '0%';
-
   let fakeProgress = 0;
   const tick = setInterval(() => {
     fakeProgress = Math.min(fakeProgress + Math.random() * 2.5, 82);
     progressBar.style.width = fakeProgress + '%';
   }, 400);
 
+  const preset = selectedPreset;
+  const dpi    = parseInt(document.getElementById('gs-dpi').value)     || 150;
+  const q      = parseInt(document.getElementById('gs-quality').value) || 75;
+
   try {
-    // Dynamic ESM import — the only reliable way to load this package in-browser
-    const { default: initGhostscript } = await import(`${GS_CDN}/gs.mjs`);
-
-    clearInterval(tick);
-    progressBar.style.width = '88%';
-
-    // locateFile tells Emscripten where the .wasm binary lives
-    const gs = await initGhostscript({
-      locateFile: file => `${GS_CDN}/${file}`,
-      print:    () => {},
-      printErr: () => {}
+    const result = await new Promise((resolve, reject) => {
+      const worker = getGsWorker();
+      worker.onmessage = e => {
+        if      (e.data.type === 'status') { status('c-status', e.data.msg, 'run'); }
+        else if (e.data.type === 'done')   { resolve(e.data.buffer); }
+        else if (e.data.type === 'error')  { reject(new Error(e.data.message)); }
+      };
+      worker.onerror = e => reject(new Error(e.message || 'Worker error'));
+      // Transfer a COPY so currentBuffer stays intact for all other tools
+      const transferBuf = currentBuffer.slice(0);
+      worker.postMessage({ preset, dpi, quality: q, buffer: transferBuf }, [transferBuf]);
     });
 
-    if (!gs || !gs.FS || !gs.callMain) throw new Error('Ghostscript module loaded but API is missing.');
-
+    clearInterval(tick);
     progressBar.style.width = '100%';
     setTimeout(() => progressWrap.classList.remove('show'), 500);
-    gsInstance = gs;
-    return gs;
 
-  } catch(err) {
-    clearInterval(tick);
-    progressWrap.classList.remove('show');
-    throw new Error('Could not load Ghostscript engine. (' + err.message + ')');
-  }
-}
-
-let compressedBytes = null;
-document.getElementById('c-btn').addEventListener('click', async () => {
-  if (!currentBuffer) return;
-  document.getElementById('c-btn').disabled = true;
-  document.getElementById('c-dl').disabled = true;
-  document.getElementById('c-apply').disabled = true;
-  status('c-status', 'Loading Ghostscript engine…', 'run');
-  try {
-    const gs = await loadGhostscript();
-    status('c-status', 'Compressing…', 'run');
-
-    const inputData = new Uint8Array(currentBuffer);
-    // Write input file to GS virtual filesystem
-    gs.FS.writeFile('input.pdf', inputData);
-
-    const args = [
-      '-dBATCH', '-dNOPAUSE', '-dSAFER', '-dQUIET',
-      '-sDEVICE=pdfwrite',
-      '-dCompatibilityLevel=1.5',
-      '-dAutoRotatePages=/None',   // preserve original page orientation
-    ];
-
-    if (selectedPreset === 'custom') {
-      const dpi = parseInt(document.getElementById('gs-dpi').value) || 150;
-      const q   = parseInt(document.getElementById('gs-quality').value) || 75;
-      args.push(
-        `-dColorImageResolution=${dpi}`,
-        `-dGrayImageResolution=${dpi}`,
-        '-dMonoImageResolution=300',
-        '-dColorImageDownsampleType=/Bicubic',
-        '-dGrayImageDownsampleType=/Bicubic',
-        '-dAutoFilterColorImages=false',
-        '-dColorImageFilter=/DCTEncode',
-        `-dJPEGQ=${q}`
-      );
-    } else {
-      args.push(`-dPDFSETTINGS=/${selectedPreset}`);
-    }
-
-    args.push('-sOutputFile=output.pdf', 'input.pdf');
-    gs.callMain(args);
-
-    const outputData = gs.FS.readFile('output.pdf');
-    compressedBytes = outputData.buffer;
-
-    // Clean up GS virtual FS
-    try { gs.FS.unlink('input.pdf'); gs.FS.unlink('output.pdf'); } catch(_) {}
-
+    compressedBytes = result;
     const origKB  = (currentBuffer.byteLength / 1024).toFixed(1);
     const compKB  = (compressedBytes.byteLength / 1024).toFixed(1);
     const pct     = (((currentBuffer.byteLength - compressedBytes.byteLength) / currentBuffer.byteLength) * 100).toFixed(1);
-    const presetLabel = selectedPreset === 'custom' ? `custom ${document.getElementById('gs-dpi').value} DPI` : selectedPreset;
+    const presetLabel = preset === 'custom' ? `custom ${dpi} DPI` : preset;
     status('c-status', `Original: ${origKB} KB → Compressed: ${compKB} KB (−${pct}%) [${presetLabel}]`, 'ok');
-    document.getElementById('c-dl').disabled = false;
+    document.getElementById('c-dl').disabled   = false;
     document.getElementById('c-apply').disabled = false;
+
   } catch(e) {
-    // If GS failed to load, fall back to pdf-lib metadata-strip compression
+    clearInterval(tick);
+    progressWrap.classList.remove('show');
+    // If GS failed, terminate the broken worker and fall back to pdf-lib
     if (e.message.includes('Could not load')) {
+      if (gsWorker) { gsWorker.terminate(); gsWorker = null; }
       status('c-status', 'Ghostscript unavailable — applying pdf-lib fallback compression…', 'run');
       try {
         const pdfDoc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
@@ -2001,7 +2019,7 @@ document.getElementById('c-btn').addEventListener('click', async () => {
         const compKB = (compressedBytes.byteLength/1024).toFixed(1);
         const pct    = (((currentBuffer.byteLength - compressedBytes.byteLength)/currentBuffer.byteLength)*100).toFixed(1);
         status('c-status', `Fallback compression: ${origKB} KB → ${compKB} KB (−${pct}%). For stronger compression, check your connection and retry.`, 'ok');
-        document.getElementById('c-dl').disabled = false;
+        document.getElementById('c-dl').disabled   = false;
         document.getElementById('c-apply').disabled = false;
       } catch(e2) { status('c-status', 'Error: ' + e2.message, 'err'); }
     } else {
@@ -3942,8 +3960,20 @@ function resetToHome() {
 (function(){
   const inp=document.getElementById('tool-choose-file');
   if(inp) inp.addEventListener('change',async e=>{
-    const file=e.target.files[0]; if(!file) return;
-    await loadPDF(file); _updateChooseBtn(file.name);
+    const files=e.target.files; if(!files.length) return;
+    const file=files[0];
+    await loadPDF(file);
+    if(files.length > 1){
+      const label = _lg==='es'
+        ? `${files.length} archivos subidos`
+        : `${files.length} files uploaded`;
+      document.getElementById('file-indicator').innerHTML=`File: <span>${label}</span>`;
+      const btn=document.getElementById('tool-choose-btn'),span=document.getElementById('tool-choose-name');
+      if(btn) btn.textContent='\u2713 PDF loaded';
+      if(span) span.textContent=label;
+    } else {
+      _updateChooseBtn(file.name);
+    }
   });
   document.addEventListener('dragover',e=>e.preventDefault());
   document.addEventListener('drop',async e=>{

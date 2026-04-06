@@ -252,6 +252,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   footer { position:relative; z-index:1; text-align:center; padding:28px 20px; font-size:0.72rem; color:var(--muted); border-top:1px solid var(--light); margin-top:40px; font-family:'Space Mono',monospace; }
   footer a { color:var(--cyan); text-decoration:none; }
   footer a:hover { text-decoration:underline; }
+
+  .vh {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
 </style>
   <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -283,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a></h1>
+  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Text note — Add text annotations to PDF pages</span></h1>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
@@ -483,7 +489,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div class="panel-box">
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;">
         <button type="button" onclick="document.getElementById('te-pdf-input').click()"
-          style="background:#2563eb;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-size:0.83rem;font-weight:600;cursor:pointer;font-family:inherit;">
+          style="background:rgba(0,245,212,0.12);color:var(--cyan);border:1px solid rgba(0,245,212,0.35);padding:7px 16px;border-radius:8px;font-size:0.78rem;cursor:pointer;font-family:'Space Mono',monospace;letter-spacing:0.04em;transition:background 0.2s;">
           <span data-i18n="btn_choose_pdf">Choose PDF</span>
         </button>
         <input type="file" id="te-pdf-input" accept="application/pdf" style="display:none;">
@@ -1587,7 +1593,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <!-- ── OTHER TOOLS STRIP ── -->
     <div id="other-tools-section">
-      <h3>OTHER TOOLS — same file</h3>
+      <h3 data-i18n="other_tools_heading">OTHER TOOLS — same file</h3>
       <div class="other-tools-strip" id="other-tools-strip"></div>
     </div>
   </div>
@@ -1616,10 +1622,276 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </div>
 
+<!-- Worker source — type unknown, browser does NOT execute -->
+<script id="compress-worker-src" type="text/js-worker">
+const GS_CDN     = 'https://cdn.jsdelivr.net/npm/@jspawn/ghostscript-wasm@0.0.2';
+const PDFLIB_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+let gsInstance   = null;
+let pdfLibLoaded = false;
+
+async function loadGS() {
+  if (gsInstance) return gsInstance;
+  const { default: initGS } = await import(GS_CDN + '/gs.mjs');
+  const gs = await initGS({
+    locateFile: function(f) { return GS_CDN + '/' + f; },
+    print: function() {}, printErr: function() {}
+  });
+  if (!gs || !gs.FS || !gs.callMain) throw new Error('Ghostscript module loaded but API is missing.');
+  gsInstance = gs;
+  return gs;
+}
+
+function ensurePdfLib() {
+  if (pdfLibLoaded) return;
+  importScripts(PDFLIB_CDN);
+  pdfLibLoaded = true;
+}
+
+self.onmessage = async function(e) {
+  var buffer = e.data.buffer, preset = e.data.preset,
+      dpi = e.data.dpi, quality = e.data.quality;
+  try {
+    self.postMessage({ type: 'status', msg: 'Loading Ghostscript engine…', cls: 'run' });
+    var gs = await loadGS();
+    self.postMessage({ type: 'progress', value: 88 });
+    self.postMessage({ type: 'status', msg: 'Compressing…', cls: 'run' });
+    gs.FS.writeFile('input.pdf', new Uint8Array(buffer));
+    var args = ['-dBATCH','-dNOPAUSE','-dSAFER','-dQUIET',
+                '-sDEVICE=pdfwrite','-dCompatibilityLevel=1.5','-dAutoRotatePages=/None'];
+    if (preset === 'custom') {
+      args.push('-dColorImageResolution='+dpi,'-dGrayImageResolution='+dpi,
+        '-dMonoImageResolution=300','-dColorImageDownsampleType=/Bicubic',
+        '-dGrayImageDownsampleType=/Bicubic','-dAutoFilterColorImages=false',
+        '-dColorImageFilter=/DCTEncode','-dJPEGQ='+quality);
+    } else { args.push('-dPDFSETTINGS=/'+preset); }
+    args.push('-sOutputFile=output.pdf','input.pdf');
+    gs.callMain(args);
+    var out = gs.FS.readFile('output.pdf');
+    try { gs.FS.unlink('input.pdf'); gs.FS.unlink('output.pdf'); } catch(_) {}
+    self.postMessage({ type: 'progress', value: 100 });
+    self.postMessage(
+      { type: 'done', buffer: out.buffer, origSize: buffer.byteLength },
+      [out.buffer]
+    );
+  } catch(gsErr) {
+    try {
+      self.postMessage({ type: 'status', msg: 'Ghostscript unavailable — applying pdf-lib fallback…', cls: 'run' });
+      ensurePdfLib();
+      var pdfDoc = await PDFLib.PDFDocument.load(buffer, { ignoreEncryption: true });
+      pdfDoc.setTitle(''); pdfDoc.setAuthor(''); pdfDoc.setSubject('');
+      pdfDoc.setKeywords([]); pdfDoc.setProducer(''); pdfDoc.setCreator('');
+      pdfDoc.getPages().forEach(function(p) {
+        try { p.node.delete(PDFLib.PDFName.of('Annots')); } catch(_) {}
+      });
+      try { pdfDoc.catalog.delete(PDFLib.PDFName.of('Metadata')); } catch(_) {}
+      var saved = await pdfDoc.save({ useObjectStreams: true, addDefaultPage: false });
+      self.postMessage(
+        { type: 'done', buffer: saved.buffer, origSize: buffer.byteLength, fallback: true },
+        [saved.buffer]
+      );
+    } catch(fbErr) { self.postMessage({ type: 'error', msg: fbErr.message }); }
+  }
+};
+</script>
 <!-- SCRIPTS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+(function () {
+
+// ── i18n ─────────────────────────────────────────────────────────────────
+const _TL = {
+  en: {
+    no_file: 'No file loaded',
+    'donation_title': 'File compressed — tools like this take time to build.',
+    'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
+    'donation_btn':   'Support on Ko-fi',
+    'donation_dismiss': 'no thanks',
+    'faq_compress_q': 'How does the Compress tool work?',
+    'faq_compress_a': "It uses Ghostscript compiled to WebAssembly, running entirely in your browser. You can choose from four presets — <em>Screen</em> (72 dpi, smallest), <em>eBook</em> (150 dpi), <em>Printer</em> (300 dpi), and <em>Prepress</em> (high quality) — or switch to <strong>Custom</strong> mode to set your own DPI and JPEG quality. The presets map directly to Ghostscript's <code>-dPDFSETTINGS</code> options. If the WASM engine fails to initialise, the tool falls back to a metadata-strip compression using pdf-lib.",
+    'faq_free_q': 'Is this tool free? How is it funded?',
+    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'btn_home': '← Home',
+    'btn_choose_pdf': 'Choose PDF',
+    'banner_working': 'Working on modified file',
+    'btn_dl_pdf': 'Download PDF',
+    'btn_keep': 'Keep working with this version',
+    'te_h2': 'Edit PDF text',
+    'te_desc': 'Click on any text block to edit it directly on the page. Click on a blank area to add new text.',
+    'te_fontsize': 'Size:',
+    'te_color': 'Colour:',
+    'te_delete': 'Delete block',
+    'te_undo': 'Undo last',
+    'te_page': 'Page',
+    'te_no_text': 'No selectable text on this page — click to add new text.',
+    'te_hint': 'Click highlighted text to edit. Click blank space to add new text.',
+    'te_btn': 'Apply edits to PDF',
+    'cp_label_preset': 'Compression preset:',
+    'cp_pre_screen_n': 'Screen',
+    'cp_pre_screen_d': '72 DPI · smallest file / digital viewing only',
+    'cp_pre_ebook_n': 'eBook',
+    'cp_pre_ebook_d': '150 DPI · good balance / email & web sharing',
+    'cp_pre_printer_n': 'Printer',
+    'cp_pre_printer_d': '300 DPI · high quality / office printing',
+    'cp_pre_prepress_n': 'Prepress',
+    'cp_pre_prepress_d': '300 DPI · color-safe / professional print',
+    'cp_pre_custom_n': 'Custom',
+    'cp_pre_custom_d': 'manual DPI / & quality control',
+    'cp_label_dpi': 'Image DPI (color & grayscale):',
+    'cp_label_qual': 'JPEG quality (1–100):',
+    'cp_gs_note': 'The Ghostscript engine will be downloaded the first time you compress a file (~30 MB).',
+    'cp_btn': 'Compress',
+    'other_tools_heading': 'Other tools',
+    'tool_name_compress': 'Compress PDF',
+    'tool_desc_compress': 'Ghostscript-powered compression with full control over DPI and quality.',
+    'tool_name_vineta': 'Title block',
+    'tool_desc_vineta': 'Architectural title block with project name, plan number, scale, signatures and north arrow.',
+    'tool_name_patch': 'Patch / Redact',
+    'tool_desc_patch': 'Draw a white polygon over any area to cover content — with optional permanent flattening.',
+    'tool_name_scalebar': 'Scale bar (m)',
+    'tool_desc_scalebar': 'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.',
+    'tool_name_scalebar_ft': 'Scale bar (ft)',
+    'tool_desc_scalebar_ft': 'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.',
+    'tool_name_watermark_logo': 'Logo watermark',
+    'tool_desc_watermark_logo': 'Embed your studio logo in grayscale with adjustable opacity and rotation.',
+    'tool_name_watermark_text': 'Text watermark',
+    'tool_desc_watermark_text': 'Add semi-transparent text across pages — customizable size, color and position.',
+    'tool_name_crop': 'Resize to format',
+    'tool_desc_crop': 'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.',
+    'tool_name_reorder': 'Reorder & remove pages',
+    'tool_desc_reorder': "Drag pages to rearrange them and remove any you don't need.",
+    'tool_name_split': 'Split PDF',
+    'tool_desc_split': 'Select break points between pages and export each section as a separate PDF.',
+    'tool_name_merge': 'Merge PDFs',
+    'tool_desc_merge': 'Upload multiple PDFs, rearrange them and combine into one.',
+    'tool_name_convert': 'Convert to images',
+    'tool_desc_convert': 'Export each page as PNG or JPG at the resolution you need.',
+    'tool_name_img2pdf': 'Image to PDF',
+    'tool_desc_img2pdf': 'Convert one or more images (JPG, PNG) into a PDF document.',
+    'tool_name_plan_numbering': 'Plan numbering',
+    'tool_desc_plan_numbering': 'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.',
+    'tool_name_revision_cloud': 'Revision cloud',
+    'tool_desc_revision_cloud': 'Add an architectural revision cloud with numbered triangle marker to PDF pages.',
+    'tool_name_grid': 'Page grid',
+    'tool_desc_grid': 'Add a reference grid to PDF pages — specify spacing or number of divisions.',
+    'tool_name_ocr': 'OCR — searchable PDF',
+    'tool_desc_ocr': 'Run optical character recognition to make scanned PDFs searchable and selectable.',
+    'tool_name_pdfa': 'Convert to PDF/A',
+    'tool_desc_pdfa': 'Convert any PDF to PDF/A-1b for long-term archiving and compliance.',
+    'tool_name_linewidth': 'Line weight',
+    'tool_desc_linewidth': 'Globally scale all line widths in a PDF — thicker or thinner in one step.',
+    'tool_name_text_note': 'Text note',
+    'tool_desc_text_note': 'Add a plain-text annotation box to any page — font, size, color and position.',
+  },
+  es: {
+    no_file: 'Sin archivo cargado',
+    'donation_title': 'Archivo comprimido — herramientas como esta llevan tiempo de desarrollo.',
+    'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
+    'donation_btn':   'Apoyar en Ko-fi',
+    'donation_dismiss': 'no, gracias',
+    'faq_compress_q': '¿Cómo funciona la herramienta de compresión?',
+    'faq_compress_a': 'Usa Ghostscript compilado a WebAssembly, ejecutándose completamente en tu navegador. Puedes elegir entre cuatro presets — <em>Screen</em> (72 ppp, más pequeño), <em>eBook</em> (150 ppp), <em>Printer</em> (300 ppp) y <em>Prepress</em> (alta calidad) — o cambiar al modo <strong>Custom</strong> para configurar tu propio DPI y calidad JPEG. Los presets corresponden directamente a las opciones <code>-dPDFSETTINGS</code> de Ghostscript. Si el motor WASM no se inicializa, la herramienta recurre a una compresión de extracción de metadatos con pdf-lib.',
+    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
+    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'btn_home': '← Inicio',
+    'btn_choose_pdf': 'Elegir PDF',
+    'banner_working': 'Trabajando con versión modificada',
+    'btn_dl_pdf': 'Descargar PDF',
+    'btn_keep': 'Seguir trabajando con esta versión',
+    'te_h2': 'Editar texto del PDF',
+    'te_desc': 'Haz clic en cualquier bloque de texto para editarlo directamente en la página. Haz clic en un área en blanco para añadir texto nuevo.',
+    'te_fontsize': 'Tamaño:',
+    'te_color': 'Color:',
+    'te_delete': 'Eliminar bloque',
+    'te_undo': 'Deshacer último',
+    'te_page': 'Página',
+    'te_no_text': 'No hay texto seleccionable — haz clic para añadir texto nuevo.',
+    'te_hint': 'Haz clic en texto resaltado para editarlo. Haz clic en espacio en blanco para añadir texto.',
+    'te_btn': 'Aplicar cambios al PDF',
+    'cp_label_preset': 'Preset de compresión:',
+    'cp_pre_screen_n': 'Screen',
+    'cp_pre_screen_d': '72 DPI · archivo mínimo / solo visualización digital',
+    'cp_pre_ebook_n': 'eBook',
+    'cp_pre_ebook_d': '150 DPI · buen equilibrio / email y web',
+    'cp_pre_printer_n': 'Printer',
+    'cp_pre_printer_d': '300 DPI · alta calidad / impresión de oficina',
+    'cp_pre_prepress_n': 'Prepress',
+    'cp_pre_prepress_d': '300 DPI · color seguro / impresión profesional',
+    'cp_pre_custom_n': 'Custom',
+    'cp_pre_custom_d': 'DPI manual / control de calidad',
+    'cp_label_dpi': 'DPI de imagen (color y escala de grises):',
+    'cp_label_qual': 'Calidad JPEG (1–100):',
+    'cp_gs_note': 'El motor Ghostscript se descargará la primera vez que comprimas un archivo (~30 MB).',
+    'cp_btn': 'Comprimir',
+    'other_tools_heading': 'Otras herramientas',
+    'tool_name_compress': 'Comprimir PDF',
+    'tool_desc_compress': 'Compresión con Ghostscript y control total sobre DPI y calidad.',
+    'tool_name_vineta': 'Viñeta',
+    'tool_desc_vineta': 'Viñeta arquitectónica con nombre de proyecto, número de plano, escala, firmas y norte.',
+    'tool_name_patch': 'Parche / Redactar',
+    'tool_desc_patch': 'Dibuja un polígono blanco sobre cualquier área para ocultar contenido, con aplanado permanente opcional.',
+    'tool_name_scalebar': 'Barra de escala (m)',
+    'tool_desc_scalebar': 'Añade una barra de escala gráfica métrica. Se dimensiona automáticamente según el formato y la escala.',
+    'tool_name_scalebar_ft': 'Barra de escala (ft)',
+    'tool_desc_scalebar_ft': 'Añade una barra de escala gráfica en pies. Se dimensiona automáticamente según el formato y la escala.',
+    'tool_name_watermark_logo': 'Marca de agua con logo',
+    'tool_desc_watermark_logo': 'Incrusta el logo de tu estudio en escala de grises con opacidad y rotación ajustables.',
+    'tool_name_watermark_text': 'Marca de agua de texto',
+    'tool_desc_watermark_text': 'Añade texto semitransparente en las páginas — tamaño, color y posición personalizables.',
+    'tool_name_crop': 'Redimensionar al formato',
+    'tool_desc_crop': 'Ajusta las páginas a A0–A4, Letter o Legal con orientación automática o forzada.',
+    'tool_name_reorder': 'Reordenar y eliminar páginas',
+    'tool_desc_reorder': 'Arrastra las páginas para reordenarlas y elimina las que no necesites.',
+    'tool_name_split': 'Dividir PDF',
+    'tool_desc_split': 'Selecciona puntos de corte entre páginas y exporta cada sección como un PDF independiente.',
+    'tool_name_merge': 'Combinar PDFs',
+    'tool_desc_merge': 'Sube varios PDFs, reordénalos y combínalos en uno.',
+    'tool_name_convert': 'Convertir a imágenes',
+    'tool_desc_convert': 'Exporta cada página como PNG o JPG a la resolución que necesites.',
+    'tool_name_img2pdf': 'Imagen a PDF',
+    'tool_desc_img2pdf': 'Convierte una o más imágenes (JPG, PNG) en un documento PDF.',
+    'tool_name_plan_numbering': 'Numeración de planos',
+    'tool_desc_plan_numbering': 'Estampa números de plano secuenciales en varios PDFs en lote. Descarga como ZIP.',
+    'tool_name_revision_cloud': 'Nube de revisión',
+    'tool_desc_revision_cloud': 'Añade una nube de revisión arquitectónica con marcador triangular numerado a páginas PDF.',
+    'tool_name_grid': 'Cuadrícula de página',
+    'tool_desc_grid': 'Añade una cuadrícula de referencia a páginas PDF — especifica el espaciado o número de divisiones.',
+    'tool_name_ocr': 'OCR — PDF buscable',
+    'tool_desc_ocr': 'Ejecuta reconocimiento óptico de caracteres para hacer buscables los PDFs escaneados.',
+    'tool_name_pdfa': 'Convertir a PDF/A',
+    'tool_desc_pdfa': 'Convierte cualquier PDF a PDF/A-1b para archivo a largo plazo y cumplimiento normativo.',
+    'tool_name_linewidth': 'Grosor de línea',
+    'tool_desc_linewidth': 'Escala globalmente todos los grosores de línea de un PDF — más gruesos o más finos en un solo paso.',
+    'tool_name_text_note': 'Nota de texto',
+    'tool_desc_text_note': 'Añade un cuadro de texto en cualquier página — fuente, tamaño, color y posición.',
+  }
+};
+const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
+const _T  = _TL[_lg] || _TL['en'];
+function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
+function applyToolI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
+  });
+  // file indicator placeholder
+  const fi = document.getElementById('file-indicator');
+  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
+  // active lang button
+  const btn = document.getElementById('lang-' + _lg);
+  if (btn) btn.classList.add('active');
+}
+function toggleTpFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
+  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+document.addEventListener('DOMContentLoaded', applyToolI18n);
+
 // ─── PDF.js lazy load ─────────────────────────────────────────────────────
 const pdfjsScript = document.createElement('script');
 pdfjsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
@@ -1658,14 +1930,13 @@ let currentBuffer = null;
 let currentFileName = '';
 let activeToolId = null;
 let modificationHistory = [];
-let gsInstance = null; // Ghostscript WASM singleton
 
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
 TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name) + '</h3><p>' + (_T['tool_desc_' + t.id.replace(/-/g,'_')] || t.desc) + '</p>';
   card.onclick = () => {
     if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
     else { openTool(t.id); }
@@ -1784,6 +2055,9 @@ function resetToHome() {
   document.getElementById('file-indicator').textContent = 'No file loaded';
   document.getElementById('btn-change-file').style.display = 'none';
   document.getElementById('working-banner').classList.remove('show');
+  const _rtb=document.getElementById('tool-choose-btn'), _rtn=document.getElementById('tool-choose-name');
+  if(_rtb) _rtb.textContent='Choose PDF'; if(_rtn) _rtn.textContent='';
+  const _rti=document.getElementById('tool-choose-file'); if(_rti) _rti.value='';
   goHome();
 }
 
@@ -1793,7 +2067,7 @@ function buildOtherTools(currentId) {
   TOOLS.filter(t => t.id !== currentId).forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'other-btn';
-    btn.textContent = `${t.icon} ${t.name}`;
+    btn.textContent = t.icon + ' ' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name);
     btn.onclick = () => { window.location.href = t.file; };
     strip.appendChild(btn);
   });
@@ -1851,51 +2125,6 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
       selectedPreset === 'custom' ? 'block' : 'none';
   });
 });
-
-// Correct package: @jspawn/ghostscript-wasm@0.0.2 (ESM, needs locateFile for .wasm resolution)
-const GS_CDN = 'https://cdn.jsdelivr.net/npm/@jspawn/ghostscript-wasm@0.0.2';
-
-async function loadGhostscript() {
-  if (gsInstance) return gsInstance;
-
-  const progressWrap = document.getElementById('gs-progress-wrap');
-  const progressBar  = document.getElementById('gs-progress-bar');
-  progressWrap.classList.add('show');
-  progressBar.style.width = '0%';
-
-  let fakeProgress = 0;
-  const tick = setInterval(() => {
-    fakeProgress = Math.min(fakeProgress + Math.random() * 2.5, 82);
-    progressBar.style.width = fakeProgress + '%';
-  }, 400);
-
-  try {
-    // Dynamic ESM import — the only reliable way to load this package in-browser
-    const { default: initGhostscript } = await import(`${GS_CDN}/gs.mjs`);
-
-    clearInterval(tick);
-    progressBar.style.width = '88%';
-
-    // locateFile tells Emscripten where the .wasm binary lives
-    const gs = await initGhostscript({
-      locateFile: file => `${GS_CDN}/${file}`,
-      print:    () => {},
-      printErr: () => {}
-    });
-
-    if (!gs || !gs.FS || !gs.callMain) throw new Error('Ghostscript module loaded but API is missing.');
-
-    progressBar.style.width = '100%';
-    setTimeout(() => progressWrap.classList.remove('show'), 500);
-    gsInstance = gs;
-    return gs;
-
-  } catch(err) {
-    clearInterval(tick);
-    progressWrap.classList.remove('show');
-    throw new Error('Could not load Ghostscript engine. (' + err.message + ')');
-  }
-}
 
 // ─── TEXT EDITOR ────────────────────────────────────────────────────────────
 let teBytes=null, tePdfJs_doc=null, tePageNum=1, teTotalPages=0;
@@ -4159,15 +4388,6 @@ document.getElementById('pn-btn').addEventListener('click', async () => {
 }
 
 document.addEventListener('DOMContentLoaded', () => { openTool('text-note'); });
-function resetToHome() {
-  currentBuffer=null; currentFileName=''; modificationHistory=[];
-  try { sessionStorage.removeItem('sb_file'); sessionStorage.removeItem('sb_name'); } catch(e){}
-  document.getElementById('file-indicator').textContent='No file loaded';
-  document.getElementById('btn-change-file').style.display='none';
-  const btn=document.getElementById('tool-choose-btn'), nm=document.getElementById('tool-choose-name');
-  if(btn) btn.textContent='Choose PDF'; if(nm) nm.textContent='';
-  const inp=document.getElementById('tool-choose-file'); if(inp) inp.value='';
-}
 (async function(){
   try {
     const b64=sessionStorage.getItem('sb_file'), name=sessionStorage.getItem('sb_name')||'document.pdf';
@@ -4196,116 +4416,7 @@ function _updateChooseBtn(name){
   if(btn) btn.textContent='\u2713 PDF loaded'; if(span) span.textContent=name;
 }
 
-// ── i18n ─────────────────────────────────────────────────────────────────
-const _TL = {
-  en: {
-    no_file: 'No file loaded',
-    'donation_title': 'File compressed — tools like this take time to build.',
-    'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
-    'donation_btn':   'Support on Ko-fi',
-    'donation_dismiss': 'no thanks',
-    'faq_compress_q': 'How does the Compress tool work?',
-    'faq_compress_a': "It uses Ghostscript compiled to WebAssembly, running entirely in your browser. You can choose from four presets — <em>Screen</em> (72 dpi, smallest), <em>eBook</em> (150 dpi), <em>Printer</em> (300 dpi), and <em>Prepress</em> (high quality) — or switch to <strong>Custom</strong> mode to set your own DPI and JPEG quality. The presets map directly to Ghostscript's <code>-dPDFSETTINGS</code> options. If the WASM engine fails to initialise, the tool falls back to a metadata-strip compression using pdf-lib.",
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
-    'btn_home': '← Home',
-    'btn_choose_pdf': 'Choose PDF',
-    'banner_working': 'Working on modified file',
-    'btn_dl_pdf': 'Download PDF',
-    'btn_keep': 'Keep working with this version',
-    'te_h2': 'Edit PDF text',
-    'te_desc': 'Click on any text block to edit it directly on the page. Click on a blank area to add new text.',
-    'te_fontsize': 'Size:',
-    'te_color': 'Colour:',
-    'te_delete': 'Delete block',
-    'te_undo': 'Undo last',
-    'te_page': 'Page',
-    'te_no_text': 'No selectable text on this page — click to add new text.',
-    'te_hint': 'Click highlighted text to edit. Click blank space to add new text.',
-    'te_btn': 'Apply edits to PDF',
-    'cp_label_preset': 'Compression preset:',
-    'cp_pre_screen_n': 'Screen',
-    'cp_pre_screen_d': '72 DPI · smallest file / digital viewing only',
-    'cp_pre_ebook_n': 'eBook',
-    'cp_pre_ebook_d': '150 DPI · good balance / email & web sharing',
-    'cp_pre_printer_n': 'Printer',
-    'cp_pre_printer_d': '300 DPI · high quality / office printing',
-    'cp_pre_prepress_n': 'Prepress',
-    'cp_pre_prepress_d': '300 DPI · color-safe / professional print',
-    'cp_pre_custom_n': 'Custom',
-    'cp_pre_custom_d': 'manual DPI / & quality control',
-    'cp_label_dpi': 'Image DPI (color & grayscale):',
-    'cp_label_qual': 'JPEG quality (1–100):',
-    'cp_gs_note': 'The Ghostscript engine will be downloaded the first time you compress a file (~30 MB).',
-    'cp_btn': 'Compress',
-  },
-  es: {
-    no_file: 'Sin archivo cargado',
-    'donation_title': 'Archivo comprimido — herramientas como esta llevan tiempo de desarrollo.',
-    'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
-    'donation_btn':   'Apoyar en Ko-fi',
-    'donation_dismiss': 'no, gracias',
-    'faq_compress_q': '¿Cómo funciona la herramienta de compresión?',
-    'faq_compress_a': 'Usa Ghostscript compilado a WebAssembly, ejecutándose completamente en tu navegador. Puedes elegir entre cuatro presets — <em>Screen</em> (72 ppp, más pequeño), <em>eBook</em> (150 ppp), <em>Printer</em> (300 ppp) y <em>Prepress</em> (alta calidad) — o cambiar al modo <strong>Custom</strong> para configurar tu propio DPI y calidad JPEG. Los presets corresponden directamente a las opciones <code>-dPDFSETTINGS</code> de Ghostscript. Si el motor WASM no se inicializa, la herramienta recurre a una compresión de extracción de metadatos con pdf-lib.',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
-    'btn_home': '← Inicio',
-    'btn_choose_pdf': 'Elegir PDF',
-    'banner_working': 'Trabajando con versión modificada',
-    'btn_dl_pdf': 'Descargar PDF',
-    'btn_keep': 'Seguir trabajando con esta versión',
-    'te_h2': 'Editar texto del PDF',
-    'te_desc': 'Haz clic en cualquier bloque de texto para editarlo directamente en la página. Haz clic en un área en blanco para añadir texto nuevo.',
-    'te_fontsize': 'Tamaño:',
-    'te_color': 'Color:',
-    'te_delete': 'Eliminar bloque',
-    'te_undo': 'Deshacer último',
-    'te_page': 'Página',
-    'te_no_text': 'No hay texto seleccionable — haz clic para añadir texto nuevo.',
-    'te_hint': 'Haz clic en texto resaltado para editarlo. Haz clic en espacio en blanco para añadir texto.',
-    'te_btn': 'Aplicar cambios al PDF',
-    'cp_label_preset': 'Preset de compresión:',
-    'cp_pre_screen_n': 'Screen',
-    'cp_pre_screen_d': '72 DPI · archivo mínimo / solo visualización digital',
-    'cp_pre_ebook_n': 'eBook',
-    'cp_pre_ebook_d': '150 DPI · buen equilibrio / email y web',
-    'cp_pre_printer_n': 'Printer',
-    'cp_pre_printer_d': '300 DPI · alta calidad / impresión de oficina',
-    'cp_pre_prepress_n': 'Prepress',
-    'cp_pre_prepress_d': '300 DPI · color seguro / impresión profesional',
-    'cp_pre_custom_n': 'Custom',
-    'cp_pre_custom_d': 'DPI manual / control de calidad',
-    'cp_label_dpi': 'DPI de imagen (color y escala de grises):',
-    'cp_label_qual': 'Calidad JPEG (1–100):',
-    'cp_gs_note': 'El motor Ghostscript se descargará la primera vez que comprimas un archivo (~30 MB).',
-    'cp_btn': 'Comprimir',
-  }
-};
-const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
-const _T  = _TL[_lg] || _TL['en'];
-function setLang(l) { localStorage.setItem('sb_lang', l); location.reload(); }
-function applyToolI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const v = _T[el.dataset.i18n]; if (v !== undefined) el.textContent = v;
-  });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
-  });
-  // file indicator placeholder
-  const fi = document.getElementById('file-indicator');
-  if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
-  // active lang button
-  const btn = document.getElementById('lang-' + _lg);
-  if (btn) btn.classList.add('active');
-}
-function toggleTpFaq(btn) {
-  const ans = btn.nextElementSibling;
-  const open = ans.classList.contains('open');
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
-  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
-}
-document.addEventListener('DOMContentLoaded', applyToolI18n);
+
 
 
 // ─── COLOR PALETTE ──────────────────────────────────────────────────────────
@@ -4365,7 +4476,7 @@ function cpSave(hex) {
 
 function cpLoad() {
   try { return JSON.parse(sessionStorage.getItem(CP_KEY)) || []; }
-  catch { return []; }
+  catch(e) { return []; }
 }
 
 function cpRenderSwatches() {
@@ -4436,6 +4547,22 @@ openTool = function(id) {
 
 document.addEventListener('DOMContentLoaded', cpInit);
 
+
+// ── GLOBAL EXPORTS ────────────────────────────────────────────────────────────
+window.resetToHome   = resetToHome;
+window.scrollGrid    = scrollGrid;
+window.setLang       = setLang;
+window.applyToolI18n = applyToolI18n;
+window.toggleTpFaq   = toggleTpFaq;
+window.cpOpenPicker  = cpOpenPicker;
+window.cpOnPick      = cpOnPick;
+window.cpEyeDropper  = cpEyeDropper;
+window.openTool      = openTool;
+window.onMergeFilesSelected = onMergeFilesSelected;
+window.onImgFilesSelected   = onImgFilesSelected;
+window.teChangePage = teChangePage;
+
+})(); // end IIFE
 </script>
 
 <footer>
