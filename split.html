@@ -199,11 +199,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .file-input-wrap:hover .file-input-label { border-color:rgba(0,245,212,0.3); color:var(--cyan); }
   .file-input-label .file-name { color:var(--cyan); }
 
+  .split-gap { position:relative; display:flex; align-items:center; justify-content:center; cursor:pointer; }
   .split-gap .split-line { width:3px; background:rgba(255,255,255,0.08); flex:1; min-height:50px; border-radius:2px; transition:background 0.15s; }
   .split-gap.marked .split-line { background:var(--err); }
   .split-gap:hover .split-line { background:rgba(0,245,212,0.3); }
-  .split-gap .split-icon { font-size:0.72rem; opacity:0; transition:opacity 0.15s; position:absolute; top:50%; transform:translateY(-50%); background:var(--bg); padding:0 2px; color:var(--err); pointer-events:none; }
-  .split-gap:hover .split-icon, .split-gap.marked .split-icon { opacity:1; }
+  .split-gap .split-icon { font-size:2.16rem; opacity:0; transition:opacity 0.15s; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg); padding:0 4px; color:var(--err); pointer-events:none; }
+  .split-gap:hover .split-icon { opacity:0.5; }
+  .split-gap.marked .split-icon { opacity:1; }
 
   .tp-faq { margin-top:24px; }
   .tp-faq-item { border-top:1px solid var(--light); }
@@ -294,7 +296,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
-      <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+      <button id="btn-change-file" onclick="spChangeFile()" style="display:none">✕ Change file</button>
     </div>
     <div id="color-palette-wrap">
       <div id="cp-active-wrap">
@@ -2032,6 +2034,20 @@ function resetToHome() {
   if(_rtb) _rtb.textContent='Choose PDF'; if(_rtn) _rtn.textContent='';
   const _rti=document.getElementById('tool-choose-file'); if(_rti) _rti.value='';
   goHome();
+}
+
+function spChangeFile(){
+  currentBuffer=null; currentFileName=''; modificationHistory=[];
+  try{sessionStorage.removeItem('sb_file');sessionStorage.removeItem('sb_name');}catch(e){}
+  document.getElementById('file-indicator').textContent='No file loaded';
+  document.getElementById('btn-change-file').style.display='none';
+  document.getElementById('working-banner').classList.remove('show');
+  splitMarks.clear();
+  document.getElementById('split-grid').innerHTML='';
+  document.getElementById('sp-btn').disabled=true;
+  document.getElementById('sp-status').textContent='';
+  const nm=document.getElementById('tool-choose-name'); if(nm) nm.textContent='';
+  const inp=document.getElementById('tool-choose-file'); if(inp){inp.value='';inp.click();}
 }
 
 function buildOtherTools(currentId) {
@@ -4086,7 +4102,7 @@ document.addEventListener('DOMContentLoaded', () => { openTool('split'); });
       const bin=atob(b64),arr=new Uint8Array(bin.length);
       for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
       currentBuffer=arr.buffer; currentFileName=name; _updateChooseBtn(name);
-      document.getElementById('file-indicator').innerHTML='File: <span style="color:#fff">'+name+'</span>';
+      document.getElementById('file-indicator').innerHTML='File: <span>'+name+'</span>';
       document.getElementById('btn-change-file').style.display='inline-block';
     }
   }catch(e){}
@@ -4243,6 +4259,7 @@ window.cpEyeDropper  = cpEyeDropper;
 window.openTool      = openTool;
 window.onMergeFilesSelected = onMergeFilesSelected;
 window.onImgFilesSelected   = onImgFilesSelected;
+window.spChangeFile  = spChangeFile;
 
 })(); // end IIFE
 </script>

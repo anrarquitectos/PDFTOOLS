@@ -293,7 +293,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
-      <button id="btn-change-file" onclick="resetToHome()" style="display:none">✕ Change file</button>
+      <button id="btn-change-file" onclick="teChangeFile()" style="display:none">✕ Change file</button>
     </div>
     <div id="color-palette-wrap">
       <div id="cp-active-wrap">
@@ -496,7 +496,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span id="te-pdf-name" style="font-size:0.80rem;color:#555;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
       </div>
         <h2 data-i18n="te_h2">Edit PDF text</h2>
-        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;" data-i18n="te_desc">Click on any text block to edit it directly on the page. Click on a blank area to add new text.</p>
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;" data-i18n-html="te_desc">Click on any text block to edit it directly on the page. <strong>Double-click</strong> on a blank area to add new text. If the PDF text is not selectable, first make it searchable using the <a href="https://scalebarpdf.com/ocr" style="color:var(--cyan)">OCR tool</a>.</p>
         <div id="te-toolbar" style="display:none;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;">
           <div style="display:flex;align-items:center;gap:4px;">
             <label style="font-size:0.78rem;color:var(--mid);" data-i18n="te_fontsize">Size:</label>
@@ -1717,14 +1717,14 @@ const _TL = {
     'btn_dl_pdf': 'Download PDF',
     'btn_keep': 'Keep working with this version',
     'te_h2': 'Edit PDF text',
-    'te_desc': 'Click on any text block to edit it directly on the page. Click on a blank area to add new text.',
+    'te_desc': 'Click on any text block to edit it directly on the page. <strong>Double-click</strong> on a blank area to add new text. If the PDF text is not selectable, first make it searchable using the <a href="https://scalebarpdf.com/ocr" style="color:var(--cyan)">OCR tool</a>.',
     'te_fontsize': 'Size:',
     'te_color': 'Colour:',
     'te_delete': 'Delete block',
     'te_undo': 'Undo last',
     'te_page': 'Page',
     'te_no_text': 'No selectable text on this page — click to add new text.',
-    'te_hint': 'Click highlighted text to edit. Click blank space to add new text.',
+    'te_hint': 'Click highlighted text to edit. Double-click blank space to add new text.',
     'te_btn': 'Apply edits to PDF',
     'cp_label_preset': 'Compression preset:',
     'cp_pre_screen_n': 'Screen',
@@ -1799,14 +1799,14 @@ const _TL = {
     'btn_dl_pdf': 'Descargar PDF',
     'btn_keep': 'Seguir trabajando con esta versión',
     'te_h2': 'Editar texto del PDF',
-    'te_desc': 'Haz clic en cualquier bloque de texto para editarlo directamente en la página. Haz clic en un área en blanco para añadir texto nuevo.',
+    'te_desc': 'Haz clic en cualquier bloque de texto para editarlo directamente en la página. Haz <strong>doble clic</strong> en un área en blanco para añadir texto nuevo. Si el texto del PDF no es seleccionable, primero hazlo buscable con la <a href="https://scalebarpdf.com/ocr" style="color:var(--cyan)">herramienta OCR</a>.',
     'te_fontsize': 'Tamaño:',
     'te_color': 'Color:',
     'te_delete': 'Eliminar bloque',
     'te_undo': 'Deshacer último',
     'te_page': 'Página',
     'te_no_text': 'No hay texto seleccionable — haz clic para añadir texto nuevo.',
-    'te_hint': 'Haz clic en texto resaltado para editarlo. Haz clic en espacio en blanco para añadir texto.',
+    'te_hint': 'Haz clic en texto resaltado para editarlo. Haz doble clic en espacio en blanco para añadir texto.',
     'te_btn': 'Aplicar cambios al PDF',
     'cp_label_preset': 'Preset de compresión:',
     'cp_pre_screen_n': 'Screen',
@@ -2129,7 +2129,7 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
 // ─── TEXT EDITOR ────────────────────────────────────────────────────────────
 let teBytes=null, tePdfJs_doc=null, tePageNum=1, teTotalPages=0;
 const TE_SCALE=1.6, PT_MM=72/25.4;
-let teBlocks=[], teActiveId=null, teHistory=[];
+let teBlocks=[], teActiveId=null, teSelectedId=null, teHistory=[];
 
 function showDonationBanner(){
   const b=document.getElementById('donation-banner'),h=document.getElementById('donation-heart'),
@@ -2245,7 +2245,7 @@ function teDrawEdits(){
       }
     }
     // Dashed border on all non-deleted blocks
-    ctx.strokeStyle='rgba(37,99,235,0.3)'; ctx.lineWidth=1; ctx.setLineDash([3,2]);
+    ctx.strokeStyle=(b.id===teSelectedId||b.id===teActiveId)?'rgba(255,77,109,0.65)':'rgba(37,99,235,0.3)'; ctx.lineWidth=1; ctx.setLineDash([3,2]);
     ctx.strokeRect(b.x,b.y,b.w,b.h); ctx.setLineDash([]);
   });
 }
@@ -2342,12 +2342,15 @@ function teBuildHitLayer(){
   hl.onclick=e=>{
     if(e.target!==hl) return;
     teCommitActive();
+    teSelectedId=null;
+    teDrawEdits();
   };
 }
 
 function teActivate(block){
   teCommitActive();
   teActiveId=block.id;
+  teSelectedId=block.id;
   const txt=block.newStr!==null?block.newStr:block.str;
   document.getElementById('te-size').value=Math.round(block.fontSize);
   document.getElementById('te-color').value=block.color||'#1a1a1a';
@@ -2374,6 +2377,21 @@ function teAddNew(cx,cy){
   teBlocks.push(block);
   teDrawEdits(); teBuildHitLayer();
   teActivate(block);
+}
+
+function teChangeFile(){
+  teBytes=null; tePdfJs_doc=null; teBlocks=[]; teActiveId=null; teSelectedId=null; teHistory=[];
+  document.getElementById('te-pdf-name').textContent='';
+  document.getElementById('te-toolbar').style.display='none';
+  document.getElementById('te-page-nav').style.display='none';
+  document.getElementById('te-wrap').style.display='none';
+  document.getElementById('te-hint').style.display='none';
+  document.getElementById('te-btn').disabled=true;
+  document.getElementById('te-dl').disabled=true;
+  document.getElementById('te-apply').disabled=true;
+  document.getElementById('te-status').textContent='';
+  document.getElementById('btn-change-file').style.display='none';
+  const inp=document.getElementById('te-pdf-input'); inp.value=''; inp.click();
 }
 
 function teCommitActive(){
@@ -2426,11 +2444,12 @@ document.getElementById('te-color').addEventListener('input',()=>{
     teEd.style.color=block.color;block.newStr=teEd.value;block.edited=true;teDrawEdits();}
 });
 document.getElementById('te-delete-btn').addEventListener('click',()=>{
-  if(!teActiveId) return;
+  const delId=teActiveId||teSelectedId;
+  if(!delId) return;
   tePushHistory();
-  const block=teBlocks.find(b=>b.id===teActiveId);
+  const block=teBlocks.find(b=>b.id===delId);
   if(block){block.deleted=true;block.edited=true;}
-  teEd.style.display='none'; teActiveId=null;
+  teEd.style.display='none'; teActiveId=null; teSelectedId=null;
   teDrawEdits(); teBuildHitLayer();
 });
 function tePushHistory(){
@@ -4561,6 +4580,7 @@ window.openTool      = openTool;
 window.onMergeFilesSelected = onMergeFilesSelected;
 window.onImgFilesSelected   = onImgFilesSelected;
 window.teChangePage = teChangePage;
+window.teChangeFile = teChangeFile;
 
 })(); // end IIFE
 </script>
