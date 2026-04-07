@@ -776,7 +776,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span class="faq-arrow">▼</span>
         </button>
         <div class="faq-a" data-i18n-html="faq1_a">
-          No — nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.
+          No, nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.
         </div>
       </div>
 
@@ -2027,7 +2027,7 @@ const TRANSLATIONS = {
     faq9_q: 'Can I reorder pages and then split the result?',
     faq10_q: 'Is this tool free? How is it funded?',
     // FAQ answers (HTML allowed)
-    faq1_a: 'No — nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.',
+    faq1_a: 'No, nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.',
     faq2_a: 'Any modern Chromium-based browser (Chrome 90+, Edge 90+, Brave) or Firefox 90+ works well. Safari 16+ on macOS and iOS is also supported for most tools. For the <strong>Compress</strong> tool, which uses a Ghostscript WebAssembly engine, a recent Chromium browser gives the best results. If Ghostscript fails to load, the tool automatically falls back to a lighter pdf-lib compression.',
     faq3_a: "There are no server-imposed limits because everything runs locally. Practical limits depend on your device's RAM. Files up to ~150 MB are handled without issues on most modern computers. Very large files (scanned plans at 300 dpi, for example) may be slow on low-memory devices. If a tool runs out of memory the browser will show an error message — you can try reducing the file first with the <strong>Compress</strong> tool.",
     faq4_a: 'Yes, this is the intended workflow. After any operation completes, click <strong>↩ Keep working with this version</strong> to promote the result as the active file. Every subsequent tool will work on that modified version. A green banner at the top of the tool panel tracks your modification history so you always know which version you are working on.',
@@ -2114,7 +2114,7 @@ const TRANSLATIONS = {
     faq9_q: '¿Puedo reordenar páginas y luego dividir el resultado?',
     faq10_q: '¿Esta herramienta es gratuita? ¿Cómo se financia?',
     // Respuestas FAQ (HTML permitido)
-    faq1_a: 'No — nadie. Ni nosotros, ni ningún tercero. Cada operación se ejecuta completamente en tu navegador con JavaScript, de modo que tu PDF nunca sale de tu dispositivo desde el momento en que lo abres hasta que descargas el resultado. Esto no es solo una política de privacidad: el sitio no tiene ningún servidor backend, lo que hace técnicamente imposible que tus archivos sean transmitidos o vistos por otra persona.',
+    faq1_a: 'No, nadie. Ni nosotros, ni ningún tercero. Cada operación se ejecuta completamente en tu navegador con JavaScript, de modo que tu PDF nunca sale de tu dispositivo desde el momento en que lo abres hasta que descargas el resultado. Esto no es solo una política de privacidad: el sitio no tiene ningún servidor backend, lo que hace técnicamente imposible que tus archivos sean transmitidos o vistos por otra persona.',
     faq2_a: 'Cualquier navegador moderno basado en Chromium (Chrome 90+, Edge 90+, Brave) o Firefox 90+ funciona bien. Safari 16+ en macOS e iOS también es compatible con la mayoría de herramientas. Para la herramienta <strong>Comprimir</strong>, que usa un motor Ghostscript WebAssembly, un navegador Chromium reciente da los mejores resultados. Si Ghostscript no se carga, la herramienta recurre automáticamente a una compresión más ligera con pdf-lib.',
     faq3_a: 'No hay límites impuestos por el servidor porque todo se ejecuta localmente. Los límites prácticos dependen de la RAM de tu dispositivo. Los archivos de hasta ~150 MB se manejan sin problemas en la mayoría de los ordenadores modernos. Los archivos muy grandes (planos escaneados a 300 ppp, por ejemplo) pueden ser lentos en dispositivos con poca memoria. Si una herramienta se queda sin memoria, el navegador mostrará un mensaje de error — puedes reducir primero el archivo con la herramienta <strong>Comprimir</strong>.',
     faq4_a: 'Sí, este es el flujo de trabajo previsto. Después de que se complete cualquier operación, haz clic en <strong>↩ Seguir trabajando con esta versión</strong> para activar el resultado como archivo activo. Cada herramienta posterior trabajará sobre esa versión modificada. Un banner verde en la parte superior del panel de la herramienta registra tu historial de modificaciones para que siempre sepas sobre qué versión estás trabajando.',
@@ -2223,7 +2223,7 @@ function updateTopBar() {
 document.addEventListener('DOMContentLoaded', () => {
   const activeLang = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
   const btnEl = document.getElementById('lang-' + activeLang);
-  if (btnEl) { btnEl.style.color = '#fff'; btnEl.style.borderColor = '#fff'; }
+  if (btnEl) { btnEl.style.color = 'var(--cyan)'; btnEl.style.borderColor = 'var(--cyan)'; }
 });
 
 // Drop zone removed — cards navigate directly to tool pages
