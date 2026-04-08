@@ -143,8 +143,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #patch-topbar { background:rgba(8,11,18,0.95); color:#fff; padding:10px 16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--light); flex-shrink:0; }
   #patch-topbar span { font-size:0.78rem; color:var(--muted); }
   #patch-topbar .patch-sep { color:rgba(255,255,255,0.1); }
-  #patch-canvas-wrap { flex:1; overflow:auto; display:flex; align-items:flex-start; justify-content:center; padding:16px; }
-  #patch-canvas-container { position:relative; display:inline-block; cursor:crosshair; }
+  #patch-canvas-wrap { flex:1; overflow:auto; display:flex; align-items:flex-start; justify-content:center; padding:24px;
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+                      linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+                      linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.03) 75%),
+                      linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.03) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px; }
+  #patch-canvas-container { position:relative; display:inline-block; cursor:crosshair; box-shadow: 0 8px 32px rgba(0,0,0,0.6); flex-shrink:0; }
   #patch-canvas-bg { display:block; }
   #patch-canvas-draw { position:absolute; top:0; left:0; cursor:crosshair; }
   .patch-vertex-dot { position:absolute; width:10px; height:10px; border-radius:50%; background:#e03; border:2px solid #fff; transform:translate(-50%,-50%); pointer-events:none; }
@@ -1629,6 +1635,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <span class="patch-sep">|</span>
     <span id="patch-tb-info">Click to place vertices. Click the blue dot (or near the first point) to close the polygon.</span>
     <span class="patch-sep" style="margin-left:auto;">|</span>
+    <button class="btn" id="patch-zoom-out" style="font-size:0.78rem;padding:4px 10px;border-color:rgba(255,255,255,0.2);color:var(--muted);" title="Zoom out">−</button>
+    <span id="patch-zoom-label" style="font-size:0.75rem;color:var(--muted);min-width:40px;text-align:center;">150%</span>
+    <button class="btn" id="patch-zoom-in"  style="font-size:0.78rem;padding:4px 10px;border-color:rgba(255,255,255,0.2);color:var(--muted);" title="Zoom in">+</button>
     <button class="btn" id="patch-undo-btn"  style="font-size:0.78rem;padding:4px 10px;border-color:rgba(255,255,255,0.2);color:var(--muted);">↩ Undo last</button>
     <button class="btn" id="patch-clear-btn" style="font-size:0.78rem;padding:4px 10px;border-color:rgba(255,255,255,0.2);color:var(--muted);">✕ Clear</button>
     <button class="btn btn-primary" id="patch-apply-poly" disabled style="font-size:0.78rem;padding:4px 12px;">✓ Apply patch</button>
@@ -1974,6 +1983,7 @@ async function loadPDF(file) {
   modificationHistory = [];
   updateTopBar();
   showDropCheck(file.name);
+  populatePatchSel();
 }
 
 function updateTopBar() {
@@ -3129,11 +3139,11 @@ document.getElementById('patch-open-btn').addEventListener('click', async () => 
   const pdfJs  = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
   const pjPage = await pdfJs.getPage(patchPageIdx + 1);
 
-  // Fit to 90% of viewport
-  const maxW = window.innerWidth  * 0.90;
-  const maxH = (window.innerHeight - 100) * 0.90;
-  const vp0  = pjPage.getViewport({ scale: 1 });
-  patchScale  = Math.min(maxW / vp0.width, maxH / vp0.height);
+  // Fixed zoom from zoom control
+  const PATCH_ZOOM = PATCH_ZOOM_STEPS[patchZoomIdx];
+  patchScale = PATCH_ZOOM;
+  document.getElementById('patch-zoom-label').textContent =
+    Math.round(patchScale * 100) + '%';
   const vp   = pjPage.getViewport({ scale: patchScale });
 
   bgCanvas.width  = drawCanvas.width  = vp.width;
@@ -3283,6 +3293,38 @@ document.getElementById('patch-clear-btn').addEventListener('click', () => {
 
 document.getElementById('patch-close-btn').addEventListener('click', () => {
   fs.classList.remove('open');
+});
+
+// ── Zoom controls ──────────────────────────────────────────────────────────
+const PATCH_ZOOM_STEPS = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0];
+let patchZoomIdx = 4; // default index → 1.5×
+
+function applyPatchZoom() {
+  patchScale = PATCH_ZOOM_STEPS[patchZoomIdx];
+  document.getElementById('patch-zoom-label').textContent =
+    Math.round(patchScale * 100) + '%';
+  // Re-render canvas at new scale if we have a loaded page
+  if (bgCanvas.width === 0) return;
+  _rerenderPatchCanvas();
+}
+
+async function _rerenderPatchCanvas() {
+  try {
+    const pdfJs  = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
+    const pjPage = await pdfJs.getPage(patchPageIdx + 1);
+    const vp = pjPage.getViewport({ scale: patchScale });
+    bgCanvas.width  = drawCanvas.width  = vp.width;
+    bgCanvas.height = drawCanvas.height = vp.height;
+    await pjPage.render({ canvasContext: bgCtx, viewport: vp }).promise;
+    redrawPolygon();
+  } catch(_) {}
+}
+
+document.getElementById('patch-zoom-in').addEventListener('click', () => {
+  if (patchZoomIdx < PATCH_ZOOM_STEPS.length - 1) { patchZoomIdx++; applyPatchZoom(); }
+});
+document.getElementById('patch-zoom-out').addEventListener('click', () => {
+  if (patchZoomIdx > 0) { patchZoomIdx--; applyPatchZoom(); }
 });
 
 // ── Apply patch ────────────────────────────────────────────────────────────
@@ -4100,7 +4142,7 @@ document.getElementById('pn-btn').addEventListener('click', async () => {
     () => { if (rcBytes) applyAsActive(rcBytes, 'Rev cloud', 'rc-status', 'rc-apply'); });
 }
 
-document.addEventListener('DOMContentLoaded', () => { openTool('patch'); setTimeout(populatePatchSel,100); });
+document.addEventListener('DOMContentLoaded', () => { openTool('patch'); setTimeout(populatePatchSel,100); cpInit(); });
 function resetToHome() {
   currentBuffer=null; currentFileName=''; modificationHistory=[];
   try { sessionStorage.removeItem('sb_file'); sessionStorage.removeItem('sb_name'); } catch(e){}
@@ -4119,6 +4161,7 @@ function resetToHome() {
       currentBuffer=arr.buffer; currentFileName=name; _updateChooseBtn(name);
       document.getElementById('file-indicator').innerHTML='File: <span style="color:#fff">'+name+'</span>';
       document.getElementById('btn-change-file').style.display='inline-block';
+      populatePatchSel();
     }
   }catch(e){}
   const inp=document.getElementById('tool-choose-file');
