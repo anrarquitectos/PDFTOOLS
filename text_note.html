@@ -289,7 +289,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Text note — Add text annotations to PDF pages</span></h1>
+  <h1><a href="/"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Text note — Add text annotations to PDF pages</span></h1>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
@@ -496,24 +496,125 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <span id="te-pdf-name" style="font-size:0.80rem;color:#555;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
       </div>
         <h2 data-i18n="te_h2">Edit PDF text</h2>
-        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:14px;" data-i18n-html="te_desc">Click on any text block to edit it directly on the page. <strong>Double-click</strong> on a blank area to add new text. If the PDF text is not selectable, first make it searchable using the <a href="https://scalebarpdf.com/ocr" style="color:var(--cyan)">OCR tool</a>.</p>
-        <div id="te-toolbar" style="display:none;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px;">
-          <div style="display:flex;align-items:center;gap:4px;">
-            <label style="font-size:0.78rem;color:var(--mid);" data-i18n="te_fontsize">Size:</label>
-            <input type="number" id="te-size" value="12" min="4" max="96" step="0.5" style="width:54px;">
+        <p style="font-size:0.82rem;color:var(--mid);margin-bottom:16px;" data-i18n-html="te_desc">Click on any text block to edit it directly on the page. <strong>Double-click</strong> on a blank area to add new text. If the PDF text is not selectable, first make it searchable using the <a href="https://scalebarpdf.com/ocr" style="color:var(--cyan)">OCR tool</a>.</p>
+
+        <!-- ── TOOLBAR ── -->
+        <div id="te-toolbar" style="display:none;flex-direction:column;gap:0;margin-bottom:12px;border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;">
+
+          <!-- Row 1: Text controls -->
+          <div style="display:flex;align-items:center;background:rgba(255,255,255,0.03);border-bottom:1px solid rgba(255,255,255,0.06);padding:6px 10px;gap:8px;">
+            <span style="font-size:0.68rem;color:var(--text);letter-spacing:0.08em;text-transform:uppercase;flex-shrink:0;" data-i18n="te_group_text">Text</span>
+            <div style="flex:1;"></div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+              <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+                <label style="font-size:0.75rem;color:var(--muted);line-height:1;" data-i18n="te_fontsize">Size</label>
+                <input type="number" id="te-size" value="12" min="4" max="96" step="0.5"
+                  style="width:52px;height:26px;padding:0 6px;box-sizing:border-box;vertical-align:middle;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:4px;color:var(--text);font-family:inherit;font-size:0.78rem;outline:none;margin:0;">
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+                <label style="font-size:0.75rem;color:var(--muted);line-height:1;" data-i18n="te_color">Colour</label>
+                <input type="color" id="te-color" value="#1a1a1a"
+                  style="height:26px;width:40px;padding:2px 3px;box-sizing:border-box;vertical-align:middle;border:1px solid rgba(255,255,255,0.12);border-radius:4px;cursor:pointer;background:rgba(255,255,255,0.05);margin:0;">
+              </div>
+              <div style="width:1px;height:18px;background:rgba(255,255,255,0.1);flex-shrink:0;"></div>
+              <button class="btn" id="te-delete-btn"
+                style="padding:0 12px;height:26px;box-sizing:border-box;font-size:0.76rem;border-color:rgba(255,77,109,0.4);color:var(--err);margin:0;line-height:1;">✕ <span data-i18n="te_delete">Delete block</span></button>
+              <button class="btn" id="te-undo-btn"
+                style="padding:0 12px;height:26px;box-sizing:border-box;font-size:0.76rem;margin:0;line-height:1;">↩ <span data-i18n="te_undo">Undo last</span></button>
+            </div>
           </div>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <label style="font-size:0.78rem;color:var(--mid);" data-i18n="te_color">Colour:</label>
-            <input type="color" id="te-color" value="#1a1a1a" style="height:30px;width:44px;padding:2px 3px;border:1px solid rgba(255,255,255,0.15);border-radius:4px;cursor:pointer;background:rgba(255,255,255,0.05);">
+
+          <!-- Row 2: Annotation tools -->
+          <div style="display:flex;align-items:center;background:rgba(255,255,255,0.02);padding:6px 10px;gap:8px;">
+            <span style="font-size:0.68rem;color:var(--text);letter-spacing:0.08em;text-transform:uppercase;flex-shrink:0;" data-i18n="te_group_annotate">Annotate</span>
+            <div style="flex:1;"></div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+              <button class="btn" id="te-hl-btn" onclick="teSetHighlightMode()"
+                style="padding:0 12px;height:26px;box-sizing:border-box;font-size:0.76rem;margin:0;line-height:1;transition:all 0.15s;" title="Toggle highlight mode — click text blocks to highlight them" data-i18n-title="te_hl_title">
+                <span style="color:#ffe000;">▮</span> <span data-i18n="te_hl_btn">Highlight</span>
+              </button>
+              <button class="btn" id="te-eraser-btn" onclick="teSetEraserMode()"
+                style="padding:0 12px;height:26px;box-sizing:border-box;font-size:0.76rem;margin:0;line-height:1;transition:all 0.15s;" title="Toggle eraser mode — click highlighted blocks to remove highlight" data-i18n-title="te_eraser_title">
+                <span data-i18n="te_eraser_btn">⌫ Erase hl</span>
+              </button>
+              <div style="width:1px;height:18px;background:rgba(255,255,255,0.1);flex-shrink:0;"></div>
+              <button class="btn" id="te-stamp-btn" onclick="teToggleStampPicker()"
+                style="padding:0 12px;height:26px;box-sizing:border-box;font-size:0.76rem;margin:0;line-height:1;transition:all 0.15s;" title="Insert a stamp onto the page" data-i18n-title="te_stamp_title">
+                <span data-i18n="te_stamp_btn">✓ Stamp</span>
+              </button>
+            </div>
           </div>
-          <button class="btn" id="te-delete-btn" style="padding:4px 10px;font-size:0.80rem;border-color:var(--err);color:var(--err);" data-i18n="te_delete">Delete block</button>
-          <button class="btn" id="te-undo-btn" style="padding:4px 10px;font-size:0.80rem;" data-i18n="te_undo">Undo last</button>
+
+          <!-- Row 3: Stamp picker (hidden by default) -->
+          <div id="te-stamp-picker" style="display:none;align-items:center;gap:8px;padding:8px 10px;background:rgba(0,0,0,0.15);border-top:1px solid rgba(255,255,255,0.06);flex-wrap:wrap;">
+            <span style="font-size:0.68rem;color:var(--muted);letter-spacing:0.06em;flex-shrink:0;" data-i18n="te_stamp_hint">Click a stamp, then click on the page to place it:</span>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button class="te-stamp-opt" data-stamp="check" onclick="teSelectStamp('check')" data-i18n-title="te_stamp_check"
+                style="background:none;border:2px solid rgba(255,255,255,0.12);border-radius:8px;padding:4px;cursor:pointer;transition:border-color 0.15s;display:flex;align-items:center;gap:6px;">
+                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="14" fill="#16a34a" opacity="0.15"/>
+                  <circle cx="16" cy="16" r="14" fill="none" stroke="#16a34a" stroke-width="2"/>
+                  <polyline points="9,16 14,21 23,11" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span style="font-size:0.72rem;color:#4ade80;" data-i18n="te_stamp_check_lbl">OK</span>
+              </button>
+              <button class="te-stamp-opt" data-stamp="cross" onclick="teSelectStamp('cross')" data-i18n-title="te_stamp_cross"
+                style="background:none;border:2px solid rgba(255,255,255,0.12);border-radius:8px;padding:4px;cursor:pointer;transition:border-color 0.15s;display:flex;align-items:center;gap:6px;">
+                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="14" fill="#dc2626" opacity="0.15"/>
+                  <circle cx="16" cy="16" r="14" fill="none" stroke="#dc2626" stroke-width="2"/>
+                  <line x1="10" y1="10" x2="22" y2="22" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="22" y1="10" x2="10" y2="22" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <span style="font-size:0.72rem;color:#f87171;" data-i18n="te_stamp_cross_lbl">No</span>
+              </button>
+              <button class="te-stamp-opt" data-stamp="question" onclick="teSelectStamp('question')" data-i18n-title="te_stamp_question"
+                style="background:none;border:2px solid rgba(255,255,255,0.12);border-radius:8px;padding:4px;cursor:pointer;transition:border-color 0.15s;display:flex;align-items:center;gap:6px;">
+                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="14" fill="#1d4ed8" opacity="0.15"/>
+                  <circle cx="16" cy="16" r="14" fill="none" stroke="#1d4ed8" stroke-width="2"/>
+                  <text x="16" y="22" text-anchor="middle" font-family="Georgia,serif" font-size="17" font-weight="bold" fill="#3b82f6">?</text>
+                </svg>
+                <span style="font-size:0.72rem;color:#60a5fa;" data-i18n="te_stamp_question_lbl">?</span>
+              </button>
+              <button class="te-stamp-opt" data-stamp="star" onclick="teSelectStamp('star')" data-i18n-title="te_stamp_star"
+                style="background:none;border:2px solid rgba(255,255,255,0.12);border-radius:8px;padding:4px;cursor:pointer;transition:border-color 0.15s;display:flex;align-items:center;gap:6px;">
+                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="14" fill="#ca8a04" opacity="0.15"/>
+                  <circle cx="16" cy="16" r="14" fill="none" stroke="#ca8a04" stroke-width="2"/>
+                  <polygon points="16,7 18.4,13.2 25,13.2 19.8,17.2 21.8,23.5 16,19.5 10.2,23.5 12.2,17.2 7,13.2 13.6,13.2" fill="#eab308" opacity="0.9"/>
+                </svg>
+                <span style="font-size:0.72rem;color:#facc15;" data-i18n="te_stamp_star_lbl">★</span>
+              </button>
+            </div>
+            <button onclick="teSelectStamp(null)" data-i18n="te_stamp_cancel"
+              style="background:none;border:none;color:var(--muted);font-size:0.72rem;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:inherit;">✕ cancel</button>
+          </div>
         </div>
-        <div id="te-page-nav" style="display:none;align-items:center;gap:8px;margin-bottom:10px;font-size:0.82rem;">
-          <button class="btn" id="te-prev" style="padding:3px 10px;" onclick="teChangePage(-1)">←</button>
-          <span data-i18n="te_page">Page</span> <span id="te-page-cur">1</span> / <span id="te-page-total">1</span>
-          <button class="btn" id="te-next" style="padding:3px 10px;" onclick="teChangePage(+1)">→</button>
-          <span id="te-no-text" style="font-size:0.78rem;color:var(--mid);display:none;" data-i18n="te_no_text">No selectable text — click to add new text.</span>
+
+        <!-- ── PAGE NAV + ZOOM ── -->
+        <div id="te-page-nav" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;padding:5px 2px;font-size:0.82rem;border-bottom:1px solid rgba(255,255,255,0.05);">
+          <button class="btn" id="te-prev" style="padding:0 10px;height:26px;box-sizing:border-box;margin:0;line-height:1;" onclick="teChangePage(-1)">←</button>
+          <span style="color:var(--muted);font-size:0.78rem;" data-i18n="te_page">Page</span>
+          <span id="te-page-cur" style="color:var(--text);font-weight:700;">1</span>
+          <span style="color:var(--muted);">/</span>
+          <span id="te-page-total" style="color:var(--muted);">1</span>
+          <button class="btn" id="te-next" style="padding:0 10px;height:26px;box-sizing:border-box;margin:0;line-height:1;" onclick="teChangePage(+1)">→</button>
+          <span id="te-no-text" style="font-size:0.75rem;color:var(--mid);display:none;" data-i18n="te_no_text">No selectable text — double-click to add new text.</span>
+          <span style="flex:1;"></span>
+          <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
+            <label style="font-size:0.70rem;color:var(--muted);letter-spacing:0.06em;line-height:1;" data-i18n="te_zoom_lbl">Zoom</label>
+            <select id="te-zoom" title="Canvas zoom" onchange="teSetZoom(parseFloat(this.value))"
+              style="height:26px;padding:0 7px;box-sizing:border-box;vertical-align:middle;font-size:0.72rem;border:1px solid rgba(255,255,255,0.1);border-radius:4px;background:rgba(255,255,255,0.04);color:var(--muted);cursor:pointer;font-family:inherit;outline:none;transition:border-color 0.15s;margin:0;">
+              <option value="0.8">80%</option>
+              <option value="1.0">100%</option>
+              <option value="1.2">120%</option>
+              <option value="1.6" selected>160%</option>
+              <option value="2.0">200%</option>
+              <option value="2.5">250%</option>
+              <option value="3.0">300%</option>
+            </select>
+          </div>
         </div>
         <div id="te-wrap" style="position:relative;display:none;border:1px solid var(--light);overflow:auto;max-height:75vh;background:#888;">
           <div id="te-inner" style="position:relative;display:inline-block;">
@@ -1722,6 +1823,25 @@ const _TL = {
     'te_color': 'Colour:',
     'te_delete': 'Delete block',
     'te_undo': 'Undo last',
+    'te_group_text': 'Text',
+    'te_group_annotate': 'Annotate',
+    'te_hl_btn': 'Highlight',
+    'te_hl_title': 'Toggle highlight mode — click text blocks to highlight them',
+    'te_eraser_btn': '⌫ Erase hl',
+    'te_eraser_title': 'Toggle eraser mode — click highlighted blocks to remove highlight',
+    'te_stamp_btn': '✓ Stamp',
+    'te_stamp_title': 'Insert a stamp onto the page',
+    'te_stamp_hint': 'Click a stamp, then click on the page to place it:',
+    'te_stamp_check': 'Check / Approved',
+    'te_stamp_check_lbl': 'OK',
+    'te_stamp_cross': 'Rejected / Error',
+    'te_stamp_cross_lbl': 'No',
+    'te_stamp_question': 'Question / Review',
+    'te_stamp_question_lbl': '?',
+    'te_stamp_star': 'Featured',
+    'te_stamp_star_lbl': '★',
+    'te_stamp_cancel': '✕ cancel',
+    'te_zoom_lbl': 'Zoom',
     'te_page': 'Page',
     'te_no_text': 'No selectable text on this page — click to add new text.',
     'te_hint': 'Click highlighted text to edit. Double-click blank space to add new text.',
@@ -1804,6 +1924,25 @@ const _TL = {
     'te_color': 'Color:',
     'te_delete': 'Eliminar bloque',
     'te_undo': 'Deshacer último',
+    'te_group_text': 'Texto',
+    'te_group_annotate': 'Anotar',
+    'te_hl_btn': 'Resaltar',
+    'te_hl_title': 'Modo resaltado — haz clic en bloques de texto para resaltarlos',
+    'te_eraser_btn': '⌫ Borrar resaltado',
+    'te_eraser_title': 'Modo borrador — haz clic en bloques resaltados para quitar el color',
+    'te_stamp_btn': '✓ Sello',
+    'te_stamp_title': 'Insertar un sello en la página',
+    'te_stamp_hint': 'Elige un sello y haz clic en la página para colocarlo:',
+    'te_stamp_check': 'Aprobado',
+    'te_stamp_check_lbl': 'OK',
+    'te_stamp_cross': 'Rechazado',
+    'te_stamp_cross_lbl': 'No',
+    'te_stamp_question': 'Revisión',
+    'te_stamp_question_lbl': '?',
+    'te_stamp_star': 'Destacado',
+    'te_stamp_star_lbl': '★',
+    'te_stamp_cancel': '✕ cancelar',
+    'te_zoom_lbl': 'Zoom',
     'te_page': 'Página',
     'te_no_text': 'No hay texto seleccionable — haz clic para añadir texto nuevo.',
     'te_hint': 'Haz clic en texto resaltado para editarlo. Haz doble clic en espacio en blanco para añadir texto.',
@@ -1876,6 +2015,9 @@ function applyToolI18n() {
   document.querySelectorAll('[data-i18n-html]').forEach(el => {
     const v = _T[el.dataset.i18nHtml]; if (v !== undefined) el.innerHTML = v;
   });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const v = _T[el.dataset.i18nTitle]; if (v !== undefined) el.title = v;
+  });
   // file indicator placeholder
   const fi = document.getElementById('file-indicator');
   if (fi && !fi.querySelector('span')) fi.textContent = _T.no_file || 'No file loaded';
@@ -1903,27 +2045,32 @@ pdfjsScript.onload = () => {
 
 // ─── TOOL DEFINITIONS ────────────────────────────────────────────────────
 const TOOLS = [
-  { id:'compress',        file:'compress.html',        icon:'🗜', name:'Compress PDF',           desc:'Ghostscript-powered compression with full control over DPI and quality.' },
-  { id:'vineta',          file:'vineta.html',           icon:'📋', name:'Title block',             desc:'Architectural title block with project name, plan number, scale, signatures and north arrow.' },
-  { id:'patch',           file:'patch.html',            icon:'⬜', name:'Patch / Redact',          desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
-  { id:'scalebar',        file:'scalebar.html',         icon:'📏', name:'Scale bar (m)',            desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
-  { id:'scalebar-ft',     file:'scalebar_ft.html',      icon:'📐', name:'Scale bar (ft)',           desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
-  { id:'watermark-logo',  file:'watermark_logo.html',   icon:'🔖', name:'Logo watermark',          desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
-  { id:'watermark-text',  file:'watermark_text.html',   icon:'✒',  name:'Text watermark',          desc:'Add semi-transparent text across pages — customizable size, color and position.' },
-  { id:'crop',            file:'crop.html',             icon:'📋', name:'Resize to format',        desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
-  { id:'reorder',         file:'reorder.html',          icon:'⇅',  name:'Reorder & remove pages',  desc:'Drag pages to rearrange them and remove any you don\'t need.' },
-  { id:'split',           file:'split.html',            icon:'✂',  name:'Split PDF',               desc:'Select break points between pages and export each section as a separate PDF.' },
-  { id:'merge',           file:'merge.html',            icon:'⊕',  name:'Merge PDFs',              desc:'Upload multiple PDFs, rearrange them and combine into one.', noFile: true },
-  { id:'convert',         file:'convert.html',          icon:'🖼', name:'Convert to images',       desc:'Export each page as PNG or JPG at the resolution you need.' },
-  { id:'img2pdf',         file:'imagetopdf.html',       icon:'🗒', name:'Image to PDF',            desc:'Convert one or more images (JPG, PNG) into a PDF document.', noFile: true },
-  { id:'plan-numbering',  file:'plan_numbering.html',   icon:'🔢', name:'Plan numbering',          desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
-  { id:'revision-cloud',  file:'revision_cloud.html',   icon:'☁',  name:'Revision cloud',          desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
-  { id:'grid',            file:'grid.html',             icon:'#',  name:'Page grid',               desc:'Add a reference grid to PDF pages — specify spacing or number of divisions.' },
-  { id:'ocr',             file:'ocr.html',              icon:'🔍', name:'OCR — searchable PDF',    desc:'Run optical character recognition to make scanned PDFs searchable and selectable.' },
-  { id:'pdfa',            file:'pdfa.html',             icon:'📄', name:'Convert to PDF/A',        desc:'Convert any PDF to PDF/A-1b for long-term archiving and compliance.' },
-  { id:'linewidth',       file:'linewidth.html',        icon:'✏',  name:'Line weight',             desc:'Globally scale all line widths in a PDF — thicker or thinner in one step.' },
-  { id:'text-note',       file:'text_note.html',        icon:'✏',  name:'Edit PDF text',              desc:'Click any text block to edit it directly on the page. Add, modify or delete text.' },
+  { id:'compress',       url:'/compress',       icon:'🗜', name:'Compress PDF',          desc:'Ghostscript-powered compression with full control over DPI and quality.' },
+  { id:'vineta',         url:'/vineta',         icon:'📋', name:'Title block',            desc:'Architectural title block with project name, plan number, scale, signatures and north arrow.' },
+  { id:'patch',          url:'/patch',          icon:'⬜', name:'Patch / Redact',         desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
+  { id:'scalebar',       url:'/scalebar',       icon:'📏', name:'Scale bar (m)',           desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
+  { id:'scalebar-ft',    url:'/scalebar_ft',    icon:'📐', name:'Scale bar (ft)',          desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
+  { id:'watermark-logo', url:'/watermark_logo', icon:'🔖', name:'Logo watermark',         desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
+  { id:'watermark-text', url:'/watermark_text', icon:'✒',  name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
+  { id:'crop',           url:'/crop',           icon:'📋', name:'Resize to format',       desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
+  { id:'reorder',        url:'/reorder',        icon:'⇅',  name:'Reorder & remove pages', desc:'Drag pages to rearrange them and remove any you don\'t need.' },
+  { id:'split',          url:'/split',          icon:'✂',  name:'Split PDF',              desc:'Select break points between pages and export each section as a separate PDF.' },
+  { id:'merge',          url:'/merge',          icon:'⊕',  name:'Merge PDFs',             desc:'Upload multiple PDFs, rearrange them and combine into one.' },
+  { id:'convert',        url:'/convert',        icon:'🖼', name:'Convert to images',      desc:'Export each page as PNG or JPG at the resolution you need.' },
+  { id:'img2pdf',        url:'/imagetopdf',     icon:'🗒', name:'Image to PDF',           desc:'Convert one or more images (JPG, PNG) into a PDF document.' },
+  { id:'plan-numbering', url:'/plan_numbering', icon:'🔢', name:'Plan numbering',         desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
+  { id:'revision-cloud', url:'/revision_cloud', icon:'☁',  name:'Revision cloud',         desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
+  { id:'grid',           url:'/grid',           icon:'#',  name:'Page grid',              desc:'Add a reference grid to PDF pages — specify spacing or number of divisions.' },
+  { id:'ocr',            url:'/ocr',            icon:'🔍', name:'OCR — searchable PDF',   desc:'Run optical character recognition to make scanned PDFs searchable and selectable.' },
+  { id:'pdfa',           url:'/pdfa',           icon:'📄', name:'Convert to PDF/A',       desc:'Convert any PDF to PDF/A-1b for long-term archiving and compliance.' },
+  { id:'linewidth',      url:'/linewidth',      icon:'✏',  name:'Line weight',            desc:'Globally scale all line widths in a PDF — thicker or thinner in one step.' },
+  { id:'text-note',      url:'/text_note',      icon:'💬', name:'Text note',              desc:'Add a plain-text annotation box to any page — font, size, color and position.' },
+  { id:'page-numbers',   url:'/page_numbers',   icon:'🔢', name:'Page numbers',           desc:'Add automatic page numbers to every page of your PDF.' },
+  { id:'rotate-pages',   url:'/rotate_pages',   icon:'↻',  name:'Rotate pages',           desc:'Rotate individual pages or the entire document by 90°, 180° or 270°.' },
+  { id:'extract-pages',  url:'/extract_pages',  icon:'📤', name:'Extract pages',          desc:'Pull out a selection of pages from a PDF into a new document.' },
+  { id:'add-image',      url:'/add_image',      icon:'🖼', name:'Add image',              desc:'Insert a JPG or PNG image onto any page at the position and size you choose.' },
 ];
+
 
 // ─── STATE ───────────────────────────────────────────────────────────────
 let currentBuffer = null;
@@ -1937,13 +2084,9 @@ TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
   card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name) + '</h3><p>' + (_T['tool_desc_' + t.id.replace(/-/g,'_')] || t.desc) + '</p>';
-  card.onclick = () => {
-    if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
-    else { openTool(t.id); }
-  };
+  card.onclick = () => openTool(t.id);
   homeGrid.appendChild(card);
 });
-let pendingTool = null;
 
 function scrollGrid(dir) {
   const grid = document.getElementById('home-tools-grid');
@@ -1999,7 +2142,6 @@ function showDropCheck(name) {
 document.getElementById('file-input-hidden').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   await loadPDF(file);
-  if (pendingTool) { openTool(pendingTool); pendingTool = null; }
   e.target.value = '';
 });
 
@@ -2067,8 +2209,8 @@ function buildOtherTools(currentId) {
   TOOLS.filter(t => t.id !== currentId).forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'other-btn';
-    btn.textContent = t.icon + ' ' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name);
-    btn.onclick = () => { window.location.href = t.file; };
+    btn.textContent = _T['tool_name_' + t.id.replace(/-/g,'_')] || t.name;
+    btn.onclick = () => { window.location.href = t.url; };
     strip.appendChild(btn);
   });
 }
@@ -2128,7 +2270,8 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
 
 // ─── TEXT EDITOR ────────────────────────────────────────────────────────────
 let teBytes=null, tePdfJs_doc=null, tePageNum=1, teTotalPages=0;
-const TE_SCALE=1.6, PT_MM=72/25.4;
+let TE_SCALE=1.6; const PT_MM=72/25.4;
+let teHighlights=[], teHighlightMode=false, teEraserMode=false;
 let teBlocks=[], teActiveId=null, teSelectedId=null, teHistory=[];
 
 function showDonationBanner(){
@@ -2233,6 +2376,17 @@ function teDrawEdits(){
   const ctx=oc.getContext('2d');
   ctx.clearRect(0,0,oc.width,oc.height);
   const pidx=tePageNum-1;
+  // Draw highlights first (below text overlays)
+  teHighlights.filter(h=>h.pageIndex===pidx).forEach(h=>{
+    ctx.fillStyle='rgba(255,220,0,0.38)';
+    ctx.fillRect(h.x,h.y,h.w,h.h);
+    if(teEraserMode){
+      ctx.strokeStyle='rgba(255,80,80,0.7)'; ctx.lineWidth=1.5; ctx.setLineDash([3,2]);
+      ctx.strokeRect(h.x,h.y,h.w,h.h); ctx.setLineDash([]);
+    }
+  });
+  // Draw stamps (async — fire and forget for canvas preview)
+  teDrawStamps(ctx, pidx);
   teBlocks.filter(b=>b.pageIndex===pidx).forEach(b=>{
     if(b.deleted){ return; }
     if(b.edited||b.isNew){
@@ -2269,6 +2423,7 @@ function teBuildHitLayer(){
     d.style.width=b.w+'px'; d.style.height=b.h+'px';
     // Cursor: move on border, text in center
     d.addEventListener('mousemove',e=>{
+      if(teHighlightMode||teEraserMode){ d.style.cursor='crosshair'; return; }
       d.style.cursor=isOnBorder(e,d)?'move':'text';
     });
     d.addEventListener('mouseenter',()=>{
@@ -2276,16 +2431,33 @@ function teBuildHitLayer(){
       ctx.fillStyle='rgba(37,99,235,0.08)'; ctx.fillRect(b.x,b.y,b.w,b.h);
     });
     d.addEventListener('mouseleave',()=>teDrawEdits());
-    // Click center → activate (edit)
+    // Click center → activate (edit) / highlight / erase mode
     d.addEventListener('click',e=>{
       e.stopPropagation();
-      if(!isOnBorder(e,d)) teActivate(b);
+      if(teStampMode){
+        const rect=document.getElementById('te-hl').getBoundingClientRect();
+        tePlaceStamp(e.clientX-rect.left, e.clientY-rect.top);
+        return;
+      }
+      if(isOnBorder(e,d)) return;
+      if(teHighlightMode){
+        teToggleHighlight(b); return;
+      }
+      if(teEraserMode){
+        teRemoveHighlight(b.id); return;
+      }
+      teActivate(b);
     });
     // Drag from border → move block
     d.addEventListener('mousedown',e=>{
+      if(teHighlightMode||teEraserMode) return; // don't drag in these modes
       if(!isOnBorder(e,d)) return;
       e.preventDefault(); e.stopPropagation();
       teCommitActive();
+      teSelectedId=b.id;
+      document.getElementById('te-size').value=Math.round(b.fontSize);
+      document.getElementById('te-color').value=b.color||'#1a1a1a';
+      teDrawEdits();
       const startX=e.clientX, startY=e.clientY;
       const origX=b.x, origY=b.y;
       const onMove=ev=>{
@@ -2332,15 +2504,21 @@ function teBuildHitLayer(){
     },{passive:false});
     hl.appendChild(d);
   });
-  // Double-click on blank space → create new text
+  // Double-click on blank space → create new text (unless stamp mode)
   hl.ondblclick=e=>{
     if(e.target!==hl) return;
+    if(teStampMode) return; // stamp mode: don't add text on dblclick
     const rect=hl.getBoundingClientRect();
     teAddNew(e.clientX-rect.left, e.clientY-rect.top);
   };
-  // Single click on blank → commit active only
+  // Single click on blank → place stamp OR commit active
   hl.onclick=e=>{
     if(e.target!==hl) return;
+    if(teStampMode){
+      const rect=hl.getBoundingClientRect();
+      tePlaceStamp(e.clientX-rect.left, e.clientY-rect.top);
+      return;
+    }
     teCommitActive();
     teSelectedId=null;
     teDrawEdits();
@@ -2379,8 +2557,152 @@ function teAddNew(cx,cy){
   teActivate(block);
 }
 
+async function teSetZoom(scale){
+  TE_SCALE=scale;
+  // Re-scale all existing block pixel coords (they were stored in old scale)
+  // We need to re-render from scratch to get correct viewport coords
+  // Clear blocks for current page so they get re-extracted at new scale
+  const pidx=tePageNum-1;
+  teBlocks=teBlocks.filter(b=>b.pageIndex!==pidx||b.isNew);
+  // Re-scale new blocks proportionally
+  teBlocks.filter(b=>b.pageIndex===pidx&&b.isNew).forEach(b=>{
+    // These were stored in old-scale px — convert to pt then back to new px
+    b.x=b.x/(_prevTeScale||scale)*scale;
+    b.y=b.y/(_prevTeScale||scale)*scale;
+    b.w=b.w/(_prevTeScale||scale)*scale;
+    b.h=b.h/(_prevTeScale||scale)*scale;
+  });
+  // Re-scale highlights for current page
+  teHighlights.filter(h=>h.pageIndex===pidx).forEach(h=>{
+    const r=scale/(_prevTeScale||scale);
+    h.x*=r; h.y*=r; h.w*=r; h.h*=r;
+  });
+  // Re-scale stamps for current page (position only — size stays fixed)
+  teStamps.filter(s=>s.pageIndex===pidx).forEach(s=>{
+    const r=scale/(_prevTeScale||scale);
+    s.x*=r; s.y*=r;
+  });
+  _prevTeScale=scale;
+  await teRenderPage();
+}
+let _prevTeScale=1.6;
+
+function teToggleHighlight(block){
+  const pidx=block.pageIndex;
+  const existing=teHighlights.findIndex(h=>h.blockId===block.id&&h.pageIndex===pidx);
+  if(existing>=0){ teHighlights.splice(existing,1); }
+  else {
+    teHighlights.push({id:'hl-'+Date.now(),blockId:block.id,pageIndex:pidx,
+      x:block.x,y:block.y,w:block.w,h:block.h});
+  }
+  teDrawEdits();
+}
+function teRemoveHighlight(blockId){
+  const pidx=tePageNum-1;
+  const idx=teHighlights.findIndex(h=>h.blockId===blockId&&h.pageIndex===pidx);
+  if(idx>=0){ teHighlights.splice(idx,1); teDrawEdits(); }
+}
+function teSetHighlightMode(on){
+  if(on===undefined) on=!teHighlightMode;
+  teHighlightMode=on; teEraserMode=false;
+  document.getElementById('te-hl-btn').style.background=on?'rgba(255,220,0,0.22)':'';
+  document.getElementById('te-hl-btn').style.borderColor=on?'rgba(255,220,0,0.6)':'';
+  document.getElementById('te-hl-btn').style.color=on?'#ffe000':'';
+  document.getElementById('te-eraser-btn').style.background='';
+  document.getElementById('te-eraser-btn').style.borderColor='';
+  document.getElementById('te-eraser-btn').style.color='';
+  teDrawEdits();
+}
+function teSetEraserMode(on){
+  if(on===undefined) on=!teEraserMode;
+  teEraserMode=on; teHighlightMode=false;
+  document.getElementById('te-eraser-btn').style.background=on?'rgba(255,80,80,0.15)':'';
+  document.getElementById('te-eraser-btn').style.borderColor=on?'rgba(255,80,80,0.5)':'';
+  document.getElementById('te-eraser-btn').style.color=on?'var(--err)':'';
+  document.getElementById('te-hl-btn').style.background='';
+  document.getElementById('te-hl-btn').style.borderColor='';
+  document.getElementById('te-hl-btn').style.color='';
+  teDrawEdits();
+}
+
+// ── STAMP SYSTEM ─────────────────────────────────────────────────────────────
+let teStamps=[], teStampMode=null; // teStampMode = 'check'|'cross'|'question'|'star'|null
+
+const TE_STAMP_SIZE=48; // px on canvas (fixed)
+
+// SVG definitions for each stamp type
+const TE_STAMP_SVG={
+  check:`<svg width="48" height="48" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#16a34a" opacity="0.2"/><circle cx="16" cy="16" r="14" fill="none" stroke="#16a34a" stroke-width="2"/><polyline points="9,16 14,21 23,11" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  cross:`<svg width="48" height="48" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#dc2626" opacity="0.2"/><circle cx="16" cy="16" r="14" fill="none" stroke="#dc2626" stroke-width="2"/><line x1="10" y1="10" x2="22" y2="22" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/><line x1="22" y1="10" x2="10" y2="22" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+  question:`<svg width="48" height="48" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#1d4ed8" opacity="0.2"/><circle cx="16" cy="16" r="14" fill="none" stroke="#1d4ed8" stroke-width="2"/><text x="16" y="22" text-anchor="middle" font-family="Georgia,serif" font-size="17" font-weight="bold" fill="#3b82f6">?</text></svg>`,
+  star:`<svg width="48" height="48" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="14" fill="#ca8a04" opacity="0.2"/><circle cx="16" cy="16" r="14" fill="none" stroke="#ca8a04" stroke-width="2"/><polygon points="16,7 18.4,13.2 25,13.2 19.8,17.2 21.8,23.5 16,19.5 10.2,23.5 12.2,17.2 7,13.2 13.6,13.2" fill="#eab308"/></svg>`
+};
+
+// Cache of HTMLImageElement per type
+const _teStampImgCache={};
+function _teStampImg(type){
+  if(_teStampImgCache[type]) return Promise.resolve(_teStampImgCache[type]);
+  return new Promise(res=>{
+    const blob=new Blob([TE_STAMP_SVG[type]],{type:'image/svg+xml'});
+    const url=URL.createObjectURL(blob);
+    const img=new Image();
+    img.onload=()=>{ _teStampImgCache[type]=img; URL.revokeObjectURL(url); res(img); };
+    img.src=url;
+  });
+}
+
+function teToggleStampPicker(){
+  const picker=document.getElementById('te-stamp-picker');
+  const isOpen=picker.style.display!=='none'&&picker.style.display!=='';
+  if(isOpen){ picker.style.display='none'; teSelectStamp(null); }
+  else { picker.style.display='flex'; }
+  const btn=document.getElementById('te-stamp-btn');
+  btn.style.borderColor=isOpen?'':'rgba(0,245,212,0.4)';
+  btn.style.color=isOpen?'':'var(--cyan)';
+  btn.style.background=isOpen?'':'rgba(0,245,212,0.08)';
+}
+
+function teSelectStamp(type){
+  teStampMode=type;
+  // Update all option buttons
+  document.querySelectorAll('.te-stamp-opt').forEach(btn=>{
+    const active=btn.dataset.stamp===type;
+    btn.style.borderColor=active?'rgba(0,245,212,0.7)':'rgba(255,255,255,0.12)';
+    btn.style.background=active?'rgba(0,245,212,0.1)':'none';
+  });
+  // Update hit-layer cursor
+  const hl=document.getElementById('te-hl');
+  if(hl) hl.style.cursor=type?'crosshair':'';
+  // Close picker if cancelling
+  if(!type){
+    document.getElementById('te-stamp-picker').style.display='none';
+    const btn=document.getElementById('te-stamp-btn');
+    btn.style.borderColor=''; btn.style.color=''; btn.style.background='';
+  }
+}
+
+function tePlaceStamp(cx,cy){
+  if(!teStampMode) return;
+  const sz=TE_STAMP_SIZE;
+  teStamps.push({id:'st-'+Date.now(), type:teStampMode,
+    x:cx-sz/2, y:cy-sz/2, w:sz, h:sz, pageIndex:tePageNum-1});
+  teSelectStamp(null); // auto-deactivate after placing
+  teDrawEdits();
+}
+
+// Draw stamps on overlay canvas
+async function teDrawStamps(ctx, pidx){
+  const tooDraw=teStamps.filter(s=>s.pageIndex===pidx);
+  for(const s of tooDraw){
+    const img=await _teStampImg(s.type);
+    ctx.drawImage(img, s.x, s.y, s.w, s.h);
+  }
+}
+
 function teChangeFile(){
   teBytes=null; tePdfJs_doc=null; teBlocks=[]; teActiveId=null; teSelectedId=null; teHistory=[];
+  teHighlights=[]; teHighlightMode=false; teEraserMode=false;
+  teStamps=[]; teStampMode=null;
   document.getElementById('te-pdf-name').textContent='';
   document.getElementById('te-toolbar').style.display='none';
   document.getElementById('te-page-nav').style.display='none';
@@ -2429,19 +2751,36 @@ teEd.addEventListener('keydown',e=>{
   if(e.key==='Escape'){e.preventDefault();teEd.style.display='none';teActiveId=null;teDrawEdits();teBuildHitLayer();}
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();teCommitActive();}
 });
+// Prevent toolbar interactions from blurring the textarea and clearing teActiveId
+document.getElementById('te-toolbar').addEventListener('mousedown',e=>{
+  // Only prevent if there is an active block being edited
+  if(teActiveId) e.preventDefault();
+});
+
 document.getElementById('te-size').addEventListener('input',()=>{
-  if(!teActiveId) return;
-  const block=teBlocks.find(b=>b.id===teActiveId);
-  if(block){block.fontSize=parseFloat(document.getElementById('te-size').value)||block.fontSize;
-    teEd.style.fontSize=Math.round(block.fontSize*TE_SCALE)+'px';
-    teEd.style.height='auto';teEd.style.height=teEd.scrollHeight+'px';
-    block.newStr=teEd.value;block.edited=true;teDrawEdits();}
+  const id=teActiveId||teSelectedId;
+  if(!id) return;
+  const block=teBlocks.find(b=>b.id===id);
+  if(block){
+    block.fontSize=parseFloat(document.getElementById('te-size').value)||block.fontSize;
+    block.h=block.fontSize*TE_SCALE*1.3;
+    if(teActiveId){
+      teEd.style.fontSize=Math.round(block.fontSize*TE_SCALE)+'px';
+      teEd.style.height='auto';teEd.style.height=teEd.scrollHeight+'px';
+      block.newStr=teEd.value;
+    }
+    block.edited=true;teDrawEdits();teBuildHitLayer();
+  }
 });
 document.getElementById('te-color').addEventListener('input',()=>{
-  if(!teActiveId) return;
-  const block=teBlocks.find(b=>b.id===teActiveId);
-  if(block){block.color=document.getElementById('te-color').value;
-    teEd.style.color=block.color;block.newStr=teEd.value;block.edited=true;teDrawEdits();}
+  const id=teActiveId||teSelectedId;
+  if(!id) return;
+  const block=teBlocks.find(b=>b.id===id);
+  if(block){
+    block.color=document.getElementById('te-color').value;
+    if(teActiveId){teEd.style.color=block.color;block.newStr=teEd.value;}
+    block.edited=true;teDrawEdits();
+  }
 });
 document.getElementById('te-delete-btn').addEventListener('click',()=>{
   const delId=teActiveId||teSelectedId;
@@ -2467,7 +2806,7 @@ document.getElementById('te-btn').addEventListener('click', async ()=>{
   teCommitActive();
   if(!currentBuffer){status('te-status',_T.no_file||'No file loaded.','err');return;}
   const edited=teBlocks.filter(b=>b.edited);
-  if(!edited.length){status('te-status','No edits to apply.','err');return;}
+  if(!edited.length && !teHighlights.length && !teStamps.length){status('te-status','No edits to apply.','err');return;}
   status('te-status','Applying edits…','run');
   document.getElementById('te-btn').disabled=true;
   try {
@@ -2476,10 +2815,43 @@ document.getElementById('te-btn').addEventListener('click', async ()=>{
     const font=await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
     const byPage={};
     edited.forEach(b=>{(byPage[b.pageIndex]||(byPage[b.pageIndex]=[])).push(b);});
+    // Also include pages that only have highlights or stamps (no text edits)
+    teHighlights.forEach(h=>{ if(!byPage[h.pageIndex]) byPage[h.pageIndex]=[]; });
+    teStamps.forEach(s=>{ if(!byPage[s.pageIndex]) byPage[s.pageIndex]=[]; });
     for(const [pidxStr,blocks] of Object.entries(byPage)){
       const pidx=parseInt(pidxStr);
       const page=pdfDoc.getPages()[pidx]; if(!page) continue;
       const{height:pgH}=page.getSize();
+      // Draw highlights for this page first
+      teHighlights.filter(h=>h.pageIndex===pidx).forEach(h=>{
+        const hxPt=h.x/TE_SCALE, hyTopPt=h.y/TE_SCALE, hhPt=h.h/TE_SCALE, hwPt=h.w/TE_SCALE;
+        const hyPt=pgH-hyTopPt-hhPt;
+        page.drawRectangle({x:hxPt,y:hyPt,width:hwPt,height:hhPt+2,
+          color:PDFLib.rgb(1,0.88,0),opacity:0.38});
+      });
+      // Embed stamps for this page
+      const pageStamps=teStamps.filter(s=>s.pageIndex===pidx);
+      for(const s of pageStamps){
+        // Rasterize SVG to PNG via offscreen canvas
+        const pngBytes=await new Promise(res=>{
+          const img=_teStampImgCache[s.type];
+          if(!img){res(null);return;}
+          const oc2=document.createElement('canvas');
+          oc2.width=96;oc2.height=96;
+          const c2=oc2.getContext('2d');
+          c2.drawImage(img,0,0,96,96);
+          oc2.toBlob(blob=>{
+            blob.arrayBuffer().then(ab=>res(new Uint8Array(ab)));
+          },'image/png');
+        });
+        if(!pngBytes) continue;
+        const pngImg=await pdfDoc.embedPng(pngBytes);
+        const szPt=s.w/TE_SCALE; // size in pts
+        const xPt=s.x/TE_SCALE;
+        const yTopPt=s.y/TE_SCALE;
+        const yPt=pgH-yTopPt-szPt;
+        page.drawImage(pngImg,{x:xPt,y:yPt,width:szPt,height:szPt});
+      }
       blocks.forEach(b=>{
         // canvas px -> PDF pts (divide by scale, flip Y)
         const xPt=b.x/TE_SCALE;
@@ -4581,6 +4953,11 @@ window.onMergeFilesSelected = onMergeFilesSelected;
 window.onImgFilesSelected   = onImgFilesSelected;
 window.teChangePage = teChangePage;
 window.teChangeFile = teChangeFile;
+window.teSetZoom = teSetZoom;
+window.teSetHighlightMode = teSetHighlightMode;
+window.teSetEraserMode    = teSetEraserMode;
+window.teToggleStampPicker = teToggleStampPicker;
+window.teSelectStamp       = teSelectStamp;
 
 })(); // end IIFE
 </script>

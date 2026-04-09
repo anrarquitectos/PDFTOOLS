@@ -366,7 +366,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Scale all line weights in a PDF — thicker or thinner, in-browser, free</span></h1>
+  <h1><a href="/"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Scale all line weights in a PDF — thicker or thinner, in-browser, free</span></h1>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
@@ -837,27 +837,32 @@ function ensurePdfjs(){
 
 // ─── TOOL DEFINITIONS ────────────────────────────────────────────────────
 const TOOLS = [
-  { id:'compress',        file:'compress.html',        icon:'🗜', name:'Compress PDF',           desc:'Ghostscript-powered compression with full control over DPI and quality.' },
-  { id:'vineta',          file:'vineta.html',           icon:'📋', name:'Title block',             desc:'Architectural title block with project name, plan number, scale, signatures and north arrow.' },
-  { id:'patch',           file:'patch.html',            icon:'⬜', name:'Patch / Redact',          desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
-  { id:'scalebar',        file:'scalebar.html',         icon:'📏', name:'Scale bar (m)',            desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
-  { id:'scalebar-ft',     file:'scalebar_ft.html',      icon:'📐', name:'Scale bar (ft)',           desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
-  { id:'watermark-logo',  file:'watermark_logo.html',   icon:'🔖', name:'Logo watermark',          desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
-  { id:'watermark-text',  file:'watermark_text.html',   icon:'✒',  name:'Text watermark',          desc:'Add semi-transparent text across pages — customizable size, color and position.' },
-  { id:'crop',            file:'crop.html',             icon:'📋', name:'Resize to format',        desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
-  { id:'reorder',         file:'reorder.html',          icon:'⇅',  name:'Reorder & remove pages',  desc:'Drag pages to rearrange them and remove any you don\'t need.' },
-  { id:'split',           file:'split.html',            icon:'✂',  name:'Split PDF',               desc:'Select break points between pages and export each section as a separate PDF.' },
-  { id:'merge',           file:'merge.html',            icon:'⊕',  name:'Merge PDFs',              desc:'Upload multiple PDFs, rearrange them and combine into one.', noFile: true },
-  { id:'convert',         file:'convert.html',          icon:'🖼', name:'Convert to images',       desc:'Export each page as PNG or JPG at the resolution you need.' },
-  { id:'img2pdf',         file:'imagetopdf.html',       icon:'🗒', name:'Image to PDF',            desc:'Convert one or more images (JPG, PNG) into a PDF document.', noFile: true },
-  { id:'plan-numbering',  file:'plan_numbering.html',   icon:'🔢', name:'Plan numbering',          desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
-  { id:'revision-cloud',  file:'revision_cloud.html',   icon:'☁',  name:'Revision cloud',          desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
-  { id:'grid',            file:'grid.html',             icon:'#',  name:'Page grid',               desc:'Add a reference grid to PDF pages — specify spacing or number of divisions.' },
-  { id:'ocr',             file:'ocr.html',              icon:'🔍', name:'OCR — searchable PDF',    desc:'Run optical character recognition to make scanned PDFs searchable and selectable.' },
-  { id:'pdfa',            file:'pdfa.html',             icon:'📄', name:'Convert to PDF/A',        desc:'Convert any PDF to PDF/A-1b for long-term archiving and compliance.' },
-  { id:'linewidth',       file:'linewidth.html',        icon:'✏',  name:'Line weight',             desc:'Globally scale all line widths in a PDF — thicker or thinner in one step.' },
-  { id:'text-note',       file:'text_note.html',        icon:'💬', name:'Text note',               desc:'Add a plain-text annotation box to any page — font, size, color and position.' },
+  { id:'compress',       url:'/compress',       icon:'🗜', name:'Compress PDF',          desc:'Ghostscript-powered compression with full control over DPI and quality.' },
+  { id:'vineta',         url:'/vineta',         icon:'📋', name:'Title block',            desc:'Architectural title block with project name, plan number, scale, signatures and north arrow.' },
+  { id:'patch',          url:'/patch',          icon:'⬜', name:'Patch / Redact',         desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
+  { id:'scalebar',       url:'/scalebar',       icon:'📏', name:'Scale bar (m)',           desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
+  { id:'scalebar-ft',    url:'/scalebar_ft',    icon:'📐', name:'Scale bar (ft)',          desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
+  { id:'watermark-logo', url:'/watermark_logo', icon:'🔖', name:'Logo watermark',         desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
+  { id:'watermark-text', url:'/watermark_text', icon:'✒',  name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
+  { id:'crop',           url:'/crop',           icon:'📋', name:'Resize to format',       desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
+  { id:'reorder',        url:'/reorder',        icon:'⇅',  name:'Reorder & remove pages', desc:'Drag pages to rearrange them and remove any you don\'t need.' },
+  { id:'split',          url:'/split',          icon:'✂',  name:'Split PDF',              desc:'Select break points between pages and export each section as a separate PDF.' },
+  { id:'merge',          url:'/merge',          icon:'⊕',  name:'Merge PDFs',             desc:'Upload multiple PDFs, rearrange them and combine into one.' },
+  { id:'convert',        url:'/convert',        icon:'🖼', name:'Convert to images',      desc:'Export each page as PNG or JPG at the resolution you need.' },
+  { id:'img2pdf',        url:'/imagetopdf',     icon:'🗒', name:'Image to PDF',           desc:'Convert one or more images (JPG, PNG) into a PDF document.' },
+  { id:'plan-numbering', url:'/plan_numbering', icon:'🔢', name:'Plan numbering',         desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
+  { id:'revision-cloud', url:'/revision_cloud', icon:'☁',  name:'Revision cloud',         desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
+  { id:'grid',           url:'/grid',           icon:'#',  name:'Page grid',              desc:'Add a reference grid to PDF pages — specify spacing or number of divisions.' },
+  { id:'ocr',            url:'/ocr',            icon:'🔍', name:'OCR — searchable PDF',   desc:'Run optical character recognition to make scanned PDFs searchable and selectable.' },
+  { id:'pdfa',           url:'/pdfa',           icon:'📄', name:'Convert to PDF/A',       desc:'Convert any PDF to PDF/A-1b for long-term archiving and compliance.' },
+  { id:'linewidth',      url:'/linewidth',      icon:'✏',  name:'Line weight',            desc:'Globally scale all line widths in a PDF — thicker or thinner in one step.' },
+  { id:'text-note',      url:'/text_note',      icon:'💬', name:'Text note',              desc:'Add a plain-text annotation box to any page — font, size, color and position.' },
+  { id:'page-numbers',   url:'/page_numbers',   icon:'🔢', name:'Page numbers',           desc:'Add automatic page numbers to every page of your PDF.' },
+  { id:'rotate-pages',   url:'/rotate_pages',   icon:'↻',  name:'Rotate pages',           desc:'Rotate individual pages or the entire document by 90°, 180° or 270°.' },
+  { id:'extract-pages',  url:'/extract_pages',  icon:'📤', name:'Extract pages',          desc:'Pull out a selection of pages from a PDF into a new document.' },
+  { id:'add-image',      url:'/add_image',      icon:'🖼', name:'Add image',              desc:'Insert a JPG or PNG image onto any page at the position and size you choose.' },
 ];
+
 
 // ─── STATE ───────────────────────────────────────────────────────────────
 let currentBuffer = null;
@@ -873,13 +878,9 @@ TOOLS.forEach(t => {
   card.className = 'tool-card';
   const _tk=t.id.replace(/-/g,'_');
   card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (_T['tool_name_'+_tk]||t.name) + '</h3><p>' + (_T['tool_desc_'+_tk]||t.desc) + '</p>';
-  card.onclick = () => {
-    if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
-    else { openTool(t.id); }
-  };
+  card.onclick = () => openTool(t.id);
   homeGrid.appendChild(card);
 });
-let pendingTool = null;
 
 function scrollGrid(dir) {
   const grid = document.getElementById('home-tools-grid');
@@ -935,7 +936,6 @@ function showDropCheck(name) {
 document.getElementById('file-input-hidden').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   await loadPDF(file);
-  if (pendingTool) { openTool(pendingTool); pendingTool = null; }
   e.target.value = '';
 });
 
@@ -1000,8 +1000,8 @@ function buildOtherTools(currentId) {
   TOOLS.filter(t => t.id !== currentId).forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'other-btn';
-    btn.textContent = t.icon + ' ' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name);
-    btn.onclick = () => { window.location.href = t.file; };
+    btn.textContent = _T['tool_name_' + t.id.replace(/-/g,'_')] || t.name;
+    btn.onclick = () => { window.location.href = t.url; };
     strip.appendChild(btn);
   });
 }
