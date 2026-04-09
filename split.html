@@ -292,7 +292,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Split PDF into multiple files</span></h1>
+  <h1><a href="/"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — Split PDF into multiple files</span></h1>
   <div id="topbar-right">
     <div style="display:flex;align-items:center;gap:8px;min-width:0;">
       <div id="file-indicator" data-i18n-placeholder="no_file">No file loaded</div>
@@ -1746,45 +1746,30 @@ const _TL = {
     'sp_load': 'Load thumbnails',
     'sp_btn': 'Split & download all',
     'other_tools_heading': 'Other tools',
-    'tool_name_compress': 'Compress PDF',
-    'tool_desc_compress': 'Ghostscript-powered compression with full control over DPI and quality.',
-    'tool_name_vineta': 'Title block',
-    'tool_desc_vineta': 'Architectural title block with project name, plan number, scale, signatures and north arrow.',
-    'tool_name_patch': 'Patch / Redact',
-    'tool_desc_patch': 'Draw a white polygon over any area to cover content — with optional permanent flattening.',
-    'tool_name_scalebar': 'Scale bar (m)',
-    'tool_desc_scalebar': 'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.',
-    'tool_name_scalebar_ft': 'Scale bar (ft)',
-    'tool_desc_scalebar_ft': 'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.',
-    'tool_name_watermark_logo': 'Logo watermark',
-    'tool_desc_watermark_logo': 'Embed your studio logo in grayscale with adjustable opacity and rotation.',
-    'tool_name_watermark_text': 'Text watermark',
-    'tool_desc_watermark_text': 'Add semi-transparent text across pages — customizable size, color and position.',
-    'tool_name_crop': 'Resize to format',
-    'tool_desc_crop': 'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.',
-    'tool_name_reorder': 'Reorder & remove pages',
-    'tool_desc_reorder': "Drag pages to rearrange them and remove any you don't need.",
-    'tool_name_split': 'Split PDF',
-    'tool_desc_split': 'Select break points between pages and export each section as a separate PDF.',
-    'tool_name_merge': 'Merge PDFs',
-    'tool_desc_merge': 'Upload multiple PDFs, rearrange them and combine into one.',
-    'tool_name_convert': 'Convert to images',
-    'tool_desc_convert': 'Export each page as PNG or JPG at the resolution you need.',
-    'tool_name_img2pdf': 'Image to PDF',
-    'tool_desc_img2pdf': 'Convert one or more images (JPG, PNG) into a PDF document.',
-    'tool_name_plan_numbering': 'Plan numbering',
-    'tool_desc_plan_numbering': 'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.',
-    'tool_name_revision_cloud': 'Revision cloud',
-    'tool_desc_revision_cloud': 'Add an architectural revision cloud with numbered triangle marker to PDF pages.',
-    'tool_name_grid': 'Page grid',
-    'tool_desc_grid': 'Add a reference grid to PDF pages — specify spacing or number of divisions.',
-    'tool_name_ocr': 'OCR — searchable PDF',
-    'tool_desc_ocr': 'Run optical character recognition to make scanned PDFs searchable and selectable.',
-    'tool_name_pdfa': 'Convert to PDF/A',
-    'tool_desc_pdfa': 'Convert any PDF to PDF/A-1b for long-term archiving and compliance.',
-    'tool_name_linewidth': 'Line weight',
-    'tool_desc_linewidth': 'Globally scale all line widths in a PDF — thicker or thinner in one step.',
-    'tool_name_text_note': 'Text note',
+    'tool_name_compress':       'Compress PDF',
+    'tool_name_vineta':          'Title block',
+    'tool_name_patch':           'Patch / Redact',
+    'tool_name_scalebar':        'Scale bar (m)',
+    'tool_name_scalebar_ft':     'Scale bar (ft)',
+    'tool_name_watermark_logo':  'Logo watermark',
+    'tool_name_watermark_text':  'Text watermark',
+    'tool_name_crop':            'Resize to format',
+    'tool_name_reorder':         'Reorder & remove pages',
+    'tool_name_split':           'Split PDF',
+    'tool_name_merge':           'Merge PDFs',
+    'tool_name_convert':         'Convert to images',
+    'tool_name_img2pdf':         'Image to PDF',
+    'tool_name_plan_numbering':  'Plan numbering',
+    'tool_name_revision_cloud':  'Revision cloud',
+    'tool_name_grid':            'Page grid',
+    'tool_name_ocr':             'OCR — searchable PDF',
+    'tool_name_pdfa':            'Convert to PDF/A',
+    'tool_name_linewidth':       'Line weight',
+    'tool_name_text_note':       'Text note',
+    'tool_name_page_numbers':    'Page numbers',
+    'tool_name_rotate_pages':    'Rotate pages',
+    'tool_name_extract_pages':   'Extract pages',
+    'tool_name_add_image':       'Add image',
     'tool_desc_text_note': 'Add a plain-text annotation box to any page — font, size, color and position.',
   },
   es: { no_file: 'Sin archivo cargado',
@@ -1801,46 +1786,30 @@ const _TL = {
     'sp_load': 'Cargar miniaturas',
     'sp_btn': 'Dividir y descargar todo',
     'other_tools_heading': 'Otras herramientas',
-    'tool_name_compress': 'Comprimir PDF',
-    'tool_desc_compress': 'Compresión con Ghostscript y control total sobre DPI y calidad.',
-    'tool_name_vineta': 'Viñeta',
-    'tool_desc_vineta': 'Viñeta arquitectónica con nombre de proyecto, número de plano, escala, firmas y norte.',
-    'tool_name_patch': 'Parche / Redactar',
-    'tool_desc_patch': 'Dibuja un polígono blanco sobre cualquier área para ocultar contenido, con aplanado permanente opcional.',
-    'tool_name_scalebar': 'Barra de escala (m)',
-    'tool_desc_scalebar': 'Añade una barra de escala gráfica métrica. Se dimensiona automáticamente según el formato y la escala.',
-    'tool_name_scalebar_ft': 'Barra de escala (ft)',
-    'tool_desc_scalebar_ft': 'Añade una barra de escala gráfica en pies. Se dimensiona automáticamente según el formato y la escala.',
-    'tool_name_watermark_logo': 'Marca de agua con logo',
-    'tool_desc_watermark_logo': 'Incrusta el logo de tu estudio en escala de grises con opacidad y rotación ajustables.',
-    'tool_name_watermark_text': 'Marca de agua de texto',
-    'tool_desc_watermark_text': 'Añade texto semitransparente en las páginas — tamaño, color y posición personalizables.',
-    'tool_name_crop': 'Redimensionar al formato',
-    'tool_desc_crop': 'Ajusta las páginas a A0–A4, Letter o Legal con orientación automática o forzada.',
-    'tool_name_reorder': 'Reordenar y eliminar páginas',
-    'tool_desc_reorder': 'Arrastra las páginas para reordenarlas y elimina las que no necesites.',
-    'tool_name_split': 'Dividir PDF',
-    'tool_desc_split': 'Selecciona puntos de corte entre páginas y exporta cada sección como un PDF independiente.',
-    'tool_name_merge': 'Combinar PDFs',
-    'tool_desc_merge': 'Sube varios PDFs, reordénalos y combínalos en uno.',
-    'tool_name_convert': 'Convertir a imágenes',
-    'tool_desc_convert': 'Exporta cada página como PNG o JPG a la resolución que necesites.',
-    'tool_name_img2pdf': 'Imagen a PDF',
-    'tool_desc_img2pdf': 'Convierte una o más imágenes (JPG, PNG) en un documento PDF.',
-    'tool_name_plan_numbering': 'Numeración de planos',
-    'tool_desc_plan_numbering': 'Estampa números de plano secuenciales en varios PDFs en lote. Descarga como ZIP.',
-    'tool_name_revision_cloud': 'Nube de revisión',
-    'tool_desc_revision_cloud': 'Añade una nube de revisión arquitectónica con marcador triangular numerado a páginas PDF.',
-    'tool_name_grid': 'Cuadrícula de página',
-    'tool_desc_grid': 'Añade una cuadrícula de referencia a páginas PDF — especifica el espaciado o número de divisiones.',
-    'tool_name_ocr': 'OCR — PDF buscable',
-    'tool_desc_ocr': 'Ejecuta reconocimiento óptico de caracteres para hacer buscables los PDFs escaneados.',
-    'tool_name_pdfa': 'Convertir a PDF/A',
-    'tool_desc_pdfa': 'Convierte cualquier PDF a PDF/A-1b para archivo a largo plazo y cumplimiento normativo.',
-    'tool_name_linewidth': 'Grosor de línea',
-    'tool_desc_linewidth': 'Escala globalmente todos los grosores de línea de un PDF — más gruesos o más finos en un solo paso.',
-    'tool_name_text_note': 'Nota de texto',
-    'tool_desc_text_note': 'Añade un cuadro de texto en cualquier página — fuente, tamaño, color y posición.',
+    'tool_name_compress':       'Comprimir PDF',
+    'tool_name_vineta':          'Viñeta / Carátula',
+    'tool_name_patch':           'Parche / Censurar',
+    'tool_name_scalebar':        'Escala gráfica (m)',
+    'tool_name_scalebar_ft':     'Escala gráfica (ft)',
+    'tool_name_watermark_logo':  'Marca de agua (logo)',
+    'tool_name_watermark_text':  'Marca de agua (texto)',
+    'tool_name_crop':            'Cambiar tamaño',
+    'tool_name_reorder':         'Reordenar páginas',
+    'tool_name_split':           'Dividir PDF',
+    'tool_name_merge':           'Fusionar PDFs',
+    'tool_name_convert':         'PDF a imágenes',
+    'tool_name_img2pdf':         'Imagen a PDF',
+    'tool_name_plan_numbering':  'Numeración de planos',
+    'tool_name_revision_cloud':  'Nube de revisión',
+    'tool_name_grid':            'Añadir una grilla',
+    'tool_name_ocr':             'PDF escaneado a texto',
+    'tool_name_pdfa':            'Convertir a PDF/A',
+    'tool_name_linewidth':       'Cambiar grosores de línea',
+    'tool_name_text_note':       'Editar texto',
+    'tool_name_page_numbers':    'Numeración de páginas',
+    'tool_name_rotate_pages':    'Rotar páginas',
+    'tool_name_extract_pages':   'Extraer páginas',
+    'tool_name_add_image':       'Añadir imagen a un PDF',
   }
 };
 const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
@@ -1878,27 +1847,32 @@ pdfjsScript.onload = () => {
 
 // ─── TOOL DEFINITIONS ────────────────────────────────────────────────────
 const TOOLS = [
-  { id:'compress',        file:'compress.html',        icon:'🗜', name:'Compress PDF',           desc:'Ghostscript-powered compression with full control over DPI and quality.' },
-  { id:'vineta',          file:'vineta.html',           icon:'📋', name:'Title block',             desc:'Architectural title block with project name, plan number, scale, signatures and north arrow.' },
-  { id:'patch',           file:'patch.html',            icon:'⬜', name:'Patch / Redact',          desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
-  { id:'scalebar',        file:'scalebar.html',         icon:'📏', name:'Scale bar (m)',            desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
-  { id:'scalebar-ft',     file:'scalebar_ft.html',      icon:'📐', name:'Scale bar (ft)',           desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
-  { id:'watermark-logo',  file:'watermark_logo.html',   icon:'🔖', name:'Logo watermark',          desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
-  { id:'watermark-text',  file:'watermark_text.html',   icon:'✒',  name:'Text watermark',          desc:'Add semi-transparent text across pages — customizable size, color and position.' },
-  { id:'crop',            file:'crop.html',             icon:'📋', name:'Resize to format',        desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
-  { id:'reorder',         file:'reorder.html',          icon:'⇅',  name:'Reorder & remove pages',  desc:'Drag pages to rearrange them and remove any you don\'t need.' },
-  { id:'split',           file:'split.html',            icon:'✂',  name:'Split PDF',               desc:'Select break points between pages and export each section as a separate PDF.' },
-  { id:'merge',           file:'merge.html',            icon:'⊕',  name:'Merge PDFs',              desc:'Upload multiple PDFs, rearrange them and combine into one.', noFile: true },
-  { id:'convert',         file:'convert.html',          icon:'🖼', name:'Convert to images',       desc:'Export each page as PNG or JPG at the resolution you need.' },
-  { id:'img2pdf',         file:'imagetopdf.html',       icon:'🗒', name:'Image to PDF',            desc:'Convert one or more images (JPG, PNG) into a PDF document.', noFile: true },
-  { id:'plan-numbering',  file:'plan_numbering.html',   icon:'🔢', name:'Plan numbering',          desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
-  { id:'revision-cloud',  file:'revision_cloud.html',   icon:'☁',  name:'Revision cloud',          desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
-  { id:'grid',            file:'grid.html',             icon:'#',  name:'Page grid',               desc:'Add a reference grid to PDF pages — specify spacing or number of divisions.' },
-  { id:'ocr',             file:'ocr.html',              icon:'🔍', name:'OCR — searchable PDF',    desc:'Run optical character recognition to make scanned PDFs searchable and selectable.' },
-  { id:'pdfa',            file:'pdfa.html',             icon:'📄', name:'Convert to PDF/A',        desc:'Convert any PDF to PDF/A-1b for long-term archiving and compliance.' },
-  { id:'linewidth',       file:'linewidth.html',        icon:'✏',  name:'Line weight',             desc:'Globally scale all line widths in a PDF — thicker or thinner in one step.' },
-  { id:'text-note',       file:'text_note.html',        icon:'💬', name:'Text note',               desc:'Add a plain-text annotation box to any page — font, size, color and position.' },
+  { id:'compress',       url:'/compress',       icon:'🗜', name:'Compress PDF',          desc:'Ghostscript-powered compression with full control over DPI and quality.' },
+  { id:'vineta',         url:'/vineta',         icon:'📋', name:'Title block',            desc:'Architectural title block with project name, plan number, scale, signatures and north arrow.' },
+  { id:'patch',          url:'/patch',          icon:'⬜', name:'Patch / Redact',         desc:'Draw a white polygon over any area to cover content — with optional permanent flattening.' },
+  { id:'scalebar',       url:'/scalebar',       icon:'📏', name:'Scale bar (m)',           desc:'Add a metric graphic scale bar. Auto-sizes by paper format and drawing scale.' },
+  { id:'scalebar-ft',    url:'/scalebar_ft',    icon:'📐', name:'Scale bar (ft)',          desc:'Add an imperial graphic scale bar in feet. Auto-sizes by paper format and drawing scale.' },
+  { id:'watermark-logo', url:'/watermark_logo', icon:'🔖', name:'Logo watermark',         desc:'Embed your studio logo in grayscale with adjustable opacity and rotation.' },
+  { id:'watermark-text', url:'/watermark_text', icon:'✒',  name:'Text watermark',         desc:'Add semi-transparent text across pages — customizable size, color and position.' },
+  { id:'crop',           url:'/crop',           icon:'📋', name:'Resize to format',       desc:'Scale pages to A0–A4, Letter or Legal — with auto or forced orientation.' },
+  { id:'reorder',        url:'/reorder',        icon:'⇅',  name:'Reorder & remove pages', desc:'Drag pages to rearrange them and remove any you don\'t need.' },
+  { id:'split',          url:'/split',          icon:'✂',  name:'Split PDF',              desc:'Select break points between pages and export each section as a separate PDF.' },
+  { id:'merge',          url:'/merge',          icon:'⊕',  name:'Merge PDFs',             desc:'Upload multiple PDFs, rearrange them and combine into one.' },
+  { id:'convert',        url:'/convert',        icon:'🖼', name:'Convert to images',      desc:'Export each page as PNG or JPG at the resolution you need.' },
+  { id:'img2pdf',        url:'/imagetopdf',     icon:'🗒', name:'Image to PDF',           desc:'Convert one or more images (JPG, PNG) into a PDF document.' },
+  { id:'plan-numbering', url:'/plan_numbering', icon:'🔢', name:'Plan numbering',         desc:'Stamp sequential plan numbers on multiple PDFs in batch. Downloads as a ZIP.' },
+  { id:'revision-cloud', url:'/revision_cloud', icon:'☁',  name:'Revision cloud',         desc:'Add an architectural revision cloud with numbered triangle marker to PDF pages.' },
+  { id:'grid',           url:'/grid',           icon:'#',  name:'Page grid',              desc:'Add a reference grid to PDF pages — specify spacing or number of divisions.' },
+  { id:'ocr',            url:'/ocr',            icon:'🔍', name:'OCR — searchable PDF',   desc:'Run optical character recognition to make scanned PDFs searchable and selectable.' },
+  { id:'pdfa',           url:'/pdfa',           icon:'📄', name:'Convert to PDF/A',       desc:'Convert any PDF to PDF/A-1b for long-term archiving and compliance.' },
+  { id:'linewidth',      url:'/linewidth',      icon:'✏',  name:'Line weight',            desc:'Globally scale all line widths in a PDF — thicker or thinner in one step.' },
+  { id:'text-note',      url:'/text_note',      icon:'💬', name:'Text note',              desc:'Add a plain-text annotation box to any page — font, size, color and position.' },
+  { id:'page-numbers',   url:'/page_numbers',   icon:'🔢', name:'Page numbers',           desc:'Add automatic page numbers to every page of your PDF.' },
+  { id:'rotate-pages',   url:'/rotate_pages',   icon:'↻',  name:'Rotate pages',           desc:'Rotate individual pages or the entire document by 90°, 180° or 270°.' },
+  { id:'extract-pages',  url:'/extract_pages',  icon:'📤', name:'Extract pages',          desc:'Pull out a selection of pages from a PDF into a new document.' },
+  { id:'add-image',      url:'/add_image',      icon:'🖼', name:'Add image',              desc:'Insert a JPG or PNG image onto any page at the position and size you choose.' },
 ];
+
 
 // ─── STATE ───────────────────────────────────────────────────────────────
 let currentBuffer = null;
@@ -1912,13 +1886,9 @@ TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
   card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name) + '</h3><p>' + (_T['tool_desc_' + t.id.replace(/-/g,'_')] || t.desc) + '</p>';
-  card.onclick = () => {
-    if (!currentBuffer && !t.noFile) { pendingTool = t.id; document.getElementById('file-input-hidden').click(); }
-    else { openTool(t.id); }
-  };
+  card.onclick = () => openTool(t.id);
   homeGrid.appendChild(card);
 });
-let pendingTool = null;
 
 function scrollGrid(dir) {
   const grid = document.getElementById('home-tools-grid');
@@ -1974,7 +1944,6 @@ function showDropCheck(name) {
 document.getElementById('file-input-hidden').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   await loadPDF(file);
-  if (pendingTool) { openTool(pendingTool); pendingTool = null; }
   e.target.value = '';
 });
 
@@ -2056,8 +2025,8 @@ function buildOtherTools(currentId) {
   TOOLS.filter(t => t.id !== currentId).forEach(t => {
     const btn = document.createElement('button');
     btn.className = 'other-btn';
-    btn.textContent = t.icon + ' ' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name);
-    btn.onclick = () => { window.location.href = t.file; };
+    btn.textContent = _T['tool_name_' + t.id.replace(/-/g,'_')] || t.name;
+    btn.onclick = () => { window.location.href = t.url; };
     strip.appendChild(btn);
   });
 }
