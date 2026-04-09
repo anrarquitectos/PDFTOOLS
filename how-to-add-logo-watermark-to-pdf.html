@@ -328,7 +328,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           "name": "How do I add my logo as a watermark to a PDF?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "1. Open the <a href='watermark_logo.html' style="color:var(--cyan);">Logo Watermark tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF(s)</strong> — you can load an entire drawing set at once. 3. Upload your logo image (PNG with transparent background works best). 4. Set opacity (0.10–0.25 is typical for drawings), scale and position. 5. Click <strong>Apply logo</strong>. 6. Download the ZIP — each page has the logo embedded as a grayscale watermark."
+            "text": "1. Open the <a href='/watermark_logo' style="color:var(--cyan);">Logo Watermark tool</a> at scalebarpdf.com. 2. Click <strong>Choose PDF(s)</strong> — you can load an entire drawing set at once. 3. Upload your logo image (PNG with transparent background works best). 4. Set opacity (0.10–0.25 is typical for drawings), scale and position. 5. Click <strong>Apply logo</strong>. 6. Download the ZIP — each page has the logo embedded as a grayscale watermark."
           }
         }
       ]
@@ -376,7 +376,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — How to Add a Logo Watermark to a PDF: batch stamp your studio brand across architectural plan sets, with opacity and rotation control</span></h1>
+  <h1><a href="/"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — How to Add a Logo Watermark to a PDF: batch stamp your studio brand across architectural plan sets, with opacity and rotation control</span></h1>
   <div id="lang-switcher">
     <button id="lang-en" onclick="setLang('en')">EN</button>
     <button id="lang-es" onclick="setLang('es')">ES</button>
@@ -387,7 +387,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- BREADCRUMB -->
   <nav class="breadcrumb">
-    <a href="index.html" data-i18n="home" style="color:var(--cyan);">Home</a>
+    <a href="/" data-i18n="home" style="color:var(--cyan);">Home</a>
     <span>›</span>
     <span data-i18n="tutorials_label">Tutorials</span>
   </nav>
@@ -403,7 +403,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE BODY -->
   <article class="prose">
 
-    <p data-i18n="intro_p1">As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet, both for branding and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and packages the result into a ZIP. You can find it <a href="watermark_logo.html" style="color:var(--cyan);">here</a>.</p>
+    <p data-i18n="intro_p1">As an architect I regularly needed to send out drawing sets with a discreet studio logo on every sheet, both for branding and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. The logo watermark tool processes any number of PDFs at once and packages the result into a ZIP. You can find it <a href="/watermark_logo" style="color:var(--cyan);">here</a>.</p>
 
     <p data-i18n="intro_p2">The logo is automatically converted to grayscale before embedding, keeping it neutral against any drawing background and avoiding color conflicts with the drawing content.</p>
 
@@ -483,18 +483,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- CTA -->
   <div class="cta-block">
-    <a href="watermark_logo.html" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Logo Watermark tool →</a>
+    <a href="/watermark_logo" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Logo Watermark tool →</a>
   </div>
 
   <!-- RELATED TOOLS -->
   <div class="related-wrap">
     <h4 data-i18n="related_title">RELATED TOOLS</h4>
     <div class="related-tools">
-      <a href="watermark_text.html" data-i18n="rel_wtext" style="color:var(--cyan);">Text watermark</a>
-      <a href="scalebar.html" data-i18n="rel_scalebar" style="color:var(--cyan);">Scale bar (m)</a>
-      <a href="vineta.html" data-i18n="rel_vineta" style="color:var(--cyan);">Title block</a>
-      <a href="plan_numbering.html" data-i18n="rel_plannum" style="color:var(--cyan);">Plan numbering</a>
-      <a href="compress.html" data-i18n="rel_compress" style="color:var(--cyan);">Compress PDF</a>
+      <a href="/watermark_text" data-i18n="rel_wtext" style="color:var(--cyan);">Text watermark</a>
+      <a href="/scalebar" data-i18n="rel_scalebar" style="color:var(--cyan);">Scale bar (m)</a>
+      <a href="/vineta" data-i18n="rel_vineta" style="color:var(--cyan);">Title block</a>
+      <a href="/plan_numbering" data-i18n="rel_plannum" style="color:var(--cyan);">Plan numbering</a>
+      <a href="/compress" data-i18n="rel_compress" style="color:var(--cyan);">Compress PDF</a>
     </div>
   </div>
 
@@ -508,7 +508,7 @@ const T = {
     article_meta: 'TUTORIAL — LOGO WATERMARK · BATCH PDF',
     article_title: 'How to add your logo as a watermark to all your plans, without software',
     article_lede: 'Sending a full drawing set to a client or contractor and want your studio\'s logo on every sheet?<br><br>This tutorial shows how to stamp it across all your PDFs at once, with the right opacity and position, without needing to open any application.',
-    intro_p1: 'As an architect I often needed to send drawing sets with my own logo on every sheet — both to give the files my identity and mark, and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. So I ended up building a page that processes any number of PDFs at once and delivers a ZIP with the watermarks. You can find it <a href="watermark_logo.html" style="color:var(--cyan);">here</a>.',
+    intro_p1: 'As an architect I often needed to send drawing sets with my own logo on every sheet — both to give the files my identity and mark, and as a basic layer of protection against misuse. Doing it sheet by sheet in Acrobat is slow, and most free tools either rasterize the result or handle multi-file batches poorly. So I ended up building a page that processes any number of PDFs at once and delivers a ZIP with the watermarks. You can find it <a href="/watermark_logo" style="color:var(--cyan);">here</a>.',
     intro_p2: 'The logo is automatically converted to grayscale before embedding, keeping it neutral against any drawing background and avoiding color conflicts with the drawing content.',
     step1_title: 'Load your PDFs and your logo',
     step1_p1: 'Open the <strong>Logo watermark</strong> tool and click <strong>Choose PDF(s)</strong>. You can load an entire drawing set at once — ten, fifty files, as many as you need. Once loaded, the button confirms how many PDFs are ready to process.',
@@ -533,7 +533,7 @@ const T = {
     rel_wtext: 'Text watermark', rel_scalebar: 'Scale bar (m)',
     rel_vineta: 'Title block', rel_plannum: 'Plan numbering', rel_compress: 'Compress PDF',
     'geo_q': 'In short — how do I stamp my logo across a full PDF drawing set?',
-    'geo_a': 'Open the <a href="watermark_logo.html" style="color:var(--cyan);">Logo Watermark tool</a> at scalebarpdf.com. Load your PDFs, upload your logo (PNG with transparent background recommended), set opacity between 0.10 and 0.25, choose position, then click <strong>Apply logo</strong>. All pages are stamped and packaged into a single ZIP — nothing is uploaded to any server.',
+    'geo_a': 'Open the <a href="/watermark_logo" style="color:var(--cyan);">Logo Watermark tool</a> at scalebarpdf.com. Load your PDFs, upload your logo (PNG with transparent background recommended), set opacity between 0.10 and 0.25, choose position, then click <strong>Apply logo</strong>. All pages are stamped and packaged into a single ZIP — nothing is uploaded to any server.',
     'geo_v': 'Also searched as: <em>add logo to PDF plans batch</em>, <em>free PDF logo watermark</em>, <em>stamp logo on PDF</em>.',
   },
   es: {
@@ -541,7 +541,7 @@ const T = {
     article_meta: 'TUTORIAL — MARCA DE AGUA LOGO · LOTE DE PDFs',
     article_title: 'Cómo añadir tu logo como marca de agua en todos tus planos, sin programas',
     article_lede: '¿Vas a enviar un juego completo de planos a un cliente o constructor y quieres el logo de tu oficina o empresa en cada lámina?<br><br>Este tutorial muestra cómo estamparlo en todos tus PDFs a la vez, con la opacidad y posición correctas, sin la necesidad de abrir ninguna aplicación.',
-    intro_p1: 'Como arquitecto necesitaba frecuentemente enviar juegos de planos con mi propio logo en cada lámina, tanto por darle mi identidad y sello a los archivos como por la necesidad de protección ante usos indebidos. Hacerlo hoja a hoja en Acrobat es lento, y la mayoría de herramientas gratuitas rasterizan el resultado o gestionan mal los lotes de múltiples archivos. Ante esto, terminé creando una página que procesa cualquier cantidad de PDFs a la vez y entrega un ZIP con las marcas de agua. La puedes encontrar <a href="watermark_logo.html" style="color:var(--cyan);">aquí</a>.',
+    intro_p1: 'Como arquitecto necesitaba frecuentemente enviar juegos de planos con mi propio logo en cada lámina, tanto por darle mi identidad y sello a los archivos como por la necesidad de protección ante usos indebidos. Hacerlo hoja a hoja en Acrobat es lento, y la mayoría de herramientas gratuitas rasterizan el resultado o gestionan mal los lotes de múltiples archivos. Ante esto, terminé creando una página que procesa cualquier cantidad de PDFs a la vez y entrega un ZIP con las marcas de agua. La puedes encontrar <a href="/watermark_logo" style="color:var(--cyan);">aquí</a>.',
     intro_p2: 'El logo se convierte automáticamente a escala de grises antes de incrustarse, lo que lo mantiene neutro frente a cualquier fondo de plano y evita conflictos de color con el contenido del dibujo.',
     step1_title: 'Carga tus PDFs y tu logo',
     step1_p1: 'Abre la herramienta <strong>Marca de agua logo</strong> y haz clic en <strong>Choose PDF(s)</strong>. Puedes cargar un juego completo de planos de una vez: diez, cincuenta archivos, los que quieras. Una vez cargados, el botón confirma cuántos PDFs están listos para procesar.',
@@ -566,7 +566,7 @@ const T = {
     rel_wtext: 'Marca de agua texto', rel_scalebar: 'Escala gráfica (m)',
     rel_vineta: 'Viñeta / Carátula', rel_plannum: 'Numeración de planos', rel_compress: 'Comprimir PDF',
     'geo_q': 'En pocas palabras, ¿cómo añado mi logo a todos mis planos PDF?',
-    'geo_a': 'Abre la <a href="watermark_logo.html" style="color:var(--cyan);">herramienta Marca de agua logo</a> en scalebarpdf.com. Carga tus PDFs, sube tu logo (se recomienda PNG con fondo transparente), ajusta la opacidad entre 0,10 y 0,25, elige la posición y haz clic en <strong>Aplicar logo</strong>. Todas las páginas quedan marcadas y se empaquetan en un ZIP.',
+    'geo_a': 'Abre la <a href="/watermark_logo" style="color:var(--cyan);">herramienta Marca de agua logo</a> en scalebarpdf.com. Carga tus PDFs, sube tu logo (se recomienda PNG con fondo transparente), ajusta la opacidad entre 0,10 y 0,25, elige la posición y haz clic en <strong>Aplicar logo</strong>. Todas las páginas quedan marcadas y se empaquetan en un ZIP.',
     'geo_v': 'También buscado como: <em>añadir logo a planos PDF en lote</em>, <em>marca de agua PDF gratis</em>, <em>estampar logo en PDF</em>.',
   }
 };

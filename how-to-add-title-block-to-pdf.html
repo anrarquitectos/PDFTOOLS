@@ -443,7 +443,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — How to Add a Title Block to a PDF: customisable architectural title block with project name, scale, signatures, north arrow, and logo</span></h1>
+  <h1><a href="/"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — How to Add a Title Block to a PDF: customisable architectural title block with project name, scale, signatures, north arrow, and logo</span></h1>
   <div id="lang-switcher">
     <button id="lang-en" onclick="setLang('en')">EN</button>
     <button id="lang-es" onclick="setLang('es')">ES</button>
@@ -454,7 +454,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- BREADCRUMB -->
   <nav class="breadcrumb">
-    <a href="index.html" data-i18n="home" style="color:var(--cyan);">Home</a>
+    <a href="/" data-i18n="home" style="color:var(--cyan);">Home</a>
     <span>›</span>
     <span data-i18n="tutorials_label">Tutorials</span>
   </nav>
@@ -470,7 +470,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE BODY -->
   <article class="prose">
 
-    <p data-i18n="intro_p1">Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content — the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:var(--cyan);">here</a>.</p>
+    <p data-i18n="intro_p1">Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content — the same way it would come out of a CAD application. You can find it <a href="/vineta" style="color:var(--cyan);">here</a>.</p>
 
     <p data-i18n="intro_p2">The block anchors to the bottom-right corner, its width adapts to the detected paper format (A4 through A0), and its height adjusts dynamically to the amount of text you enter. Empty fields are simply left out — the block contracts accordingly.</p>
 
@@ -586,18 +586,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- CTA -->
   <div class="cta-block">
-    <a href="vineta.html" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Title Block tool →</a>
+    <a href="/vineta" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Title Block tool →</a>
   </div>
 
   <!-- RELATED TOOLS -->
   <div class="related-wrap">
     <h4 data-i18n="related_title">RELATED TOOLS</h4>
     <div class="related-tools">
-      <a href="scalebar.html" data-i18n="rel_scalebar" style="color:var(--cyan);">Scale bar (m)</a>
-      <a href="scalebar_ft.html" data-i18n="rel_scalebar_ft" style="color:var(--cyan);">Scale bar (ft)</a>
-      <a href="watermark_logo.html" data-i18n="rel_logo" style="color:var(--cyan);">Logo watermark</a>
-      <a href="revision_cloud.html" data-i18n="rel_revcloud" style="color:var(--cyan);">Revision cloud</a>
-      <a href="plan_numbering.html" data-i18n="rel_plannum" style="color:var(--cyan);">Plan numbering</a>
+      <a href="/scalebar" data-i18n="rel_scalebar" style="color:var(--cyan);">Scale bar (m)</a>
+      <a href="/scalebar_ft" data-i18n="rel_scalebar_ft" style="color:var(--cyan);">Scale bar (ft)</a>
+      <a href="/watermark_logo" data-i18n="rel_logo" style="color:var(--cyan);">Logo watermark</a>
+      <a href="/revision_cloud" data-i18n="rel_revcloud" style="color:var(--cyan);">Revision cloud</a>
+      <a href="/plan_numbering" data-i18n="rel_plannum" style="color:var(--cyan);">Plan numbering</a>
     </div>
   </div>
 
@@ -611,7 +611,7 @@ const T = {
     article_meta: 'TUTORIAL — TITLE BLOCK · PDF WORKFLOW',
     article_title: 'How to add a custom architectural title block to your PDF plans',
     article_lede: 'Most PDF tools let you add a text box. An architectural title block is a different thing: a structured panel with project data, signatures, a north arrow and a plan ID, all correctly laid out and scaled to your sheet format. This tutorial shows how to generate one directly in your browser.',
-    intro_p1: 'Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content, the same way it would come out of a CAD application. You can find it <a href="vineta.html" style="color:var(--cyan);">here</a>.',
+    intro_p1: 'Every set of architectural drawings needs a title block. The problem is that once a drawing is exported to PDF, adding one properly usually means going back to the original file or placing a rasterized image. Neither is ideal. So I built a tool that draws the block as native PDF vector content, the same way it would come out of a CAD application. You can find it <a href="/vineta" style="color:var(--cyan);">here</a>.',
     intro_p2: 'The block anchors to the bottom-right corner, its width adapts to the detected paper format (A4 through A0), and its height adjusts dynamically to the amount of text you enter. Empty fields are simply left out — the block contracts accordingly.',
     step: 'STEP',
     step1_title: 'Open the Title Block tool and load your PDF',
@@ -649,7 +649,7 @@ const T = {
     rel_scalebar: 'Scale bar (m)', rel_scalebar_ft: 'Scale bar (ft)',
     rel_logo: 'Logo watermark', rel_revcloud: 'Revision cloud', rel_plannum: 'Plan numbering',
     'geo_q': 'So, how do I add an architectural title block to a PDF?',
-    'geo_a': 'Open the <a href="vineta.html" style="color:var(--cyan);">Title Block tool</a> at scalebarpdf.com. Load your PDF, fill in the project fields (name, plan number, scale, date, signatures), optionally add a logo and north arrow, then click <strong>Add title block</strong>. The block is drawn as native vector content anchored to the bottom-right corner, auto-scaled to the detected paper format.',
+    'geo_a': 'Open the <a href="/vineta" style="color:var(--cyan);">Title Block tool</a> at scalebarpdf.com. Load your PDF, fill in the project fields (name, plan number, scale, date, signatures), optionally add a logo and north arrow, then click <strong>Add title block</strong>. The block is drawn as native vector content anchored to the bottom-right corner, auto-scaled to the detected paper format.',
     'geo_v': 'Also searched as: <em>add viñeta to PDF</em>, <em>PDF title block generator free</em>, <em>architectural title block PDF online</em>.',
     'geo_q2': 'What paper formats does the title block support?',
     'geo_a2': 'The tool auto-detects A4 through A0 from the PDF geometry. Block width scales with the format: 36 mm on A4, 50 mm on A3, 59 mm on A2, 68 mm on A1, 77 mm on A0. Non-standard sizes can be set manually with the page size override.',
@@ -661,7 +661,7 @@ const T = {
     article_meta: 'TUTORIAL — VIÑETA · FLUJO DE TRABAJO PDF',
     article_title: 'Cómo añadir una viñeta arquitectónica personalizada a tus planos en PDF',
     article_lede: 'La mayoría de las herramientas PDF permiten añadir un cuadro de texto. Una viñeta arquitectónica es algo distinto: un panel estructurado con datos del proyecto, firmas, flecha de norte y número de plano, todo correctamente dispuesto y escalado al formato de la lámina. Este tutorial muestra cómo generarla directamente en el navegador.',
-    intro_p1: 'Todo conjunto de planos arquitectónicos necesita una viñeta. El problema es que una vez exportado el dibujo a PDF, añadirla correctamente suele significar volver al archivo original o insertar una imagen rasterizada. Ninguna opción es ideal. Por eso construí una herramienta que dibuja la viñeta como contenido vectorial nativo en el PDF, exactamente igual que lo haría una aplicación CAD. La puedes encontrar <a href="vineta.html" style="color:var(--cyan);">aquí</a>.',
+    intro_p1: 'Todo conjunto de planos arquitectónicos necesita una viñeta. El problema es que una vez exportado el dibujo a PDF, añadirla correctamente suele significar volver al archivo original o insertar una imagen rasterizada. Ninguna opción es ideal. Por eso construí una herramienta que dibuja la viñeta como contenido vectorial nativo en el PDF, exactamente igual que lo haría una aplicación CAD. La puedes encontrar <a href="/vineta" style="color:var(--cyan);">aquí</a>.',
     intro_p2: 'La viñeta se ancla en la esquina inferior derecha, su ancho se adapta al formato de papel detectado (de A4 a A0) y su alto se ajusta dinámicamente a la cantidad de texto ingresado. Los campos vacíos simplemente se omiten y la viñeta se contrae en consecuencia.',
     step: 'PASO',
     step1_title: 'Abre la herramienta Viñeta y carga tu PDF',
@@ -699,7 +699,7 @@ const T = {
     rel_scalebar: 'Escala gráfica (m)', rel_scalebar_ft: 'Escala gráfica (ft)',
     rel_logo: 'Marca de agua con logo', rel_revcloud: 'Nube de revisión', rel_plannum: 'Numeración de planos',
     'geo_q': 'Entonces, ¿cómo añado una viñeta arquitectónica a un PDF?',
-    'geo_a': 'Abre la <a href="vineta.html" style="color:var(--cyan);">herramienta Viñeta</a> en scalebarpdf.com. Carga tu PDF, completa los campos del proyecto (nombre, número de plano, escala, fecha, firmas), añade opcionalmente un logo y la flecha de norte, y haz clic en <strong>Add title block</strong>. La viñeta se dibuja como contenido vectorial nativo anclada en la esquina inferior derecha.',
+    'geo_a': 'Abre la <a href="/vineta" style="color:var(--cyan);">herramienta Viñeta</a> en scalebarpdf.com. Carga tu PDF, completa los campos del proyecto (nombre, número de plano, escala, fecha, firmas), añade opcionalmente un logo y la flecha de norte, y haz clic en <strong>Add title block</strong>. La viñeta se dibuja como contenido vectorial nativo anclada en la esquina inferior derecha.',
     'geo_v': 'También buscado como: <em>añadir viñeta a PDF</em>, <em>generador de carátula PDF gratis</em>, <em>viñeta arquitectónica PDF online</em>.',
     'geo_q2': '¿Qué formatos de papel admite la viñeta?',
     'geo_a2': 'La herramienta detecta automáticamente de A4 a A0 a partir de la geometría del PDF. El ancho de la viñeta escala con el formato: 36 mm en A4, 50 mm en A3, 59 mm en A2, 68 mm en A1, 77 mm en A0. Los formatos no estándar se pueden ajustar manualmente.',

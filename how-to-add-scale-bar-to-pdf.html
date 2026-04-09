@@ -374,7 +374,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 <!-- TOP BAR -->
 <div id="topbar">
-  <h1><a href="index.html"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — How to Add a Scale Bar to a PDF: automatic graphic scale for architectural drawings, sized by drawing scale and paper format</span></h1>
+  <h1><a href="/"><img src="favicon-96x96.png" alt="" style="height:28px;width:28px;border-radius:3px;flex-shrink:0;"><span class="logo-accent">SCALEBAR</span> PDF TOOLS</a><span class="vh"> — How to Add a Scale Bar to a PDF: automatic graphic scale for architectural drawings, sized by drawing scale and paper format</span></h1>
   <div id="lang-switcher">
     <button id="lang-en" onclick="setLang('en')">EN</button>
     <button id="lang-es" onclick="setLang('es')">ES</button>
@@ -385,7 +385,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- BREADCRUMB -->
   <nav class="breadcrumb">
-    <a href="index.html" data-i18n="home" style="color:var(--cyan);">Home</a>
+    <a href="/" data-i18n="home" style="color:var(--cyan);">Home</a>
     <span>›</span>
     <span data-i18n="tutorials_label">Tutorials</span>
   </nav>
@@ -401,7 +401,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- ARTICLE BODY -->
   <article class="prose">
 
-    <p data-i18n="intro_p1">As an architect I kept running into the same situation: a PDF that needed a scale bar and no straightforward way to add one correctly. Not as decoration drawn by hand, but one that is mathematically tied to the drawing scale and paper size. So I built this tool. You can find it <a href="scalebar.html" style="color:var(--cyan);">here</a>.</p>
+    <p data-i18n="intro_p1">As an architect I kept running into the same situation: a PDF that needed a scale bar and no straightforward way to add one correctly. Not as decoration drawn by hand, but one that is mathematically tied to the drawing scale and paper size. So I built this tool. You can find it <a href="/scalebar" style="color:var(--cyan);">here</a>.</p>
 
     <p data-i18n="intro_p2">The correct approach is to compute the bar length from the scale ratio and the paper format, then draw it at an exact point size. That is what this tool does automatically.</p>
 
@@ -472,18 +472,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <!-- CTA -->
   <div class="cta-block">
-    <a href="scalebar.html" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Scale Bar tool →</a>
+    <a href="/scalebar" class="cta-btn" data-i18n="cta_btn" style="color:var(--cyan);">Open Scale Bar tool →</a>
   </div>
 
   <!-- RELATED TOOLS -->
   <div class="related-wrap">
     <h4 data-i18n="related_title">RELATED TOOLS</h4>
     <div class="related-tools">
-      <a href="scalebar_ft.html" data-i18n="rel_scalebar_ft" style="color:var(--cyan);">Scale bar (ft)</a>
-      <a href="vineta.html" data-i18n="rel_vineta" style="color:var(--cyan);">Title block</a>
-      <a href="revision_cloud.html" data-i18n="rel_revcloud" style="color:var(--cyan);">Revision cloud</a>
-      <a href="plan_numbering.html" data-i18n="rel_plannum" style="color:var(--cyan);">Plan numbering</a>
-      <a href="watermark_text.html" data-i18n="rel_watermark" style="color:var(--cyan);">Text watermark</a>
+      <a href="/scalebar_ft" data-i18n="rel_scalebar_ft" style="color:var(--cyan);">Scale bar (ft)</a>
+      <a href="/vineta" data-i18n="rel_vineta" style="color:var(--cyan);">Title block</a>
+      <a href="/revision_cloud" data-i18n="rel_revcloud" style="color:var(--cyan);">Revision cloud</a>
+      <a href="/plan_numbering" data-i18n="rel_plannum" style="color:var(--cyan);">Plan numbering</a>
+      <a href="/watermark_text" data-i18n="rel_watermark" style="color:var(--cyan);">Text watermark</a>
     </div>
   </div>
 
@@ -497,7 +497,7 @@ const T = {
     article_meta: 'TUTORIAL — SCALE BAR · PDF WORKFLOW',
     article_title: 'How to add a scale bar to a PDF — automatically sized for any drawing scale',
     article_lede: 'A well-finished plan should always include a scale bar. If you\'ve already exported the file and forgot to draw it, don\'t worry. This tutorial shows how to add one that is mathematically correct and automatically proportioned to your drawing scale and paper size, without opening AutoCAD or Revit.',
-    intro_p1: 'As an architect, I have always considered it good practice to add a graphic scale bar to my drawings, but adding one without opening the AutoCAD file is not easy, especially considering that this is not a decorative element, but a precise indicator tied to the drawing’s scale and the paper format. That is why I built this tool. You can find it <a href="scalebar.html" style="color:var(--cyan);">here</a>.',
+    intro_p1: 'As an architect, I have always considered it good practice to add a graphic scale bar to my drawings, but adding one without opening the AutoCAD file is not easy, especially considering that this is not a decorative element, but a precise indicator tied to the drawing’s scale and the paper format. That is why I built this tool. You can find it <a href="/scalebar" style="color:var(--cyan);">here</a>.',
     intro_p2: 'On other sites, you can add a graphic scale bar as an image, but it will not be properly processed when exporting the PDF and will not preserve its quality when printed. The correct approach is to compute the bar length from the scale ratio and the paper format, then draw it at an exact point size as vector content. That is what this tool does automatically.',
     step: 'STEP',
     step1_title: 'Open the Scale Bar tool and load your PDF',
@@ -530,7 +530,7 @@ const T = {
     rel_scalebar_ft: 'Scale bar (ft)', rel_vineta: 'Title block',
     rel_revcloud: 'Revision cloud', rel_plannum: 'Plan numbering', rel_watermark: 'Text watermark',
     'geo_q': 'In short — how do I add a scale bar to a PDF?',
-    'geo_a': 'Open the <a href="scalebar.html" style="color:var(--cyan);">Scale Bar tool</a> at scalebarpdf.com. Load your PDF, select your drawing scale (e.g. 1:100), choose position and style, then click <strong>Add scale bar</strong>. The bar is embedded as native vector content, correctly proportioned for print.',
+    'geo_a': 'Open the <a href="/scalebar" style="color:var(--cyan);">Scale Bar tool</a> at scalebarpdf.com. Load your PDF, select your drawing scale (e.g. 1:100), choose position and style, then click <strong>Add scale bar</strong>. The bar is embedded as native vector content, correctly proportioned for print.',
     'geo_v': 'Also searched as: <em>how to add a scale to a PDF drawing</em>, <em>add graphic scale to PDF</em>, <em>PDF scale bar generator</em>.',
   },
   es: {
@@ -538,7 +538,7 @@ const T = {
     article_meta: 'TUTORIAL — ESCALA GRÁFICA · FLUJO DE TRABAJO PDF',
     article_title: 'Cómo añadir una escala gráfica a un PDF dimensionada automáticamente para cualquier escala de dibujo',
     article_lede: 'Un plano bien terminado debería llevar siempre una escala gráfica. Si ya tienes exportado el archivo y olvidaste dibujarla, no te preocupes. Este tutorial muestra cómo añadir una que sea matemáticamente correcta y proporcionada automáticamente a la escala del dibujo y al formato del papel, sin abrir AutoCAD ni Revit.',
-    intro_p1: 'Como arquitecto, siempre he considerado una buena costumbre agregar una escala gráfica a mis dibujos, pero añadir una sin abrir el archivo de Autocad no es fácil, sobre todo considerando que éste no es un elemento decorativo, sino un indicador preciso vinculado a la escala del dibujo y al formato del papel. Por eso construí esta herramienta. La puedes encontrar <a href="scalebar.html" style="color:var(--cyan);">aquí</a>.',
+    intro_p1: 'Como arquitecto, siempre he considerado una buena costumbre agregar una escala gráfica a mis dibujos, pero añadir una sin abrir el archivo de Autocad no es fácil, sobre todo considerando que éste no es un elemento decorativo, sino un indicador preciso vinculado a la escala del dibujo y al formato del papel. Por eso construí esta herramienta. La puedes encontrar <a href="/scalebar" style="color:var(--cyan);">aquí</a>.',
     intro_p2: 'En otros sitios puedes agregar una escala gráfica en forma de imagen, pero esta no será bien procesada al exportar el pdf y no conservará su calidad al imprimirse. La forma correcta es calcular la longitud de la barra a partir de la relación de escala y el formato del papel, y dibujarla a un tamaño exacto en puntos. Eso es lo que hace esta herramienta automáticamente.',
     step: 'PASO',
     step1_title: 'Abre la herramienta Escala gráfica y carga tu PDF',
@@ -571,7 +571,7 @@ const T = {
     rel_scalebar_ft: 'Escala gráfica (ft)', rel_vineta: 'Viñeta / Carátula',
     rel_revcloud: 'Nube de revisión', rel_plannum: 'Numeración de planos', rel_watermark: 'Marca de agua',
     'geo_q': 'En pocas palabras, ¿cómo añado una escala gráfica a un PDF?',
-    'geo_a': 'Abre la <a href="scalebar.html" style="color:var(--cyan);">herramienta Escala gráfica</a> en scalebarpdf.com. Carga tu PDF, selecciona la escala del dibujo (p. ej. 1:100), elige posición y estilo, y haz clic en <strong>Añadir escala gráfica</strong>. La barra se incrusta como contenido vectorial nativo con las proporciones correctas para impresión.',
+    'geo_a': 'Abre la <a href="/scalebar" style="color:var(--cyan);">herramienta Escala gráfica</a> en scalebarpdf.com. Carga tu PDF, selecciona la escala del dibujo (p. ej. 1:100), elige posición y estilo, y haz clic en <strong>Añadir escala gráfica</strong>. La barra se incrusta como contenido vectorial nativo con las proporciones correctas para impresión.',
     'geo_v': 'También buscado como: <em>cómo añadir escala a un plano PDF</em>, <em>escala gráfica PDF online gratis</em>.',
   }
 };
