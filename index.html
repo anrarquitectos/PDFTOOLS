@@ -194,8 +194,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   }
 
   .home-header p {
-    font-size: 0.82rem; color: #8fa8c4;
-    line-height: 1.75; max-width: 620px;
+    font-size: 0.86rem; color: #8fa8c4;
+    line-height: 1.75; max-width: 738px;
     margin-top: 4px;
   }
 
@@ -207,6 +207,69 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     margin-bottom: 16px;
   }
   .choose-label::before { content: '// '; }
+
+  /* ── FILTER BAR ── */
+  .choose-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .choose-row .choose-label { margin-bottom: 0; }
+
+  #filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  #filter-icon {
+    color: var(--magenta);
+    opacity: 0.7;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  #filter-pills {
+    display: flex;
+    align-items: center;
+    gap: 0;        /* gaps handled by pill padding + divider */
+  }
+  .filter-pill {
+    font-size: 0.68rem;       /* ← tamaño texto filtros */
+    color: var(--muted);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    font-family: 'Space Mono', monospace;
+    transition: color 0.18s;
+    white-space: nowrap;
+    user-select: none;
+    padding: 0 18px;          /* ← separación entre texto y divisor */
+  }
+  .filter-pill:first-child { padding-left: 0; }
+  .filter-pill:last-child  { padding-right: 0; }
+  .filter-pill:hover  { color: var(--text); }
+  .filter-pill.active { color: var(--cyan); }
+
+  .filter-divider {
+    display: inline-block;
+    width: 1px;
+    height: 10px;             /* ← alto de la barra divisoria */
+    background: var(--magenta);
+    opacity: 0.5;             /* ← opacidad de la barra divisoria */
+    flex-shrink: 0;
+  }
+
+  #clear-filter-btn {
+    background: none; border: none; padding: 0;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;       /* ← tamaño texto "eliminar filtros" */
+    color: var(--muted);
+    cursor: pointer; letter-spacing: 0.03em;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  #clear-filter-btn:hover { color: var(--text); }
+  #clear-filter-btn.visible { opacity: 1; pointer-events: auto; }
 
   /* ── TOOLS GRID ── */
   .tools-grid {
@@ -307,16 +370,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #more-tools-btn.open .chevron { transform: rotate(180deg); }
 
   /* ── CARBON ADS ── */
-  .carbon-wrap {
-    margin: 32px 0 0;
-    border: 1px solid var(--glass-border);
-    border-radius: 12px; padding: 12px 16px;
-    display: flex; align-items: center; gap: 14px;
-    min-height: 130px; background: var(--glass);
-    backdrop-filter: blur(10px);
-  }
-  .carbon-wrap .carbon-slot { flex: 1; min-height: 100px; }
-  .carbon-wrap .carbon-label { font-size: 0.65rem; color: var(--muted); white-space: nowrap; align-self: flex-end; }
 
   /* ── TOOL VIEW ── */
   #view-tool {
@@ -679,8 +732,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <h1 class="sr-only">
-  Free browser-based PDF tools for architects, engineers and technical professionals
-  to add scale bars and title blocks, compress, merge, split and edit plans locally.
+  Free PDF tools for architects. Add title blocks, compress and edit files
 </h1>
 
 <!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
@@ -694,7 +746,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p data-i18n="hero_desc">For architects and professionals who need to work with documents efficiently and confidentially. Compress drawings, add scale bars and title blocks, resize pages to ISO formats, add watermarks and more.</p>
     </div>
 
-    <p class="choose-label" data-i18n="choose_tool">Choose a tool</p>
+    <div class="choose-row">
+      <p class="choose-label" data-i18n="choose_tool">Choose a tool</p>
+      <div id="filter-bar">
+        <button id="clear-filter-btn">✕ eliminar filtros</button>
+        <div id="filter-pills">
+          <span class="filter-pill" data-filter="basic" data-i18n="filter_basic">basic</span>
+          <span class="filter-divider"></span>
+          <span class="filter-pill" data-filter="arch" data-i18n="filter_arch">for architects</span>
+          <span class="filter-divider"></span>
+          <span class="filter-pill" data-filter="notary" data-i18n="filter_notary">for notaries/editors</span>
+        </div>
+        <div id="filter-icon">
+          <svg width="13" height="12" viewBox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1.5h11M3 6h7M5 10.5h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
     <div class="tools-peek-outer" id="tools-peek-outer">
       <div class="tools-peek-wrap" id="tools-peek-wrap">
         <div class="tools-grid" id="home-tools-grid"></div>
@@ -707,15 +776,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </button>
     </div>
 
-    <!-- Carbon Ads — replace comment with Carbon script tag once approved -->
-    <div class="carbon-wrap">
-      <div class="carbon-slot" id="carbon-slot">
-        <!-- <script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?serve=XXXX&placement=yourdomain" id="_carbonads_js"></script> -->
-      </div>
-      <span class="carbon-label">advertisement</span>
-    </div>
-
-
     <!-- ── GUIDES ── -->
     <section class="guides-grid" style="margin-top:48px;">
       <h3 class="section-h3">
@@ -723,7 +783,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </h3>
       <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px; align-items:stretch;">
 
-        <a href="how-to-add-scale-bar-to-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
+        <a href="/how-to-add-scale-bar-to-pdf" style="text-decoration:none; color:inherit; display:flex;">
           <div style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:22px 20px 24px; transition:all .2s; background:rgba(255,255,255,0.04); width:100%; backdrop-filter:blur(10px); display:flex; flex-direction:column; justify-content:space-between;"
                onmouseover="this.style.borderColor='rgba(0,245,212,0.3)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)';this.style.background='rgba(0,245,212,0.04)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none';this.style.background='rgba(255,255,255,0.04)'">
             <div style="font-size:0.68rem; font-weight:600; letter-spacing:0.1em; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;" data-i18n="g1_cat">Scale bar</div>
@@ -732,7 +792,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </a>
 
-        <a href="how-to-add-logo-watermark-to-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
+        <a href="/how-to-add-logo-watermark-to-pdf" style="text-decoration:none; color:inherit; display:flex;">
           <div style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:22px 20px 24px; transition:all .2s; background:rgba(255,255,255,0.04); width:100%; backdrop-filter:blur(10px); display:flex; flex-direction:column; justify-content:space-between;"
                onmouseover="this.style.borderColor='rgba(0,245,212,0.3)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)';this.style.background='rgba(0,245,212,0.04)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none';this.style.background='rgba(255,255,255,0.04)'">
             <div style="font-size:0.68rem; font-weight:600; letter-spacing:0.1em; color:var(--magenta); text-transform:uppercase; margin-bottom:6px;" data-i18n="g2_cat">Logo watermark</div>
@@ -741,7 +801,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </a>
 
-        <a href="best-way-to-compress-a-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
+        <a href="/best-way-to-compress-a-pdf" style="text-decoration:none; color:inherit; display:flex;">
           <div style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:22px 20px 24px; transition:all .2s; background:rgba(255,255,255,0.04); width:100%; backdrop-filter:blur(10px); display:flex; flex-direction:column; justify-content:space-between;"
                onmouseover="this.style.borderColor='rgba(0,245,212,0.3)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)';this.style.background='rgba(0,245,212,0.04)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none';this.style.background='rgba(255,255,255,0.04)'">
             <div style="font-size:0.68rem; font-weight:600; letter-spacing:0.1em; color:var(--yellow); text-transform:uppercase; margin-bottom:6px;" data-i18n="g3_cat">Compression</div>
@@ -750,7 +810,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </a>
 
-        <a href="how-to-add-title-block-to-pdf.html" style="text-decoration:none; color:inherit; display:flex;">
+        <a href="/how-to-add-title-block-to-pdf" style="text-decoration:none; color:inherit; display:flex;">
           <div style="border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:22px 20px 24px; transition:all .2s; background:rgba(255,255,255,0.04); width:100%; backdrop-filter:blur(10px); display:flex; flex-direction:column; justify-content:space-between;"
                onmouseover="this.style.borderColor='rgba(0,245,212,0.3)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)';this.style.background='rgba(0,245,212,0.04)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none';this.style.background='rgba(255,255,255,0.04)'">
             <div style="font-size:0.68rem; font-weight:600; letter-spacing:0.1em; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;" data-i18n="g4_cat">Title block</div>
@@ -776,7 +836,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <span class="faq-arrow">▼</span>
         </button>
         <div class="faq-a" data-i18n-html="faq1_a">
-          No, nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.
+          No — nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.
         </div>
       </div>
 
@@ -888,7 +948,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- ═══════════════════════════════ TOOL VIEW ═══════════════════════════════ -->
 <div id="view-tool" class="view">
   <div style="max-width:1080px; margin:0 auto; padding:32px 12px;">
-    <button id="back-btn" onclick="window.location.href='index.html'">← Home</button>
+    <button id="back-btn" onclick="window.location.href='/'">← Home</button>
 
     <div id="working-banner">
       <span>✓</span>
@@ -1959,6 +2019,9 @@ const TRANSLATIONS = {
     more_tools:    'More tools',
     less_tools:    'Less tools',
     faq_title:     'Frequently asked questions',
+    filter_basic:  'basic',
+    filter_arch:   'for architects',
+    filter_notary: 'for notaries/editors',
     // Tool names
     'compress':       'Compress PDF',
     'scalebar':       'Scale bar (m)',
@@ -2027,7 +2090,7 @@ const TRANSLATIONS = {
     faq9_q: 'Can I reorder pages and then split the result?',
     faq10_q: 'Is this tool free? How is it funded?',
     // FAQ answers (HTML allowed)
-    faq1_a: 'No, nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.',
+    faq1_a: 'No — nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.',
     faq2_a: 'Any modern Chromium-based browser (Chrome 90+, Edge 90+, Brave) or Firefox 90+ works well. Safari 16+ on macOS and iOS is also supported for most tools. For the <strong>Compress</strong> tool, which uses a Ghostscript WebAssembly engine, a recent Chromium browser gives the best results. If Ghostscript fails to load, the tool automatically falls back to a lighter pdf-lib compression.',
     faq3_a: "There are no server-imposed limits because everything runs locally. Practical limits depend on your device's RAM. Files up to ~150 MB are handled without issues on most modern computers. Very large files (scanned plans at 300 dpi, for example) may be slow on low-memory devices. If a tool runs out of memory the browser will show an error message — you can try reducing the file first with the <strong>Compress</strong> tool.",
     faq4_a: 'Yes, this is the intended workflow. After any operation completes, click <strong>↩ Keep working with this version</strong> to promote the result as the active file. Every subsequent tool will work on that modified version. A green banner at the top of the tool panel tracks your modification history so you always know which version you are working on.',
@@ -2046,6 +2109,9 @@ const TRANSLATIONS = {
     more_tools:    'Más herramientas',
     less_tools:    'Menos herramientas',
     faq_title:     'Preguntas frecuentes',
+    filter_basic:  'básicas',
+    filter_arch:   'para arquitectos',
+    filter_notary: 'para notarías/editores',
     // Tool names
     'compress':       'Comprimir PDF',
     'scalebar':       'Escala gráfica (m)',
@@ -2114,7 +2180,7 @@ const TRANSLATIONS = {
     faq9_q: '¿Puedo reordenar páginas y luego dividir el resultado?',
     faq10_q: '¿Esta herramienta es gratuita? ¿Cómo se financia?',
     // Respuestas FAQ (HTML permitido)
-    faq1_a: 'No, nadie. Ni nosotros, ni ningún tercero. Cada operación se ejecuta completamente en tu navegador con JavaScript, de modo que tu PDF nunca sale de tu dispositivo desde el momento en que lo abres hasta que descargas el resultado. Esto no es solo una política de privacidad: el sitio no tiene ningún servidor backend, lo que hace técnicamente imposible que tus archivos sean transmitidos o vistos por otra persona.',
+    faq1_a: 'No — nadie. Ni nosotros, ni ningún tercero. Cada operación se ejecuta completamente en tu navegador con JavaScript, de modo que tu PDF nunca sale de tu dispositivo desde el momento en que lo abres hasta que descargas el resultado. Esto no es solo una política de privacidad: el sitio no tiene ningún servidor backend, lo que hace técnicamente imposible que tus archivos sean transmitidos o vistos por otra persona.',
     faq2_a: 'Cualquier navegador moderno basado en Chromium (Chrome 90+, Edge 90+, Brave) o Firefox 90+ funciona bien. Safari 16+ en macOS e iOS también es compatible con la mayoría de herramientas. Para la herramienta <strong>Comprimir</strong>, que usa un motor Ghostscript WebAssembly, un navegador Chromium reciente da los mejores resultados. Si Ghostscript no se carga, la herramienta recurre automáticamente a una compresión más ligera con pdf-lib.',
     faq3_a: 'No hay límites impuestos por el servidor porque todo se ejecuta localmente. Los límites prácticos dependen de la RAM de tu dispositivo. Los archivos de hasta ~150 MB se manejan sin problemas en la mayoría de los ordenadores modernos. Los archivos muy grandes (planos escaneados a 300 ppp, por ejemplo) pueden ser lentos en dispositivos con poca memoria. Si una herramienta se queda sin memoria, el navegador mostrará un mensaje de error — puedes reducir primero el archivo con la herramienta <strong>Comprimir</strong>.',
     faq4_a: 'Sí, este es el flujo de trabajo previsto. Después de que se complete cualquier operación, haz clic en <strong>↩ Seguir trabajando con esta versión</strong> para activar el resultado como archivo activo. Cada herramienta posterior trabajará sobre esa versión modificada. Un banner verde en la parte superior del panel de la herramienta registra tu historial de modificaciones para que siempre sepas sobre qué versión estás trabajando.',
@@ -2156,8 +2222,9 @@ const homeGrid = document.getElementById('home-tools-grid');
 TOOLS.forEach((t, i) => {
   const card = document.createElement('a');
   card.className = 'tool-card';
+  card.dataset.toolId = t.id;
   const p = _sm[t.id];
-  if (p) card.href = p + '.html';
+  if (p) card.href = '/' + p;
   card.style.textDecoration = 'none';
   const name = T[t.id] || t.name;
   const desc = T['d_' + t.id] || t.desc;
@@ -2165,6 +2232,58 @@ TOOLS.forEach((t, i) => {
   card.innerHTML = `<div class="icon ${colorClass}">${t.icon}</div><h3>${name}</h3><p>${desc}</p>`;
   homeGrid.appendChild(card);
 });
+
+// ── FILTER LOGIC ─────────────────────────────────────────────────────────────
+const FILTERS = {
+  basic:  ['compress','crop','reorder','split','merge','convert','img2pdf','extract-pages'],
+  arch:   ['compress','scalebar','scalebar-ft','vineta','patch','watermark-text','watermark-logo','crop','reorder','split','merge','convert','grid','plan-numbering','revision-cloud','linewidth','extract-pages'],
+  notary: ['page-numbers','merge','split','reorder','extract-pages','rotate-pages','crop','text-note','pdfa','compress','img2pdf','watermark-text'],
+};
+
+let activeFilter = null;
+
+function applyFilter(key) {
+  activeFilter = key;
+  const order = FILTERS[key];
+  const grid = document.getElementById('home-tools-grid');
+  const allCards = Array.from(grid.querySelectorAll('.tool-card'));
+
+  // Sort: filtered tools first (in specified order), rest after (hidden)
+  const inFilter  = order.map(id => allCards.find(c => c.dataset.toolId === id)).filter(Boolean);
+  const outFilter = allCards.filter(c => !order.includes(c.dataset.toolId));
+
+  // Re-append in order
+  inFilter.forEach(c  => { c.style.display = ''; grid.appendChild(c); });
+  outFilter.forEach(c => { c.style.display = 'none'; grid.appendChild(c); });
+
+  // Update pill states
+  document.querySelectorAll('.filter-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.filter === key);
+  });
+  document.getElementById('clear-filter-btn').classList.add('visible');
+}
+
+function clearFilter() {
+  activeFilter = null;
+  const grid = document.getElementById('home-tools-grid');
+  // Restore original TOOLS order
+  TOOLS.forEach(t => {
+    const card = grid.querySelector(`[data-tool-id="${t.id}"]`);
+    if (card) { card.style.display = ''; grid.appendChild(card); }
+  });
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('clear-filter-btn').classList.remove('visible');
+}
+
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    const key = pill.dataset.filter;
+    if (activeFilter === key) clearFilter();
+    else applyFilter(key);
+  });
+});
+document.getElementById('clear-filter-btn').addEventListener('click', clearFilter);
+// ─────────────────────────────────────────────────────────────────────────────
 // Apply i18n to static elements
 document.addEventListener('DOMContentLoaded', applyI18n);
 let pendingTool = null;
