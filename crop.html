@@ -1725,33 +1725,13 @@ self.onmessage = async function(e) {
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js" integrity="sha512-z8IYLHO8bTgFqj+yrPyIJnzBDf7DDhWwiEsk4sY+Oe6J2M+WQequeGS7qioI5vT6rXgVRb4K1UVQC5ER7MKzKQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="tools.js"></script>
 <script>
 (function () {
 // ── i18n — must be first so the home grid can use _T on load ──────────────
 const _TL = {
   en: {
-    'other_tools_heading': 'OTHER TOOLS — same file',
-    'tool_name_compress':        'Compress PDF',
-    'tool_name_vineta':          'Title block',
-    'tool_name_patch':           'Patch / Redact',
-    'tool_name_scalebar':        'Scale bar (m)',
-    'tool_name_scalebar_ft':     'Scale bar (ft)',
-    'tool_name_watermark_logo':  'Logo watermark',
-    'tool_name_watermark_text':  'Text watermark',
-    'tool_name_crop':            'Resize to format',
-    'tool_name_reorder':         'Reorder & remove pages',
-    'tool_name_split':           'Split PDF',
-    'tool_name_merge':           'Merge PDFs',
-    'tool_name_convert':         'Convert to images',
-    'tool_name_img2pdf':         'Image to PDF',
-    'tool_name_plan_numbering':  'Plan numbering',
-    'tool_name_revision_cloud':  'Revision cloud',
-    'tool_name_grid':            'Page grid',
-    'tool_name_ocr':             'OCR — searchable PDF',
-    'tool_name_pdfa':            'Convert to PDF/A',
-    'tool_name_linewidth':       'Line weight',
-    'tool_name_text_note':       'Text note',
-    'tool_name_extract_pages':   'Extract pages',
+        'other_tools_heading': 'OTHER TOOLS — same file',
     no_file: 'No file loaded',
     'donation_title': 'File ready — tools like this take time to build.',
     'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
@@ -1777,28 +1757,7 @@ const _TL = {
     'cr_btn': 'Resize pages',
   },
   es: {
-    'other_tools_heading': 'OTRAS HERRAMIENTAS — mismo archivo',
-    'tool_name_compress':        'Comprimir PDF',
-    'tool_name_vineta':          'Viñeta / carátula',
-    'tool_name_patch':           'Parche / Redactar',
-    'tool_name_scalebar':        'Barra de escala (m)',
-    'tool_name_scalebar_ft':     'Barra de escala (ft)',
-    'tool_name_watermark_logo':  'Marca de agua — logo',
-    'tool_name_watermark_text':  'Marca de agua — texto',
-    'tool_name_crop':            'Ajustar formato',
-    'tool_name_reorder':         'Reordenar y eliminar páginas',
-    'tool_name_split':           'Dividir PDF',
-    'tool_name_merge':           'Unir PDFs',
-    'tool_name_convert':         'Convertir a imágenes',
-    'tool_name_img2pdf':         'Imagen a PDF',
-    'tool_name_plan_numbering':  'Numeración de planos',
-    'tool_name_revision_cloud':  'Nube de revisión',
-    'tool_name_grid':            'Grilla de página',
-    'tool_name_ocr':             'OCR — PDF buscable',
-    'tool_name_pdfa':            'Convertir a PDF/A',
-    'tool_name_linewidth':       'Peso de línea',
-    'tool_name_text_note':       'Nota de texto',
-    'tool_name_extract_pages':   'Extraer páginas',
+        'other_tools_heading': 'OTRAS HERRAMIENTAS — mismo archivo',
     no_file: 'Sin archivo cargado',
     'donation_title': 'Archivo listo — herramientas como esta llevan tiempo de desarrollo.',
     'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
@@ -1974,7 +1933,7 @@ function openTool(id) {
   document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
   document.getElementById(`panel-${id}`).classList.add('active');
   activeToolId = id;
-  buildOtherTools(id);
+  window.buildOtherTools(id, _lg);
   updateWorkingBanner();
   window.scrollTo(0, 0);
   // Populate patch page selector when panel opens
@@ -2013,17 +1972,7 @@ function resetToHome() {
   goHome();
 }
 
-function buildOtherTools(currentId) {
-  const strip = document.getElementById('other-tools-strip');
-  strip.innerHTML = '';
-  TOOLS.filter(t => t.id !== currentId).forEach(t => {
-    const btn = document.createElement('button');
-    btn.className = 'other-btn';
-    btn.textContent = _T['tool_name_' + t.id.replace(/-/g,'_')] || t.name;
-    btn.onclick = () => { window.location.href = t.url; };
-    strip.appendChild(btn);
-  });
-}
+// buildOtherTools is now provided by tools.js (window.buildOtherTools)
 
 function updateWorkingBanner() {
   const banner = document.getElementById('working-banner');
