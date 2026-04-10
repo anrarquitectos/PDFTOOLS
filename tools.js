@@ -43,7 +43,7 @@ window.TOOLS = [
   { id:'linewidth',      url:'/linewidth',      icon:'✏',
     en:'Line weight',               es:'Peso de línea' },
   { id:'text-note',      url:'/text_note',      icon:'💬',
-    en:'Text note',                 es:'Nota de texto' },
+    en:'Text note',                 es:'AAAAAAAAAA' },
   { id:'page-numbers',   url:'/page_numbers',   icon:'🔢',
     en:'Page numbers',              es:'Numeración de páginas' },
   { id:'rotate-pages',   url:'/rotate_pages',   icon:'↻',
