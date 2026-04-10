@@ -2100,6 +2100,7 @@ self.onmessage = async function(e) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
         integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="tools.js"></script>
 <script>
 // ─── PDF.js lazy load ─────────────────────────────────────────────────────
 const pdfjsScript = document.createElement('script');
@@ -2155,27 +2156,7 @@ const _TL = {
     'cp_label_qual': 'JPEG quality (1–100):',
     'cp_gs_note': 'The Ghostscript engine will be downloaded the first time you compress a file (~30 MB).',
     'cp_btn': 'Compress',
-    'other_tools_heading': 'OTHER TOOLS — same file',
-    'tool_name_compress':        'Compress PDF',
-    'tool_name_vineta':          'Title block',
-    'tool_name_patch':           'Patch / Redact',
-    'tool_name_scalebar':        'Scale bar (m)',
-    'tool_name_scalebar_ft':     'Scale bar (ft)',
-    'tool_name_watermark_logo':  'Logo watermark',
-    'tool_name_watermark_text':  'Text watermark',
-    'tool_name_crop':            'Resize to format',
-    'tool_name_reorder':         'Reorder & remove pages',
-    'tool_name_split':           'Split PDF',
-    'tool_name_merge':           'Merge PDFs',
-    'tool_name_convert':         'Convert to images',
-    'tool_name_img2pdf':         'Image to PDF',
-    'tool_name_plan_numbering':  'Plan numbering',
-    'tool_name_revision_cloud':  'Revision cloud',
-    'tool_name_grid':            'Page grid',
-    'tool_name_ocr':             'OCR — searchable PDF',
-    'tool_name_pdfa':            'Convert to PDF/A',
-    'tool_name_linewidth':       'Line weight',
-    'tool_name_text_note':       'Text note',
+        'other_tools_heading': 'OTHER TOOLS — same file',
     'tool_desc_compress':        'Ghostscript-powered compression with full control over DPI and quality.',
     'tool_desc_vineta':          'Architectural title block with project name, plan number, scale, signatures and north arrow.',
     'tool_desc_patch':           'Draw a white polygon over any area to cover content — with optional permanent flattening.',
@@ -2229,27 +2210,7 @@ const _TL = {
     'cp_label_qual': 'Calidad JPEG (1–100):',
     'cp_gs_note': 'El motor Ghostscript se descargará la primera vez que comprimas un archivo (~30 MB).',
     'cp_btn': 'Comprimir',
-    'other_tools_heading': 'OTRAS HERRAMIENTAS — mismo archivo',
-    'tool_name_compress':        'Comprimir PDF',
-    'tool_name_vineta':          'Viñeta / carátula',
-    'tool_name_patch':           'Parche / Redactar',
-    'tool_name_scalebar':        'Barra de escala (m)',
-    'tool_name_scalebar_ft':     'Barra de escala (ft)',
-    'tool_name_watermark_logo':  'Marca de agua — logo',
-    'tool_name_watermark_text':  'Marca de agua — texto',
-    'tool_name_crop':            'Ajustar formato',
-    'tool_name_reorder':         'Reordenar y eliminar páginas',
-    'tool_name_split':           'Dividir PDF',
-    'tool_name_merge':           'Unir PDFs',
-    'tool_name_convert':         'Convertir a imágenes',
-    'tool_name_img2pdf':         'Imagen a PDF',
-    'tool_name_plan_numbering':  'Numeración de planos',
-    'tool_name_revision_cloud':  'Nube de revisión',
-    'tool_name_grid':            'Grilla de página',
-    'tool_name_ocr':             'OCR — PDF buscable',
-    'tool_name_pdfa':            'Convertir a PDF/A',
-    'tool_name_linewidth':       'Peso de línea',
-    'tool_name_text_note':       'Nota de texto',
+        'other_tools_heading': 'OTRAS HERRAMIENTAS — mismo archivo',
     'tool_desc_compress':        'Compresión con Ghostscript y control total sobre DPI y calidad.',
     'tool_desc_vineta':          'Carátula arquitectónica con nombre de proyecto, número de plano, escala, firmas y norte.',
     'tool_desc_patch':           'Dibuja un polígono blanco sobre cualquier área para ocultar contenido — con aplanado permanente opcional.',
@@ -2418,7 +2379,7 @@ function openTool(id) {
   document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
   document.getElementById(`panel-${id}`).classList.add('active');
   activeToolId = id;
-  buildOtherTools(id);
+  window.buildOtherTools(id, _lg);
   updateWorkingBanner();
   window.scrollTo(0, 0);
   // Populate patch page selector when panel opens
@@ -2457,19 +2418,7 @@ function resetToHome() {
   goHome();
 }
 
-function buildOtherTools(currentId) {
-  const strip = document.getElementById('other-tools-strip');
-  strip.innerHTML = '';
-  TOOLS.filter(t => t.id !== currentId).forEach(t => {
-    const btn = document.createElement('button');
-    btn.className = 'other-btn';
-    // Use translated name if available, fall back to the static name
-    const translatedName = _T['tool_name_' + t.id.replace(/-/g,'_')] || t.name;
-    btn.textContent = translatedName;
-    btn.onclick = () => { window.location.href = t.url; };
-    strip.appendChild(btn);
-  });
-}
+// buildOtherTools is now provided by tools.js (window.buildOtherTools)
 
 function updateWorkingBanner() {
   const banner = document.getElementById('working-banner');
