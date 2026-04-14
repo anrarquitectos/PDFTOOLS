@@ -832,6 +832,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       <div class="faq-item">
         <button class="faq-q" onclick="toggleFaq(this)">
+          <span data-i18n="faq0_q">What is Scalebar PDF Tools?</span>
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-a" data-i18n-html="faq0_a">
+          Scalebar PDF Tools is a completely free platform built by independent developers, designed especially for architects and students. It brings advanced PDF editing capabilities typically found in dedicated software directly into the browser, making them accessible without installation or subscription. Tools include metric and imperial scale bars, ISO-format title blocks, compression, page reordering, watermarks, redaction, and more. If you find it useful, you can support its creators on <a href="https://ko-fi.com/scalebarpdftools" target="_blank" rel="noopener noreferrer">Ko-fi</a>.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
           <span data-i18n="faq1_q">Can anyone else access my files?</span>
           <span class="faq-arrow">▼</span>
         </button>
@@ -907,16 +917,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </button>
         <div class="faq-a" data-i18n-html="faq8_a">
           <strong>White layer</strong> draws a filled white polygon directly on the page content stream. The original content is covered visually but remains in the file — it can potentially be recovered by someone with the right tools. Use this when you want a reversible, lightweight cover (e.g. to overwrite before printing).<br><br><strong>Flatten page</strong> rasterizes the entire page to a bitmap at the chosen DPI and reconstructs it as a single image, permanently destroying all underlying vector content and text within the patch. This is the correct choice when you need to irreversibly redact sensitive information before sharing a file.
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this)">
-          <span data-i18n="faq9_q">Can I reorder pages and then split the result?</span>
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="faq-a" data-i18n-html="faq9_a">
-          Yes. Use <strong>Reorder &amp; Remove Pages</strong> to drag pages into the order you want and remove any you don't need, then click <strong>↩ Keep working with this version</strong>. After that, open the <strong>Split PDF</strong> tool — it will show the reordered pages and let you click the gaps where you want to split.
         </div>
       </div>
 
@@ -2079,6 +2079,7 @@ const TRANSLATIONS = {
     g3_cat: 'Compression',        g3_title: 'The best way to compress a PDF',                                 g3_desc: 'What actually reduces file size, when each method is appropriate, and why.',
     g4_cat: 'Title block',        g4_title: 'How to add a custom architectural title block to your PDF plans',g4_desc: 'Project name, scale, signatures, north arrow and plan ID — generated directly in your browser.',
     // FAQ questions
+    faq0_q: 'What is Scalebar PDF Tools?',
     faq1_q: 'Can anyone else access my files?',
     faq2_q: 'Which browsers are supported?',
     faq3_q: 'Are there file size limits?',
@@ -2087,9 +2088,9 @@ const TRANSLATIONS = {
     faq6_q: 'How does the graphic scale bar work? How is the bar length calculated?',
     faq7_q: 'What is the Title Block (Viñeta) tool?',
     faq8_q: 'What is the difference between Patch/Redact modes?',
-    faq9_q: 'Can I reorder pages and then split the result?',
     faq10_q: 'Is this tool free? How is it funded?',
     // FAQ answers (HTML allowed)
+    faq0_a: 'Scalebar PDF Tools is a completely free platform built by independent developers, designed especially for architects and students. It brings advanced PDF editing capabilities typically found in dedicated software directly into the browser, making them accessible without installation or subscription. Tools include metric and imperial scale bars, ISO-format title blocks, compression, page reordering, watermarks, redaction, and more. If you find it useful, you can support its creators on <a href="https://ko-fi.com/scalebarpdftools" target="_blank" rel="noopener noreferrer">Ko-fi</a>.',
     faq1_a: 'No — nobody. Not us, not any third party. Every operation runs entirely inside your browser using JavaScript, so your PDF never leaves your device from the moment you open it to the moment you download the result. This is not just a privacy policy: the site has no backend server at all, making it technically impossible for your files to be transmitted or seen by anyone else.',
     faq2_a: 'Any modern Chromium-based browser (Chrome 90+, Edge 90+, Brave) or Firefox 90+ works well. Safari 16+ on macOS and iOS is also supported for most tools. For the <strong>Compress</strong> tool, which uses a Ghostscript WebAssembly engine, a recent Chromium browser gives the best results. If Ghostscript fails to load, the tool automatically falls back to a lighter pdf-lib compression.',
     faq3_a: "There are no server-imposed limits because everything runs locally. Practical limits depend on your device's RAM. Files up to ~150 MB are handled without issues on most modern computers. Very large files (scanned plans at 300 dpi, for example) may be slow on low-memory devices. If a tool runs out of memory the browser will show an error message — you can try reducing the file first with the <strong>Compress</strong> tool.",
@@ -2098,7 +2099,6 @@ const TRANSLATIONS = {
     faq6_a: 'You enter the drawing scale (e.g. <code>1:100</code>) and the tool automatically selects a "nice" bar length — a round number of metres or feet that represents roughly 20% of the page width at that scale. For example, on an A1 sheet at 1:100 the bar will be 10 m or 15 m, not 12.37 m. The bar is always drawn in PDF coordinate space with full rotation compensation so it appears correctly even on pages that have a 90°, 180° or 270° rotation flag.<br><br>Five visual styles are available: <em>Classic</em> (alternating filled/empty), <em>Hatch</em> (hatched dark segments), <em>Staggered</em> (bars alternate above/below a centre line), <em>Dots</em> (thin line with dots at each division), and <em>Ticks</em> (thin line with vertical ticks only). Any colour can be applied to all bar elements at once.',
     faq7_a: 'It adds an architectural title block to the bottom-right corner of your pages. The block width scales with the ISO paper format (A4 → 36 mm, A0 → 77 mm) and the height adjusts dynamically to fit all content without overflow. Fields include Project name, Site address, Drawing content (multi-line), Plan type and number, Scale, Date, Client signature, Designer signature, a north arrow (rotatable by degree input), and Project No. All text is automatically uppercased.',
     faq8_a: '<strong>White layer</strong> draws a filled white polygon directly on the page content stream. The original content is covered visually but remains in the file — it can potentially be recovered by someone with the right tools. Use this when you want a reversible, lightweight cover (e.g. to overwrite before printing).<br><br><strong>Flatten page</strong> rasterizes the entire page to a bitmap at the chosen DPI and reconstructs it as a single image, permanently destroying all underlying vector content and text within the patch. This is the correct choice when you need to irreversibly redact sensitive information before sharing a file.',
-    faq9_a: 'Yes. Use <strong>Reorder &amp; Remove Pages</strong> to drag pages into the order you want and remove any you don\'t need, then click <strong>↩ Keep working with this version</strong>. After that, open the <strong>Split PDF</strong> tool — it will show the reordered pages and let you click the gaps where you want to split.',
     faq10_a: 'All tools are free with no account required and no file limits. Scalebar PDF Tools is the only browser-based suite specifically built for architects — combining general PDF utilities with tools unique to architectural practice, such as metric and imperial graphic scale bars with multiple styles, ISO-format title blocks with north arrows and signature fields, and a coordinate-aware patch/redact tool that handles rotated drawing sheets correctly. The site is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served exclusively to technical and design audiences (no tracking pixels, no retargeting). If you find the tools useful, you can also leave a one-time tip via the support button. Neither is required to use any feature.',
   },
   es: {
@@ -2169,6 +2169,7 @@ const TRANSLATIONS = {
     g3_cat: 'Compresión',         g3_title: 'La mejor manera de comprimir un PDF',                                            g3_desc: 'Qué reduce realmente el tamaño del archivo, cuándo usar cada método y por qué.',
     g4_cat: 'Viñeta',             g4_title: 'Cómo añadir una viñeta arquitectónica personalizada a tus planos en PDF',       g4_desc: 'Nombre del proyecto, escala, firmas, flecha de norte e ID de plano — generado en el navegador.',
     // Preguntas FAQ
+    faq0_q: '¿Qué es Scalebar?',
     faq1_q: '¿Puede alguien más acceder a mis archivos?',
     faq2_q: '¿Qué navegadores son compatibles?',
     faq3_q: '¿Hay límites de tamaño de archivo?',
@@ -2177,9 +2178,9 @@ const TRANSLATIONS = {
     faq6_q: '¿Cómo funciona la escala gráfica? ¿Cómo se calcula la longitud de la barra?',
     faq7_q: '¿Qué es la herramienta de viñeta (Title Block)?',
     faq8_q: '¿Cuál es la diferencia entre los modos Parche y Redactar?',
-    faq9_q: '¿Puedo reordenar páginas y luego dividir el resultado?',
     faq10_q: '¿Esta herramienta es gratuita? ¿Cómo se financia?',
     // Respuestas FAQ (HTML permitido)
+    faq0_a: 'Scalebar es una plataforma completamente gratuita desarrollada por independientes, pensada especialmente para arquitectos y estudiantes. Reúne herramientas de edición de PDF avanzadas, propias del software especializado, y las pone al alcance de cualquiera directamente en el navegador, sin instalación ni suscripción. Incluye escalas gráficas métricas e imperiales, viñetas en formato ISO, compresión, reordenamiento de páginas, marcas de agua, redacción y más. Si te resulta útil, puedes apoyar a sus creadores en <a href="https://ko-fi.com/scalebarpdftools" target="_blank" rel="noopener noreferrer">Ko-fi</a>.',
     faq1_a: 'No — nadie. Ni nosotros, ni ningún tercero. Cada operación se ejecuta completamente en tu navegador con JavaScript, de modo que tu PDF nunca sale de tu dispositivo desde el momento en que lo abres hasta que descargas el resultado. Esto no es solo una política de privacidad: el sitio no tiene ningún servidor backend, lo que hace técnicamente imposible que tus archivos sean transmitidos o vistos por otra persona.',
     faq2_a: 'Cualquier navegador moderno basado en Chromium (Chrome 90+, Edge 90+, Brave) o Firefox 90+ funciona bien. Safari 16+ en macOS e iOS también es compatible con la mayoría de herramientas. Para la herramienta <strong>Comprimir</strong>, que usa un motor Ghostscript WebAssembly, un navegador Chromium reciente da los mejores resultados. Si Ghostscript no se carga, la herramienta recurre automáticamente a una compresión más ligera con pdf-lib.',
     faq3_a: 'No hay límites impuestos por el servidor porque todo se ejecuta localmente. Los límites prácticos dependen de la RAM de tu dispositivo. Los archivos de hasta ~150 MB se manejan sin problemas en la mayoría de los ordenadores modernos. Los archivos muy grandes (planos escaneados a 300 ppp, por ejemplo) pueden ser lentos en dispositivos con poca memoria. Si una herramienta se queda sin memoria, el navegador mostrará un mensaje de error — puedes reducir primero el archivo con la herramienta <strong>Comprimir</strong>.',
@@ -2188,7 +2189,6 @@ const TRANSLATIONS = {
     faq6_a: 'Introduces la escala del dibujo (p. ej. <code>1:100</code>) y la herramienta selecciona automáticamente una longitud "redonda" — un número entero de metros o pies que representa aproximadamente el 20% del ancho de la página a esa escala. Por ejemplo, en una lámina A1 a 1:100 la barra será de 10 m o 15 m, nunca 12,37 m. La barra siempre se dibuja en el espacio de coordenadas PDF con compensación de rotación completa, por lo que aparece correctamente incluso en páginas con indicador de rotación de 90°, 180° o 270°.<br><br>Hay cinco estilos visuales disponibles: <em>Classic</em> (segmentos alternos lleno/vacío), <em>Hatch</em> (segmentos oscuros tramados), <em>Staggered</em> (barras alternadas arriba/abajo de una línea central), <em>Dots</em> (línea fina con puntos en cada división) y <em>Ticks</em> (línea fina con marcas verticales). Se puede aplicar cualquier color a todos los elementos de la barra.',
     faq7_a: 'Añade una viñeta arquitectónica en la esquina inferior derecha de tus páginas. El ancho del bloque se ajusta al formato de papel ISO (A4 → 36 mm, A0 → 77 mm) y el alto se ajusta dinámicamente para contener todo el contenido sin desbordamiento. Los campos incluyen nombre del proyecto, dirección, contenido del plano (multilínea), tipo y número de plano, escala, fecha, firma del cliente, firma del proyectista, flecha de norte (rotable por grado) y N° de proyecto. Todo el texto se convierte automáticamente a mayúsculas.',
     faq8_a: '<strong>Capa blanca</strong> dibuja un polígono blanco relleno directamente en el flujo de contenido de la página. El contenido original queda cubierto visualmente pero permanece en el archivo — potencialmente recuperable con las herramientas adecuadas. Úsalo cuando quieras una cobertura reversible y ligera (p. ej. para imprimir).<br><br><strong>Aplanar página</strong> rasteriza toda la página a un mapa de bits a la DPI elegida y la reconstruye como una sola imagen, destruyendo permanentemente todo el contenido vectorial y texto subyacente en el parche. Esta es la opción correcta cuando necesitas redactar información sensible de forma irreversible antes de compartir un archivo.',
-    faq9_a: 'Sí. Usa <strong>Reordenar y eliminar páginas</strong> para arrastrar las páginas al orden que quieras y eliminar las que no necesites, luego haz clic en <strong>↩ Seguir trabajando con esta versión</strong>. Después abre la herramienta <strong>Dividir PDF</strong> — mostrará las páginas reordenadas y te permitirá hacer clic en los puntos de corte donde quieras dividir.',
     faq10_a: 'Todas las herramientas son gratuitas sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools es la única suite de navegador diseñada específicamente para arquitectos — combinando utilidades PDF generales con herramientas exclusivas de la práctica arquitectónica, como escalas gráficas métricas e imperiales con múltiples estilos, viñetas en formato ISO con flechas de norte y campos de firma, y una herramienta de parche/redacción compatible con láminas rotadas. El sitio se mantiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva — un único anuncio dirigido exclusivamente a audiencias técnicas y de diseño (sin píxeles de seguimiento, sin retargeting). Si las herramientas te resultan útiles, también puedes dejar un donativo único con el botón de apoyo. Ninguno es requisito para usar cualquier función.',
   }
 };

@@ -10,6 +10,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Embed your studio logo as a watermark on every page of a PDF — free, in-browser, no upload required. Automatically converts the image to grayscale with adjustable opacity and rotation. Ideal for architecture firms and design studios stamping plan sets.">
 <link rel="canonical" href="https://scalebarpdf.com/watermark_logo">
 <title>Add a Logo Watermark to a PDF — Scalebar PDF Tools</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
@@ -1728,10 +1729,10 @@ let gsWorker = null; // Ghostscript isolated Web Worker
 
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
-TOOLS.forEach(t => {
+if (window.TOOLS) TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name || t.en}</h3><p>${t.desc || ''}</p>`;
   card.onclick = () => openTool(t.id);
   homeGrid.appendChild(card);
 });

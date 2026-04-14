@@ -10,6 +10,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Add a semi-transparent text watermark to any PDF — free and in-browser, no account needed. Customize font size, color, opacity, and position: diagonal across the page, bottom right, or top left. Apply to all pages or the first page only.">
 <link rel="canonical" href="https://scalebarpdf.com/watermark_text">
 <title>Add a Text Watermark to a PDF — Scalebar PDF Tools</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
@@ -598,8 +599,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <input type="number" id="wt-opacity" value="0.15" min="0.05" max="1" step="0.05">
           </div>
           <div>
-            <label data-i18n="wt_label_color">Color (hex):</label>
-            <input type="text" id="wt-color" value="#000000">
+            <label data-i18n="wt_label_color">Colour:</label>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <input type="color" id="wt-color" value="#000000"
+                style="height:34px;width:60px;padding:2px 4px;border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius);cursor:pointer;background:rgba(255,255,255,0.05);">
+              <div id="wt-swatch-row" class="vn-swatch-row" style="display:none;"></div>
+            </div>
           </div>
         </div>
         <div class="row">
@@ -609,6 +614,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
               <option value="center" data-i18n="wt_pos_center">Center (diagonal)</option>
               <option value="br" data-i18n="wt_pos_br">Bottom right</option>
               <option value="tl" data-i18n="wt_pos_tl">Top left</option>
+              <option value="tr" data-i18n="wt_pos_tr">Top right</option>
+              <option value="bl" data-i18n="wt_pos_bl">Bottom left</option>
             </select>
           </div>
           <div>
@@ -1728,10 +1735,10 @@ let gsWorker = null; // Ghostscript isolated Web Worker
 
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
-TOOLS.forEach(t => {
+if (window.TOOLS) TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name || t.en}</h3><p>${t.desc || ''}</p>`;
   card.onclick = () => openTool(t.id);
   homeGrid.appendChild(card);
 });
@@ -2106,6 +2113,10 @@ document.getElementById('wt-btn').addEventListener('click', async () => { showDo
           rotate = PDFLib.degrees(rot + 35);
         } else if (pos === 'br') {
           vx = visW - tw - margin; vy = margin; rotate = textRot;
+        } else if (pos === 'tr') {
+          vx = visW - tw - margin; vy = visH - sz - margin; rotate = textRot;
+        } else if (pos === 'bl') {
+          vx = margin; vy = margin; rotate = textRot;
         } else { // tl
           vx = margin; vy = visH - sz - margin; rotate = textRot;
         }
@@ -3982,11 +3993,13 @@ const _TL = {
     'wt_placeholder': 'e.g. CONFIDENTIAL — Arch. Studio Johnson',
     'wt_label_size': 'Font size (pt):',
     'wt_label_opacity': 'Opacity (0.05–1):',
-    'wt_label_color': 'Color (hex):',
+    'wt_label_color': 'Colour:',
     'wt_label_pos': 'Position:',
     'wt_pos_center': 'Center (diagonal)',
     'wt_pos_br': 'Bottom right',
     'wt_pos_tl': 'Top left',
+    'wt_pos_tr': 'Top right',
+    'wt_pos_bl': 'Bottom left',
     'wt_label_pages': 'Apply to:',
     'wt_pages_all': 'All pages',
     'wt_pages_first': 'First page only',
@@ -4025,11 +4038,13 @@ const _TL = {
     'wt_placeholder': 'p. ej. CONFIDENCIAL — Estudio Arq. García',
     'wt_label_size': 'Tamaño de fuente (pt):',
     'wt_label_opacity': 'Opacidad (0.05–1):',
-    'wt_label_color': 'Color (hex):',
+    'wt_label_color': 'Color:',
     'wt_label_pos': 'Posición:',
     'wt_pos_center': 'Centro (diagonal)',
     'wt_pos_br': 'Inferior derecha',
     'wt_pos_tl': 'Superior izquierda',
+    'wt_pos_tr': 'Superior derecha',
+    'wt_pos_bl': 'Inferior izquierda',
     'wt_label_pages': 'Aplicar a:',
     'wt_pages_all': 'Todas las páginas',
     'wt_pages_first': 'Solo primera página',
@@ -4189,6 +4204,71 @@ openTool = function(id) {
 };
 
 document.addEventListener('DOMContentLoaded', cpInit);
+
+// ── Text watermark: extract PDF colours for swatch row ────────────────────
+async function wtExtractColors() {
+  if (!currentBuffer || !window.pdfjsLib) return;
+  try {
+    const doc  = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
+    const page = await doc.getPage(1);
+    const vp   = page.getViewport({ scale: 0.5 });
+    const canvas = document.createElement('canvas');
+    canvas.width = vp.width; canvas.height = vp.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport: vp }).promise;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const px = imageData.data;
+    const colorSet = new Set();
+    function pushRGB(r, g, b) {
+      if (r===255&&g===255&&b===255) return;
+      if (r<8&&g<8&&b<8) return;
+      colorSet.add(`${Math.round(r/8)*8},${Math.round(g/8)*8},${Math.round(b/8)*8}`);
+    }
+    for (let i = 0; i < px.length; i += 4*12) {
+      if (px[i+3]<200) continue;
+      pushRGB(px[i], px[i+1], px[i+2]);
+    }
+    const ops = await page.getOperatorList();
+    const OPS = pdfjsLib.OPS;
+    function pushNorm(r,g,b){ pushRGB(Math.round(r*255),Math.round(g*255),Math.round(b*255)); }
+    for (let i = 0; i < ops.fnArray.length; i++) {
+      const fn=ops.fnArray[i], args=ops.argsArray[i]||[];
+      if(fn===OPS.setFillRGBColor   ||fn===OPS.setStrokeRGBColor)  pushNorm(...args);
+      if(fn===OPS.setFillColorN     ||fn===OPS.setStrokeColorN)    { if(args.length>=3)pushNorm(args[0],args[1],args[2]); }
+      if(fn===OPS.setFillGray       ||fn===OPS.setStrokeGray)      { const v=args[0]; if(v>0.05&&v<0.95)pushNorm(v,v,v); }
+      if(fn===OPS.setFillCMYKColor  ||fn===OPS.setStrokeCMYKColor) { const[c,m,y,k]=args; pushNorm((1-c)*(1-k),(1-m)*(1-k),(1-y)*(1-k)); }
+    }
+    const colors=[...colorSet].map(s=>s.split(',').map(Number));
+    const filtered=[];
+    for(const col of colors){
+      if(!filtered.some(f=>Math.abs(f[0]-col[0])+Math.abs(f[1]-col[1])+Math.abs(f[2]-col[2])<25))
+        filtered.push(col);
+    }
+    const row=document.getElementById('wt-swatch-row');
+    if(!row) return;
+    row.innerHTML='';
+    if(filtered.length>0){
+      filtered.slice(0,16).forEach(([r,g,b])=>{
+        const hex='#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+        const sw=document.createElement('div');
+        sw.className='vn-swatch'; sw.style.background=hex; sw.title=hex;
+        sw.addEventListener('click',()=>{
+          document.getElementById('wt-color').value=hex;
+          row.querySelectorAll('.vn-swatch').forEach(s=>s.classList.remove('active'));
+          sw.classList.add('active');
+        });
+        row.appendChild(sw);
+      });
+      row.style.display='flex';
+    }
+  } catch(e){}
+}
+const _origLoadPDF_wt = loadPDF;
+loadPDF = async function(file) {
+  await _origLoadPDF_wt(file);
+  wtExtractColors();
+};
+setTimeout(()=>{ if(currentBuffer) wtExtractColors(); }, 800);
 
 </script>
 
