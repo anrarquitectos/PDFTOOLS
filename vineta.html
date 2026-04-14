@@ -10,6 +10,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!-- End Google Tag Manager -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Free online tool to add an architectural title block to your PDF plans — directly in the browser, no upload required. Includes project name, plan number, scale, date, client and designer signatures, and a rotatable north arrow. Automatically adapts to A0–A4 and Letter formats.">
 <link rel="canonical" href="https://scalebarpdf.com/vineta">
 <title>Add an Architectural Title Block to a PDF — Scalebar PDF Tools</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
@@ -1895,12 +1896,12 @@ let currentFileName = '';
 let activeToolId = null;
 let modificationHistory = [];
 
-// ─── HOME GRID ────────────────────────────────────────────────���──────────
+// ─── HOME GRID ────────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
-TOOLS.forEach(t => {
+if (window.TOOLS) TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (_T['tool_name_' + t.id.replace(/-/g,'_')] || t.name) + '</h3><p>' + (_T['tool_desc_' + t.id.replace(/-/g,'_')] || t.desc) + '</p>';
+  card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (t.name || t.en) + '</h3><p>' + (t.desc || '') + '</p>';
   card.onclick = () => openTool(t.id);
   homeGrid.appendChild(card);
 });
