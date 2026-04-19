@@ -929,17 +929,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="row">
           <div>
-            <label>Apply to:</label>
+            <label data-i18n="sb_label_pages">Apply to:</label>
             <select id="sb-pages">
-              <option value="all">All pages</option>
-              <option value="first">First page only</option>
+              <option value="all" data-i18n="sb_pages_all">All pages</option>
+              <option value="first" data-i18n="sb_pages_first">First page only</option>
             </select>
           </div>
         </div>
         <!-- RC Canvas: click-to-position picker -->
         <div class="rc-preview-wrap">
-          <label style="display:block;margin-bottom:3px;">Position — click on the preview to place the bar:</label>
-          <p class="rc-hint" id="rc-hint-sb">Load a PDF to see a page preview. Click anywhere on it to position the scale bar. The preview updates instantly as you change style, colour, or scale.</p>
+          <label style="display:block;margin-bottom:3px;" data-i18n="sb_label_pos_click">Position — click on the preview to place the bar:</label>
+          <p class="rc-hint" id="rc-hint-sb" data-i18n="sb_rc_hint">Load a PDF to see a page preview. Click anywhere on it to position the scale bar. The preview updates instantly as you change style, colour, or scale.</p>
           <div class="rc-canvas-outer" id="rc-outer-sb">
             <canvas class="rc-canvas-bg" id="rc-bg-sb"></canvas>
             <canvas class="rc-canvas-ov" id="rc-ov-sb"></canvas>
@@ -948,7 +948,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div class="row">
           <div style="grid-column:1/-1;">
-            <label>Style:</label>
+            <label data-i18n="sb_label_style">Style:</label>
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">
               <input type="hidden" id="sb-style" value="1">
               <button type="button" class="sb-style-btn active" data-prefix="sb" data-val="1" title="Style 1">
@@ -1106,9 +1106,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </p>
         <div class="row">
           <div>
-            <label>Page size (or auto-detect):</label>
+            <label data-i18n="sb_label_size">Page size (or auto-detect):</label>
             <select id="sbf-pagesize">
-              <option value="auto">Auto-detect from PDF</option>
+              <option value="auto" data-i18n="sb_size_auto">Auto-detect from PDF</option>
               <option value="A4">A4 — 210×297 mm</option>
               <option value="A3">A3 — 297×420 mm</option>
               <option value="A2">A2 — 420×594 mm</option>
@@ -1119,24 +1119,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </select>
           </div>
           <div>
-            <label>Drawing scale (1 : X):</label>
+            <label data-i18n="sb_label_scale">Drawing scale (1 : X):</label>
             <input type="number" id="sbf-scale" value="96" min="1" max="100000"
               placeholder="e.g. 96 for 1″=8′">
           </div>
         </div>
         <div class="row">
           <div>
-            <label>Apply to:</label>
+            <label data-i18n="sb_label_pages">Apply to:</label>
             <select id="sbf-pages">
-              <option value="all">All pages</option>
-              <option value="first">First page only</option>
+              <option value="all" data-i18n="sb_pages_all">All pages</option>
+              <option value="first" data-i18n="sb_pages_first">First page only</option>
             </select>
           </div>
         </div>
         <!-- RC Canvas: click-to-position picker (feet) -->
         <div class="rc-preview-wrap">
-          <label style="display:block;margin-bottom:3px;">Position — click on the preview to place the bar:</label>
-          <p class="rc-hint" id="rc-hint-sbf">Load a PDF to see a page preview. Click anywhere on it to position the scale bar. The preview updates instantly as you change style, colour, or scale.</p>
+          <label style="display:block;margin-bottom:3px;" data-i18n="sb_label_pos_click">Position — click on the preview to place the bar:</label>
+          <p class="rc-hint" id="rc-hint-sbf" data-i18n="sb_rc_hint">Load a PDF to see a page preview. Click anywhere on it to position the scale bar. The preview updates instantly as you change style, colour, or scale.</p>
           <div class="rc-canvas-outer" id="rc-outer-sbf">
             <canvas class="rc-canvas-bg" id="rc-bg-sbf"></canvas>
             <canvas class="rc-canvas-ov" id="rc-ov-sbf"></canvas>
@@ -1144,7 +1144,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="row">
           <div style="grid-column:1/-1;">
-            <label>Style:</label>
+            <label data-i18n="sb_label_style">Style:</label>
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;">
               <input type="hidden" id="sbf-style" value="1">
               <button type="button" class="sb-style-btn active" data-prefix="sbf" data-val="1" title="Style 1">
@@ -1877,6 +1877,9 @@ const _TL = {
     'sb_offset_example': 'Example: X = +5 moves the bar 5% of the page width to the right. Y = −2 moves it 2% downward.',
     'sb_label_style': 'Style:',
     'sb_label_color': 'Colour:',
+    'sb_label_style': 'Style:',
+    'sb_label_pos_click': 'Position — click on the preview to place the bar:',
+    'sb_rc_hint': 'Load a PDF to see a page preview. Click anywhere on it to position the scale bar. The preview updates instantly as you change style, colour, or scale.',
     'sb_btn': 'Add scale bar',
     'other_tools_heading': 'Other tools',
         'tool_desc_text_note': 'Add a plain-text annotation box to any page — font, size, color and position.',
@@ -1910,6 +1913,9 @@ const _TL = {
     'sb_offset_example': 'Ejemplo: X = +5 mueve la barra un 5% del ancho de la página a la derecha. Y = −2 la mueve un 2% hacia abajo.',
     'sb_label_style': 'Estilo:',
     'sb_label_color': 'Color:',
+    'sb_label_style': 'Estilo:',
+    'sb_label_pos_click': 'Posición — haz clic en la vista previa para ubicar la barra:',
+    'sb_rc_hint': 'Carga un PDF para ver la vista previa de la página. Haz clic en cualquier punto para posicionar la escala gráfica. La vista se actualiza al instante al cambiar el estilo, el color o la escala.',
     'sb_btn': 'Añadir escala gráfica',
     'other_tools_heading': 'Otras herramientas',
         'tool_desc_text_note': 'Añade una caja de texto a cualquier página — fuente, tamaño, color y posición.',
@@ -1957,11 +1963,11 @@ let gsInstance = null; // Ghostscript WASM singleton
 
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
-TOOLS.forEach(t => {
+if (window.TOOLS) TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  var _tn2 = _T['tool_name_' + t.id.replace(/-/g,'_')] || t.name;
-  var _td2 = _T['tool_desc_' + t.id.replace(/-/g,'_')] || t.desc;
+  var _tn2 = _T['tool_name_' + t.id.replace(/-/g,'_')] || t.name || t.en;
+  var _td2 = _T['tool_desc_' + t.id.replace(/-/g,'_')] || t.desc || '';
   card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + _tn2 + '</h3><p>' + _td2 + '</p>';
   card.onclick = () => openTool(t.id);
   homeGrid.appendChild(card);

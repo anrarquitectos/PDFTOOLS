@@ -1496,16 +1496,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="row">
           <div>
-            <label>Position:</label>
+            <label data-i18n="pn_label_pos">Position:</label>
             <select id="pn-pos">
-              <option value="br">Bottom right</option>
-              <option value="bl">Bottom left</option>
-              <option value="tr">Top right</option>
-              <option value="tl">Top left</option>
+              <option value="br" data-i18n="pn_pos_br">Bottom right</option>
+              <option value="bl" data-i18n="pn_pos_bl">Bottom left</option>
+              <option value="tr" data-i18n="pn_pos_tr">Top right</option>
+              <option value="tl" data-i18n="pn_pos_tl">Top left</option>
             </select>
           </div>
           <div>
-            <label>Font size (pt):</label>
+            <label data-i18n="pn_label_size">Font size (pt):</label>
             <input type="number" id="pn-size" value="18" min="6" max="72">
           </div>
           <div>
@@ -1516,10 +1516,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
         <div class="row">
           <div>
-            <label>Apply to:</label>
+            <label data-i18n="pn_label_pages">Apply to:</label>
             <select id="pn-pages">
               <option value="all" data-i18n="pn_pages_all">All pages of each PDF</option>
-              <option value="first">First page only</option>
+              <option value="first" data-i18n="pn_pages_first">First page only</option>
             </select>
           </div>
 
@@ -1881,10 +1881,10 @@ let modificationHistory = [];
 
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
-TOOLS.forEach(t => {
+if (window.TOOLS) TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name}</h3><p>${t.desc}</p>`;
+  card.innerHTML = `<div class="icon">${t.icon}</div><h3>${t.name || t.en}</h3><p>${t.desc || ''}</p>`;
   card.onclick = () => openTool(t.id);
   homeGrid.appendChild(card);
 });
