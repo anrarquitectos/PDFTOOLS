@@ -1745,6 +1745,7 @@ const _TL = {
     'btn_dl_pdf': 'Download PDF',
     'btn_keep': 'Keep working with this version',
     'gr_h2': 'Add a reference grid to your PDF',
+    'gr_desc': 'Adds a reference grid to your drawing. In <strong>scale spacing</strong> mode, specify the drawing scale and the real-world distance between grid lines — the paper spacing is calculated automatically so the grid represents real dimensions correctly. When drawn <em>below</em> existing content the grid is inserted at the start of the page content stream, appearing under all CAD lines and fills.',
     'gr_label_mode': 'Grid spacing mode:',
     'gr_mode_spacing': 'Fixed spacing',
     'gr_mode_divs': 'Divisions',
@@ -1779,6 +1780,7 @@ const _TL = {
     'btn_dl_pdf': 'Descargar PDF',
     'btn_keep': 'Seguir trabajando con esta versión',
     'gr_h2': 'Añade una grilla de referencia a tu PDF',
+    'gr_desc': 'Añade una grilla de referencia a tu dibujo. En el modo <strong>espaciado a escala</strong>, indica la escala del dibujo y la distancia real entre líneas — el espaciado en papel se calcula automáticamente para que la grilla represente dimensiones reales. Cuando se dibuja <em>bajo</em> el contenido existente, la grilla se inserta al inicio del flujo de contenido de la página, quedando por debajo de todas las líneas y rellenos del plano.',
     'gr_label_mode': 'Modo de espaciado:',
     'gr_mode_spacing': 'Espaciado fijo',
     'gr_mode_divs': 'Divisiones',
@@ -1840,10 +1842,10 @@ let modificationHistory = [];
 
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
-TOOLS.forEach(t => {
+if (window.TOOLS) TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
-  card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (_T['tool_name_'+t.id.replace(/-/g,'_')]||t.name) + '</h3><p>' + (_T['tool_desc_'+t.id.replace(/-/g,'_')]||t.desc) + '</p>';
+  card.innerHTML = '<div class="icon">' + t.icon + '</div><h3>' + (_T['tool_name_'+t.id.replace(/-/g,'_')]||t.name||t.en) + '</h3><p>' + (_T['tool_desc_'+t.id.replace(/-/g,'_')]||t.desc||'') + '</p>';
   card.onclick = () => openTool(t.id);
   homeGrid.appendChild(card);
 });
