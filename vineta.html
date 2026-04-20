@@ -1351,10 +1351,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div class="row" style="margin-top:8px;">
           <div>
-            <label>Apply to:</label>
+            <label data-i18n="vn_label_pages">Apply to:</label>
             <select id="vn-pages">
-              <option value="all">All pages</option>
-              <option value="first">First page only</option>
+              <option value="all" data-i18n="vn_pages_all">All pages</option>
+              <option value="first" data-i18n="vn_pages_first">First page only</option>
             </select>
           </div>
           <div>
@@ -1386,12 +1386,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
 
-        <div style="margin-top:14px;">
+        <div style="margin-top:8px;">
           <button class="btn btn-primary" id="vn-btn" data-i18n="vn_btn">Add title block</button>
           <button class="btn btn-dl" id="vn-dl" disabled>⬇ <span data-i18n="btn_dl_pdf">Download PDF</span></button>
           <button class="btn btn-apply" id="vn-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
         </div>
-        <div class="status" id="vn-status"></div>
+        <div class="status" id="vn-status" style="min-height:0"></div>
 
         <div id="donation-banner">
           <div id="donation-heart-stage">
@@ -1409,12 +1409,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
           </div>
         </div>
-      <div class="tp-faq">
-      <div class="tp-faq-item">
-        <button class="tp-faq-q" onclick="toggleTpFaq(this)"><span data-i18n="faq_free_q"></span><span class="faq-arrow">▼</span></button>
-        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
-      </div>
-      </div>
+
       </div>
     </div>
 
@@ -1777,8 +1772,6 @@ const _TL = {
     'banner_working': 'Working on modified file',
     'btn_dl_pdf': 'Download PDF',
     'btn_keep': 'Keep working with this version',
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
     'vn_h2': 'Add an architectural title block to a PDF',
     'vn_desc': 'Adds a professional architectural title block to the bottom-right corner of your PDF pages. The block width adapts to the detected paper format (A4–A0) and the height adjusts automatically to fit all content. Fields include project name, site, drawing content, plan type and number, scale, date, client and designer signatures, north arrow, and project logo.',
     'vn_label_project': 'Project name:',
@@ -1820,8 +1813,6 @@ const _TL = {
     'banner_working': 'Trabajando con versión modificada',
     'btn_dl_pdf': 'Descargar PDF',
     'btn_keep': 'Seguir trabajando con esta versión',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
     'vn_h2': 'Añade una viñeta arquitectónica a un PDF',
     'vn_desc': 'Añade una viñeta arquitectónica profesional en la esquina inferior derecha de tus páginas PDF. El ancho se adapta al formato detectado (A4–A0) y la altura se ajusta automáticamente al contenido. Incluye nombre del proyecto, ubicación, contenido del plano, tipo y número, escala, fecha, firmas de cliente y proyectista, norte y logo.',
     'vn_label_project': 'Nombre del proyecto:',
@@ -1834,8 +1825,8 @@ const _TL = {
     'vn_label_date': 'Fecha:',
     'vn_label_client': 'Nombre del cliente:',
     'vn_label_designer': 'Nombre del proyectista:',
-    'vn_label_north': 'Rotación flecha norte (°)',
-    'vn_north_hint': '0° = arriba, sentido horario',
+    'vn_label_north': 'Rotación flecha norte en grados',
+    'vn_north_hint': '',
     'vn_label_projno': 'N.º de proyecto:',
     'vn_label_logo': 'Logo',
     'vn_logo_hint': '(opcional — se muestra en escala de grises en la parte superior)',
@@ -1845,7 +1836,7 @@ const _TL = {
     'vn_label_pages': 'Aplicar a:',
     'vn_pages_all': 'Todas las páginas',
     'vn_pages_first': 'Solo primera página',
-    'vn_label_pagesize': 'Forzar tamaño de página:',
+    'vn_label_pagesize': 'Tamaño de página:',
     'vn_size_auto': 'Autodetectar',
     'vn_label_size': 'Tamaño:',
     'vn_size_small': 'Pequeño',

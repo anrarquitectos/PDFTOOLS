@@ -848,22 +848,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
     </div>
-      <div class="tp-faq">
-      <div class="tp-faq-item">
-        <button class="tp-faq-q" onclick="toggleTpFaq(this)">
-          <span data-i18n="faq_compress_q"></span>
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="tp-faq-a" data-i18n-html="faq_compress_a"></div>
-      </div>
-      <div class="tp-faq-item">
-        <button class="tp-faq-q" onclick="toggleTpFaq(this)">
-          <span data-i18n="faq_free_q"></span>
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
-      </div>
-      </div>
+
 
     <!-- ── 2. CONVERT TO IMAGE ── -->
     <div class="tool-panel" id="panel-convert">
@@ -2131,10 +2116,6 @@ const _TL = {
     'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
     'donation_btn':   'Support on Ko-fi',
     'donation_dismiss': 'no thanks',
-    'faq_compress_q': 'How does the Compress tool work?',
-    'faq_compress_a': "It uses Ghostscript compiled to WebAssembly, running entirely in your browser. You can choose from four presets — <em>Screen</em> (72 dpi, smallest), <em>eBook</em> (150 dpi), <em>Printer</em> (300 dpi), and <em>Prepress</em> (high quality) — or switch to <strong>Custom</strong> mode to set your own DPI and JPEG quality. The presets map directly to Ghostscript's <code>-dPDFSETTINGS</code> options. If the WASM engine fails to initialise, the tool falls back to a metadata-strip compression using pdf-lib.",
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
     'btn_home': '← Home',
     'btn_choose_pdf': 'Choose PDF',
     'banner_working': 'Working on modified file',
@@ -2185,10 +2166,6 @@ const _TL = {
     'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
     'donation_btn':   'Apoyar en Ko-fi',
     'donation_dismiss': 'no, gracias',
-    'faq_compress_q': '¿Cómo funciona la herramienta de compresión?',
-    'faq_compress_a': 'Usa Ghostscript compilado a WebAssembly, ejecutándose completamente en tu navegador. Puedes elegir entre cuatro presets — <em>Screen</em> (72 ppp, más pequeño), <em>eBook</em> (150 ppp), <em>Printer</em> (300 ppp) y <em>Prepress</em> (alta calidad) — o cambiar al modo <strong>Custom</strong> para configurar tu propio DPI y calidad JPEG. Los presets corresponden directamente a las opciones <code>-dPDFSETTINGS</code> de Ghostscript. Si el motor WASM no se inicializa, la herramienta recurre a una compresión de extracción de metadatos con pdf-lib.',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
     'btn_home': '← Inicio',
     'btn_choose_pdf': 'Elegir PDF',
     'banner_working': 'Trabajando con versión modificada',
