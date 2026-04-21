@@ -209,19 +209,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .split-gap .split-icon { font-size:0.72rem; opacity:0; transition:opacity 0.15s; position:absolute; top:50%; transform:translateY(-50%); background:var(--bg); padding:0 2px; color:var(--err); pointer-events:none; }
   .split-gap:hover .split-icon, .split-gap.marked .split-icon { opacity:1; }
 
-  .tp-faq { margin-top:24px; }
-  .tp-faq-item { border-top:1px solid var(--light); }
-  .tp-faq-item:last-child { border-bottom:1px solid var(--light); }
-  .tp-faq-q { width:100%; background:none; border:none; text-align:left; padding:12px 4px; font-size:0.84rem; font-weight:600; color:var(--text); font-family:'Chakra Petch',sans-serif; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px; transition:color 0.2s; }
-  .tp-faq-q:hover { color:var(--cyan); }
-  .tp-faq-q .faq-arrow { font-size:0.7rem; color:var(--muted); transition:transform .2s; flex-shrink:0; }
-  .tp-faq-q.open .faq-arrow { transform:rotate(180deg); }
-  .tp-faq-a { display:none; padding:0 4px 14px; font-size:0.8rem; line-height:1.65; color:var(--muted); }
-  .tp-faq-a.open { display:block; }
-  .tp-faq-a strong { color:var(--text); }
-  .tp-faq-a code { background:rgba(0,245,212,0.08); padding:1px 6px; border-radius:3px; font-size:0.78rem; color:var(--cyan); border:1px solid rgba(0,245,212,0.15); }
-  .tp-faq-a em { color:#8fa8c4; }
-
   .faq-item { border-top:1px solid var(--light); }
   .faq-item:last-child { border-bottom:1px solid var(--light); }
   .faq-q { width:100%; background:none; border:none; text-align:left; padding:14px 4px; font-size:0.84rem; font-weight:600; color:var(--text); font-family:'Chakra Petch',sans-serif; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px; transition:color 0.2s; }
@@ -257,6 +244,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   footer { position:relative; z-index:1; text-align:center; padding:28px 20px; font-size:0.72rem; color:var(--muted); border-top:1px solid var(--light); margin-top:40px; font-family:'Space Mono',monospace; }
   footer a { color:var(--cyan); text-decoration:none; }
   footer a:hover { text-decoration:underline; }
+
+  /* ── CROP FULLSCREEN ── */
+  #cropcut-fullscreen { display:none; position:fixed; inset:0; z-index:500; background:#0a0c12; flex-direction:column; }
+  #cropcut-fullscreen.open { display:flex; }
+  #cropcut-topbar { background:rgba(8,11,18,0.95); color:#fff; padding:10px 16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; border-bottom:1px solid var(--light); flex-shrink:0; }
+  #cropcut-topbar label { display:inline; margin-bottom:0; font-size:0.78rem; color:var(--muted); }
+  #cropcut-topbar select { display:inline-block; width:auto; padding:4px 8px; margin-bottom:0; font-size:0.78rem; }
+  #cropcut-canvas-wrap { flex:1; overflow:auto; display:flex; align-items:center; justify-content:center; padding:16px; }
+  #cropcut-canvas-container { position:relative; display:inline-block; }
+  #cropcut-bg { display:block; }
+  #cropcut-overlay { position:absolute; top:0; left:0; }
+  #cropcut-info-bar { background:rgba(8,11,18,0.95); color:var(--muted); font-size:0.75rem; padding:6px 16px; border-top:1px solid var(--light); flex-shrink:0; font-family:'Space Mono',monospace; }
+  /* ── CROP MODE TABS ── */
+  .crop-mode-tabs { display:flex; gap:0; margin-bottom:18px; border:1px solid rgba(255,255,255,0.12); border-radius:var(--radius); overflow:hidden; }
+  .crop-mode-tab { flex:1; background:rgba(255,255,255,0.03); border:none; color:var(--muted); font-family:'Space Mono',monospace; font-size:0.78rem; padding:9px 12px; cursor:pointer; transition:all 0.15s; border-right:1px solid rgba(255,255,255,0.1); letter-spacing:0.04em; }
+  .crop-mode-tab:last-child { border-right:none; }
+  .crop-mode-tab.active { background:rgba(0,245,212,0.1); color:var(--cyan); }
+  .crop-mode-tab:hover:not(.active) { background:rgba(255,255,255,0.06); color:var(--text); }
 </style>
   <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
@@ -675,7 +680,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
 
-    <!-- ── 5. RESIZE TO STANDARD FORMAT ── -->
+    <!-- ── 5. RESIZE TO STANDARD FORMAT / CROP ── -->
     <div class="tool-panel" id="panel-crop">
       <div class="panel-box">
       <div id="tool-choose-wrap" style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
@@ -687,44 +692,68 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <input type="file" accept="application/pdf" id="tool-choose-file" style="display:none;">
         <span id="tool-choose-name" style="font-size:0.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;"></span>
       </div>
-        <h2 data-i18n="cr_h2">Resize to standard format</h2>
-        <p style="font-size:0.82rem; color:var(--mid); margin-bottom:14px;">
-          <span data-i18n="cr_desc">Rescales each page to the selected ISO or standard format, fitting the content within the new dimensions.</span>
-        </p>
-        <div class="row">
-          <div>
-            <label data-i18n="cr_label_fmt">Target format:</label>
-            <select id="crop-format">
-              <option value="A4">A4 — 210×297 mm</option>
-              <option value="A3">A3 — 297×420 mm</option>
-              <option value="A2">A2 — 420×594 mm</option>
-              <option value="A1">A1 — 594×841 mm</option>
-              <option value="A0">A0 — 841×1189 mm</option>
-              <option value="LETTER">Letter — 216×279 mm</option>
-              <option value="LEGAL">Legal — 216×356 mm</option>
-            </select>
+
+        <!-- Mode tabs -->
+        <div class="crop-mode-tabs">
+          <button class="crop-mode-tab active" id="crop-tab-resize" onclick="switchCropMode('resize')" data-i18n="tab_resize">⇔ Resize to format</button>
+          <button class="crop-mode-tab" id="crop-tab-crop" onclick="switchCropMode('crop')" data-i18n="tab_crop">✂ Crop area</button>
+        </div>
+
+        <!-- ── Resize section ── -->
+        <div id="crop-resize-section">
+          <h2 data-i18n="cr_h2">Resize to standard format</h2>
+          <p style="font-size:0.82rem; color:var(--mid); margin-bottom:14px;">
+            <span data-i18n="cr_desc">Rescales each page to the selected ISO or standard format, fitting the content within the new dimensions.</span>
+          </p>
+          <div class="row">
+            <div>
+              <label data-i18n="cr_label_fmt">Target format:</label>
+              <select id="crop-format">
+                <option value="A4">A4 — 210×297 mm</option>
+                <option value="A3">A3 — 297×420 mm</option>
+                <option value="A2">A2 — 420×594 mm</option>
+                <option value="A1">A1 — 594×841 mm</option>
+                <option value="A0">A0 — 841×1189 mm</option>
+                <option value="LETTER">Letter — 216×279 mm</option>
+                <option value="LEGAL">Legal — 216×356 mm</option>
+              </select>
+            </div>
+            <div>
+              <label data-i18n="cr_label_orient">Orientation:</label>
+              <select id="crop-orient">
+                <option value="auto" data-i18n="cr_orient_auto">Auto (match each page)</option>
+                <option value="portrait" data-i18n="cr_orient_port">Portrait</option>
+                <option value="landscape" data-i18n="cr_orient_land">Landscape</option>
+              </select>
+            </div>
+            <div>
+              <label data-i18n="cr_label_fit">Fit mode:</label>
+              <select id="crop-mode">
+                <option value="fit" data-i18n="cr_fit_fit">Fit — scale without cropping</option>
+                <option value="stretch" data-i18n="cr_fit_stretch">Stretch — force exact dimensions</option>
+              </select>
+            </div>
           </div>
           <div>
-            <label data-i18n="cr_label_orient">Orientation:</label>
-            <select id="crop-orient">
-              <option value="auto" data-i18n="cr_orient_auto">Auto (match each page)</option>
-              <option value="portrait" data-i18n="cr_orient_port">Portrait</option>
-              <option value="landscape" data-i18n="cr_orient_land">Landscape</option>
-            </select>
-          </div>
-          <div>
-            <label data-i18n="cr_label_fit">Fit mode:</label>
-            <select id="crop-mode">
-              <option value="fit" data-i18n="cr_fit_fit">Fit — scale without cropping</option>
-              <option value="stretch" data-i18n="cr_fit_stretch">Stretch — force exact dimensions</option>
-            </select>
+            <button class="btn btn-primary" id="crop-btn" data-i18n="cr_btn">Resize pages</button>
+            <button class="btn btn-dl" id="crop-dl" disabled>⬇ <span data-i18n="btn_dl_pdf">Download PDF</span></button>
+            <button class="btn btn-apply" id="crop-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
           </div>
         </div>
-        <div>
-          <button class="btn btn-primary" id="crop-btn" data-i18n="cr_btn">Resize pages</button>
-          <button class="btn btn-dl" id="crop-dl" disabled>⬇ <span data-i18n="btn_dl_pdf">Download PDF</span></button>
-          <button class="btn btn-apply" id="crop-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
+
+        <!-- ── Crop section ── -->
+        <div id="crop-crop-section" style="display:none">
+          <h2 data-i18n="cc_h2">Crop page area</h2>
+          <p style="font-size:0.82rem; color:var(--mid); margin-bottom:14px;">
+            <span data-i18n="cc_desc">Select a rectangular region to keep. The area outside the selection will be hidden using a PDF CropBox — content is preserved but not visible.</span>
+          </p>
+          <div>
+            <button class="btn btn-primary" id="cropcut-open-btn" data-i18n="cc_open">✂ Open crop editor</button>
+            <button class="btn btn-dl" id="cropcut-dl-btn" disabled data-i18n="cc_dl">⬇ Download PDF</button>
+            <button class="btn btn-apply" id="cropcut-keep-btn" disabled data-i18n="cc_keep">↩ Keep working with this version</button>
+          </div>
         </div>
+
         <div class="status" id="crop-status"></div>
 
         <div id="donation-banner">
@@ -746,13 +775,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       </div>
     </div>
       <div class="tp-faq">
-      <div class="tp-faq-item">
-        <button class="tp-faq-q" onclick="toggleTpFaq(this)">
-          <span data-i18n="faq_free_q"></span>
-          <span class="faq-arrow">▼</span>
-        </button>
-        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
-      </div>
       </div>
 
     <!-- ── 6. REORDER & REMOVE ── -->
@@ -1652,6 +1674,44 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 </div>
 
+<!-- ── CROP FULLSCREEN EDITOR ── -->
+<div id="cropcut-fullscreen">
+  <div id="cropcut-topbar">
+    <strong style="color:#fff;font-size:0.85rem;" data-i18n="cc_editor">Crop editor</strong>
+    <span style="color:rgba(255,255,255,0.15);">|</span>
+    <label data-i18n="cc_aspect">Aspect ratio:</label>
+    <select id="cropcut-ratio-sel" onchange="ccUpdateAspectAndRedraw()">
+      <option value="free" data-i18n="cc_free">Free</option>
+      <option value="A4">A4</option>
+      <option value="A3">A3</option>
+      <option value="A2">A2</option>
+      <option value="A1">A1</option>
+      <option value="A0">A0</option>
+      <option value="LETTER">Letter</option>
+      <option value="LEGAL">Legal</option>
+    </select>
+    <select id="cropcut-orient-sel" onchange="ccUpdateAspectAndRedraw()">
+      <option value="auto" data-i18n="cc_orient_auto">Auto orient</option>
+      <option value="portrait" data-i18n="cc_orient_port">Portrait</option>
+      <option value="landscape" data-i18n="cc_orient_land">Landscape</option>
+    </select>
+    <span style="color:rgba(255,255,255,0.15);margin-left:auto;">|</span>
+    <label style="display:flex;align-items:center;gap:5px;white-space:nowrap;">
+      <input type="checkbox" id="cropcut-all-pages" checked style="accent-color:var(--cyan);cursor:pointer;">
+      <span data-i18n="cc_all_pages">All pages</span>
+    </label>
+    <button class="btn btn-primary" id="cropcut-apply-btn" style="font-size:0.78rem;padding:4px 14px;" data-i18n="cc_apply">✓ Apply crop</button>
+    <button class="btn" id="cropcut-close-btn" style="font-size:0.78rem;padding:4px 10px;border-color:rgba(255,255,255,0.2);color:var(--muted);" data-i18n="cc_close">✕ Close</button>
+  </div>
+  <div id="cropcut-canvas-wrap">
+    <div id="cropcut-canvas-container">
+      <canvas id="cropcut-bg"></canvas>
+      <canvas id="cropcut-overlay"></canvas>
+    </div>
+  </div>
+  <div id="cropcut-info-bar" data-i18n="cc_info">Drag to move the crop area. Drag corners or edges to resize.</div>
+</div>
+
 <!-- SCRIPTS -->
 <script id="compress-worker-src" type="text/js-worker">
 const GS_CDN     = 'https://cdn.jsdelivr.net/npm/@jspawn/ghostscript-wasm@0.0.2';
@@ -1737,8 +1797,8 @@ const _TL = {
     'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
     'donation_btn':   'Support on Ko-fi',
     'donation_dismiss': 'no thanks',
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
+    'faq_free_q': '',
+    'faq_free_a': '',
     'btn_home': '← Home',
     'btn_choose_pdf': 'Choose PDF',
     'banner_working': 'Working on modified file',
@@ -1755,6 +1815,25 @@ const _TL = {
     'cr_fit_fit': 'Fit — scale without cropping',
     'cr_fit_stretch': 'Stretch — force exact dimensions',
     'cr_btn': 'Resize pages',
+    'file_prefix': 'File',
+    'pdf_loaded': '\u2713 PDF loaded',
+    'tab_resize': '\u21d4 Resize to format',
+    'tab_crop':   '\u2702 Crop area',
+    'cc_h2':      'Crop page area',
+    'cc_desc':    'Select a rectangular region to keep. The area outside the selection will be hidden using a PDF CropBox \u2014 content is preserved but not visible.',
+    'cc_open':    '\u2702 Open crop editor',
+    'cc_dl':      '\u2b07 Download PDF',
+    'cc_keep':    '\u21a9 Keep working with this version',
+    'cc_editor':  'Crop editor',
+    'cc_aspect':  'Aspect ratio:',
+    'cc_free':    'Free',
+    'cc_orient_auto': 'Auto orient',
+    'cc_orient_port': 'Portrait',
+    'cc_orient_land': 'Landscape',
+    'cc_all_pages':   'All pages',
+    'cc_apply':   '\u2713 Apply crop',
+    'cc_close':   '\u2715 Close',
+    'cc_info':    'Drag to move the crop area. Drag corners or edges to resize.',
   },
   es: {
         'other_tools_heading': 'OTRAS HERRAMIENTAS — mismo archivo',
@@ -1763,8 +1842,8 @@ const _TL = {
     'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
     'donation_btn':   'Apoyar en Ko-fi',
     'donation_dismiss': 'no, gracias',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
+    'faq_free_q': '',
+    'faq_free_a': '',
     'btn_home': '← Inicio',
     'btn_choose_pdf': 'Elegir PDF',
     'banner_working': 'Trabajando con versión modificada',
@@ -1781,6 +1860,25 @@ const _TL = {
     'cr_fit_fit': 'Ajustar — escalar sin recortar',
     'cr_fit_stretch': 'Estirar — forzar dimensiones exactas',
     'cr_btn': 'Cambiar formato',
+    'file_prefix': 'Archivo',
+    'pdf_loaded': '\u2713 PDF cargado',
+    'tab_resize': '\u21d4 Cambiar formato',
+    'tab_crop':   '\u2702 Recortar área',
+    'cc_h2':      'Recortar área de página',
+    'cc_desc':    'Selecciona una región rectangular para conservar. El área fuera de la selección quedará oculta mediante un CropBox de PDF \u2014 el contenido se preserva pero no es visible.',
+    'cc_open':    '\u2702 Abrir editor de recorte',
+    'cc_dl':      '\u2b07 Descargar PDF',
+    'cc_keep':    '\u21a9 Seguir trabajando con esta versión',
+    'cc_editor':  'Editor de recorte',
+    'cc_aspect':  'Proporción:',
+    'cc_free':    'Libre',
+    'cc_orient_auto': 'Orientación automática',
+    'cc_orient_port': 'Vertical',
+    'cc_orient_land': 'Horizontal',
+    'cc_all_pages':   'Todas las páginas',
+    'cc_apply':   '\u2713 Aplicar recorte',
+    'cc_close':   '\u2715 Cerrar',
+    'cc_info':    'Arrastra para mover el área de recorte. Arrastra las esquinas o bordes para redimensionar.',
   }
 };
 const _lg = (localStorage.getItem('sb_lang') || navigator.language || 'en').slice(0,2).toLowerCase();
@@ -1798,13 +1896,7 @@ function applyToolI18n() {
   const btn = document.getElementById('lang-' + _lg);
   if (btn) btn.classList.add('active');
 }
-function toggleTpFaq(btn) {
-  const ans = btn.nextElementSibling;
-  const open = ans.classList.contains('open');
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-a').forEach(a => a.classList.remove('open'));
-  btn.closest('.tp-faq').querySelectorAll('.tp-faq-q').forEach(q => q.classList.remove('open'));
-  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
-}
+function toggleTpFaq() {}
 document.addEventListener('DOMContentLoaded', applyToolI18n);
 
 // ─── PDF.js lazy load ─────────────────────────────────────────────────────
@@ -1899,7 +1991,7 @@ function updateTopBar() {
   const label = modificationHistory.length > 0
     ? `${currentFileName} [modified ×${modificationHistory.length}]`
     : currentFileName;
-  document.getElementById('file-indicator').innerHTML = `File: <span>${label}</span>`;
+  document.getElementById('file-indicator').innerHTML = `${_T.file_prefix || 'File'}: <span>${label}</span>`;
   const _bcf = document.getElementById('btn-change-file'); if (_bcf) _bcf.style.display = 'inline-block';
   persistFile();
 }
@@ -2330,6 +2422,329 @@ function showDonationBanner() {
 }
 document.getElementById('crop-dl').addEventListener('click', () => { if (cropBytes) { download(cropBytes, nameSuffix(`_${document.getElementById('crop-format').value}`)); showDonationBanner(); } });
 document.getElementById('crop-apply').addEventListener('click', () => { if (cropBytes) applyAsActive(cropBytes, `Resize ${document.getElementById('crop-format').value}`, 'crop-status', 'crop-apply'); });
+
+// ─── 5b. CROP MODE SWITCH ─────────────────────────────────────────────────
+function switchCropMode(mode) {
+  document.getElementById('crop-resize-section').style.display = mode === 'resize' ? '' : 'none';
+  document.getElementById('crop-crop-section').style.display   = mode === 'crop'   ? '' : 'none';
+  document.getElementById('crop-tab-resize').classList.toggle('active', mode === 'resize');
+  document.getElementById('crop-tab-crop').classList.toggle('active',   mode === 'crop');
+}
+
+// ─── 5c. CROP AREA (CropBox visual selection) ─────────────────────────────
+let ccBgCanvas, ccOverlayCanvas, ccBgCtx, ccOvCtx;
+let ccPageScale = 1;
+let ccVisW = 0, ccVisH = 0, ccRawW = 0, ccRawH = 0, ccRot = 0;
+let ccRect = { x: 0, y: 0, w: 200, h: 200 };
+let ccDrag = null;
+let ccAspect = 0; // 0 = free, otherwise width/height ratio
+let ccBytes = null;
+const CC_HS = 7; // handle half-size in px
+
+function ccInit() {
+  ccBgCanvas     = document.getElementById('cropcut-bg');
+  ccOverlayCanvas = document.getElementById('cropcut-overlay');
+  if (!ccBgCanvas || !ccOverlayCanvas) return;
+  ccBgCtx = ccBgCanvas.getContext('2d');
+  ccOvCtx = ccOverlayCanvas.getContext('2d');
+
+  ccOverlayCanvas.addEventListener('mousedown',  ccOnDown);
+  ccOverlayCanvas.addEventListener('mousemove',  ccOnMove);
+  ccOverlayCanvas.addEventListener('mouseup',    ccOnUp);
+  ccOverlayCanvas.addEventListener('mouseleave', ccOnUp);
+  ccOverlayCanvas.addEventListener('touchstart', ccOnDown, { passive: false });
+  ccOverlayCanvas.addEventListener('touchmove',  ccOnMove, { passive: false });
+  ccOverlayCanvas.addEventListener('touchend',   ccOnUp);
+
+  document.getElementById('cropcut-apply-btn').addEventListener('click', ccApply);
+  document.getElementById('cropcut-close-btn').addEventListener('click', function() {
+    document.getElementById('cropcut-fullscreen').classList.remove('open');
+  });
+  document.getElementById('cropcut-open-btn').addEventListener('click', ccOpen);
+  document.getElementById('cropcut-dl-btn').addEventListener('click', function() {
+    if (ccBytes) download(ccBytes, nameSuffix('_cropped'));
+  });
+  document.getElementById('cropcut-keep-btn').addEventListener('click', function() {
+    if (ccBytes) applyAsActive(ccBytes, 'Crop', 'crop-status', 'cropcut-keep-btn');
+  });
+}
+
+function ccGetPos(e) {
+  var rect = ccOverlayCanvas.getBoundingClientRect();
+  var sx = ccOverlayCanvas.width / rect.width;
+  var sy = ccOverlayCanvas.height / rect.height;
+  var src = e.touches ? e.touches[0] : e;
+  return { x: (src.clientX - rect.left) * sx, y: (src.clientY - rect.top) * sy };
+}
+
+function ccHandleAt(mx, my) {
+  var r = ccRect, t = CC_HS + 5;
+  var pts = [
+    { id:'nw', hx:r.x,        hy:r.y        },
+    { id:'n',  hx:r.x+r.w/2,  hy:r.y        },
+    { id:'ne', hx:r.x+r.w,    hy:r.y        },
+    { id:'e',  hx:r.x+r.w,    hy:r.y+r.h/2  },
+    { id:'se', hx:r.x+r.w,    hy:r.y+r.h    },
+    { id:'s',  hx:r.x+r.w/2,  hy:r.y+r.h    },
+    { id:'sw', hx:r.x,        hy:r.y+r.h    },
+    { id:'w',  hx:r.x,        hy:r.y+r.h/2  }
+  ];
+  for (var i = 0; i < pts.length; i++) {
+    if (Math.abs(mx - pts[i].hx) < t && Math.abs(my - pts[i].hy) < t) return pts[i].id;
+  }
+  if (mx > r.x && mx < r.x+r.w && my > r.y && my < r.y+r.h) return 'move';
+  return null;
+}
+
+function ccClamp(r) {
+  var cw = ccBgCanvas.width, ch = ccBgCanvas.height;
+  r.w = Math.max(20, Math.min(r.w, cw));
+  r.h = Math.max(20, Math.min(r.h, ch));
+  r.x = Math.max(0, Math.min(r.x, cw - r.w));
+  r.y = Math.max(0, Math.min(r.y, ch - r.h));
+  return r;
+}
+
+function ccOnDown(e) {
+  e.preventDefault();
+  var pos = ccGetPos(e);
+  var h = ccHandleAt(pos.x, pos.y);
+  if (!h) return;
+  ccDrag = { type: h, smx: pos.x, smy: pos.y, sr: { x:ccRect.x, y:ccRect.y, w:ccRect.w, h:ccRect.h } };
+}
+
+function ccOnMove(e) {
+  e.preventDefault();
+  var pos = ccGetPos(e);
+  if (!ccDrag) {
+    var h = ccHandleAt(pos.x, pos.y);
+    var cm = { nw:'nw-resize', n:'n-resize', ne:'ne-resize', e:'e-resize',
+               se:'se-resize', s:'s-resize', sw:'sw-resize', w:'w-resize', move:'move' };
+    ccOverlayCanvas.style.cursor = cm[h] || 'default';
+    return;
+  }
+  var dx = pos.x - ccDrag.smx, dy = pos.y - ccDrag.smy;
+  var sr = ccDrag.sr;
+  var r = { x:sr.x, y:sr.y, w:sr.w, h:sr.h };
+
+  if (ccDrag.type === 'move') {
+    r.x = sr.x + dx;
+    r.y = sr.y + dy;
+  } else {
+    var ht = ccDrag.type;
+    if (ht.indexOf('e') !== -1) { r.w = Math.max(20, sr.w + dx); }
+    if (ht.indexOf('s') !== -1) { r.h = Math.max(20, sr.h + dy); }
+    if (ht.indexOf('w') !== -1) { var nw = Math.max(20, sr.w - dx); r.x = sr.x + sr.w - nw; r.w = nw; }
+    if (ht.indexOf('n') !== -1) { var nh = Math.max(20, sr.h - dy); r.y = sr.y + sr.h - nh; r.h = nh; }
+    if (ccAspect > 0) {
+      if (ht === 'e' || ht === 'w') { r.h = r.w / ccAspect; }
+      else if (ht === 'n' || ht === 's') { r.w = r.h * ccAspect; }
+      else {
+        if (Math.abs(dx) >= Math.abs(dy)) { r.h = r.w / ccAspect; }
+        else { r.w = r.h * ccAspect; }
+      }
+    }
+  }
+  ccRect = ccClamp(r);
+  ccDraw();
+}
+
+function ccOnUp() { ccDrag = null; }
+
+function ccDraw() {
+  var cw = ccBgCanvas.width, ch = ccBgCanvas.height;
+  ccOvCtx.clearRect(0, 0, cw, ch);
+
+  // Dark overlay with transparent crop hole (evenodd fill)
+  ccOvCtx.save();
+  ccOvCtx.fillStyle = 'rgba(0,0,0,0.52)';
+  ccOvCtx.beginPath();
+  ccOvCtx.rect(0, 0, cw, ch);
+  ccOvCtx.rect(ccRect.x, ccRect.y, ccRect.w, ccRect.h);
+  ccOvCtx.fill('evenodd');
+  ccOvCtx.restore();
+
+  // Crop border
+  ccOvCtx.save();
+  ccOvCtx.strokeStyle = '#00f5d4';
+  ccOvCtx.lineWidth = 1.5;
+  ccOvCtx.strokeRect(ccRect.x + 0.5, ccRect.y + 0.5, ccRect.w - 1, ccRect.h - 1);
+  ccOvCtx.restore();
+
+  // Rule of thirds guide lines
+  ccOvCtx.save();
+  ccOvCtx.strokeStyle = 'rgba(0,245,212,0.2)';
+  ccOvCtx.lineWidth = 0.5;
+  for (var i = 1; i < 3; i++) {
+    var gx = ccRect.x + ccRect.w / 3 * i;
+    var gy = ccRect.y + ccRect.h / 3 * i;
+    ccOvCtx.beginPath(); ccOvCtx.moveTo(gx, ccRect.y); ccOvCtx.lineTo(gx, ccRect.y + ccRect.h); ccOvCtx.stroke();
+    ccOvCtx.beginPath(); ccOvCtx.moveTo(ccRect.x, gy); ccOvCtx.lineTo(ccRect.x + ccRect.w, gy); ccOvCtx.stroke();
+  }
+  ccOvCtx.restore();
+
+  // Resize handles
+  var handles = [
+    { x:ccRect.x,            y:ccRect.y            },
+    { x:ccRect.x+ccRect.w/2, y:ccRect.y            },
+    { x:ccRect.x+ccRect.w,   y:ccRect.y            },
+    { x:ccRect.x+ccRect.w,   y:ccRect.y+ccRect.h/2 },
+    { x:ccRect.x+ccRect.w,   y:ccRect.y+ccRect.h   },
+    { x:ccRect.x+ccRect.w/2, y:ccRect.y+ccRect.h   },
+    { x:ccRect.x,            y:ccRect.y+ccRect.h   },
+    { x:ccRect.x,            y:ccRect.y+ccRect.h/2 }
+  ];
+  var hs = CC_HS;
+  ccOvCtx.save();
+  ccOvCtx.fillStyle = '#00f5d4';
+  ccOvCtx.strokeStyle = '#003d35';
+  ccOvCtx.lineWidth = 1;
+  handles.forEach(function(h) {
+    ccOvCtx.fillRect(h.x - hs, h.y - hs, hs*2, hs*2);
+    ccOvCtx.strokeRect(h.x - hs + 0.5, h.y - hs + 0.5, hs*2 - 1, hs*2 - 1);
+  });
+  ccOvCtx.restore();
+
+  var wPt = (ccRect.w / ccPageScale).toFixed(0);
+  var hPt = (ccRect.h / ccPageScale).toFixed(0);
+  var wMm = (wPt * 25.4 / 72).toFixed(1);
+  var hMm = (hPt * 25.4 / 72).toFixed(1);
+  document.getElementById('cropcut-info-bar').textContent =
+    'Crop area: ' + wPt + ' \xd7 ' + hPt + ' pts (' + wMm + ' \xd7 ' + hMm + ' mm)' +
+    '  \u2014  ' + (_T.cc_info || 'Drag to move the crop area. Drag corners or edges to resize.');
+}
+
+function ccUpdateAspectAndRedraw() {
+  var sel    = document.getElementById('cropcut-ratio-sel').value;
+  var orient = document.getElementById('cropcut-orient-sel').value;
+  if (sel === 'free') { ccAspect = 0; ccDraw(); return; }
+  var sizes = PAGE_SIZES[sel];
+  var pw = sizes[0], ph = sizes[1]; // pw < ph (portrait)
+  var aspect;
+  if      (orient === 'landscape') { aspect = ph / pw; }
+  else if (orient === 'portrait')  { aspect = pw / ph; }
+  else { aspect = (ccRect.w >= ccRect.h) ? (ph / pw) : (pw / ph); }
+  ccAspect = aspect;
+  ccRect.h = ccRect.w / ccAspect;
+  ccRect = ccClamp(ccRect);
+  ccDraw();
+}
+
+async function ccOpen() {
+  if (!currentBuffer) { status('crop-status', 'Load a PDF first.', 'err'); return; }
+  if (!window.pdfjsLib) { status('crop-status', 'PDF.js still loading, try again in a moment.', 'err'); return; }
+  status('crop-status', 'Loading preview\u2026', 'run');
+  try {
+    var pdfJs  = await pdfjsLib.getDocument({ data: currentBuffer.slice(0) }).promise;
+    var pjPage = await pdfJs.getPage(1);
+
+    var libDoc  = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+    var libPage = libDoc.getPages()[0];
+    var sz = libPage.getSize();
+    ccRawW = sz.width; ccRawH = sz.height; ccRot = 0;
+    try {
+      var rn = libPage.node.get(PDFLib.PDFName.of('Rotate'));
+      if (rn) ccRot = ((rn.value() % 360) + 360) % 360;
+    } catch(_) {}
+    var sw = ccRot === 90 || ccRot === 270;
+    ccVisW = sw ? ccRawH : ccRawW;
+    ccVisH = sw ? ccRawW : ccRawH;
+
+    var maxW = window.innerWidth * 0.88;
+    var maxH = (window.innerHeight - 120) * 0.88;
+    var vp0  = pjPage.getViewport({ scale: 1 });
+    ccPageScale = Math.min(maxW / vp0.width, maxH / vp0.height, 2.5);
+    var vp = pjPage.getViewport({ scale: ccPageScale });
+
+    ccBgCanvas.width     = ccOverlayCanvas.width  = Math.round(vp.width);
+    ccBgCanvas.height    = ccOverlayCanvas.height = Math.round(vp.height);
+
+    await pjPage.render({ canvasContext: ccBgCtx, viewport: vp }).promise;
+
+    var mg = Math.min(vp.width, vp.height) * 0.08;
+    ccRect = { x: mg, y: mg, w: vp.width - mg*2, h: vp.height - mg*2 };
+
+    ccUpdateAspectAndRedraw();
+    document.getElementById('cropcut-fullscreen').classList.add('open');
+    status('crop-status', '', '');
+  } catch(e) {
+    status('crop-status', 'Error: ' + e.message, 'err');
+  }
+}
+
+async function ccApply() {
+  if (!currentBuffer) return;
+  var btn = document.getElementById('cropcut-apply-btn');
+  btn.disabled = true;
+  document.getElementById('cropcut-fullscreen').classList.remove('open');
+  status('crop-status', 'Applying crop\u2026', 'run');
+  try {
+    var doc = await PDFLib.PDFDocument.load(currentBuffer.slice(0), { ignoreEncryption: true });
+    var applyAll = document.getElementById('cropcut-all-pages').checked;
+    var pages    = applyAll ? doc.getPages() : [doc.getPages()[0]];
+
+    // Fractional crop position relative to page 1 visual dimensions
+    var fracX1 = (ccRect.x / ccPageScale) / ccVisW;
+    var fracY1 = (ccRect.y / ccPageScale) / ccVisH;
+    var fracX2 = ((ccRect.x + ccRect.w) / ccPageScale) / ccVisW;
+    var fracY2 = ((ccRect.y + ccRect.h) / ccPageScale) / ccVisH;
+
+    pages.forEach(function(page) {
+      var psz  = page.getSize();
+      var rawW = psz.width, rawH = psz.height;
+      var rot  = 0;
+      try {
+        var rn2 = page.node.get(PDFLib.PDFName.of('Rotate'));
+        if (rn2) rot = ((rn2.value() % 360) + 360) % 360;
+      } catch(_) {}
+      var sw2  = rot === 90 || rot === 270;
+      var visW = sw2 ? rawH : rawW;
+      var visH = sw2 ? rawW : rawH;
+
+      // Proportional crop in visual space (y from top, canvas convention)
+      var vxL = fracX1 * visW, vxR = fracX2 * visW;
+      var vyT = fracY1 * visH, vyB = fracY2 * visH;
+
+      // Convert canvas-top-origin visual y to PDF bottom-origin visual y
+      var vyBotL = visH - vyB; // bottom edge of crop rect (PDF y up)
+      var vyBotR = visH - vyT; // top    edge of crop rect (PDF y up)
+
+      // Visual (y-up) → raw PDF coords (handles page rotation)
+      function toPdfRaw(vx, vy) {
+        switch(rot) {
+          case 0:   return { x: vx,          y: vy          };
+          case 90:  return { x: rawW - vy,    y: vx          };
+          case 180: return { x: rawW - vx,    y: rawH - vy   };
+          default:  return { x: vy,           y: rawH - vx   };
+        }
+      }
+
+      var corners = [
+        toPdfRaw(vxL, vyBotL), toPdfRaw(vxR, vyBotL),
+        toPdfRaw(vxL, vyBotR), toPdfRaw(vxR, vyBotR)
+      ];
+      var cbX1 = Math.min(corners[0].x, corners[1].x, corners[2].x, corners[3].x);
+      var cbY1 = Math.min(corners[0].y, corners[1].y, corners[2].y, corners[3].y);
+      var cbX2 = Math.max(corners[0].x, corners[1].x, corners[2].x, corners[3].x);
+      var cbY2 = Math.max(corners[0].y, corners[1].y, corners[2].y, corners[3].y);
+
+      page.setCropBox(cbX1, cbY1, cbX2 - cbX1, cbY2 - cbY1);
+    });
+
+    ccBytes = await doc.save({ useObjectStreams: true });
+    var n = pages.length;
+    status('crop-status', 'Crop applied to ' + n + ' page(s). Download or keep working.', 'ok');
+    document.getElementById('cropcut-dl-btn').disabled   = false;
+    document.getElementById('cropcut-keep-btn').disabled = false;
+    showDonationBanner && showDonationBanner();
+  } catch(e) {
+    status('crop-status', 'Error: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', ccInit);
 
 // ─── 6. REORDER & REMOVE ──────────────────────────────────────────────────
 let reorderBytes = null;
@@ -4008,10 +4423,10 @@ document.addEventListener('DOMContentLoaded', () => { openTool('crop');  });
 function resetToHome() {
   currentBuffer=null; currentFileName=''; modificationHistory=[];
   try { sessionStorage.removeItem('sb_file'); sessionStorage.removeItem('sb_name'); } catch(e){}
-  document.getElementById('file-indicator').textContent='No file loaded';
+  document.getElementById('file-indicator').textContent=_T.no_file||'No file loaded';
   document.getElementById('btn-change-file').style.display='none';
   const btn=document.getElementById('tool-choose-btn'), nm=document.getElementById('tool-choose-name');
-  if(btn) btn.textContent='Choose PDF'; if(nm) nm.textContent='';
+  if(btn) btn.textContent=_T.btn_choose_pdf||'Choose PDF'; if(nm) nm.textContent='';
   const inp=document.getElementById('tool-choose-file'); if(inp) inp.value='';
 }
 (async function(){
@@ -4021,7 +4436,7 @@ function resetToHome() {
       const bin=atob(b64),arr=new Uint8Array(bin.length);
       for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i);
       currentBuffer=arr.buffer; currentFileName=name; _updateChooseBtn(name);
-      document.getElementById('file-indicator').innerHTML='File: <span style="color:#fff">'+name+'</span>';
+      document.getElementById('file-indicator').innerHTML=((_T.file_prefix||'File')+': <span style="color:#fff">'+name+'</span>');
       document.getElementById('btn-change-file').style.display='inline-block';
     }
   }catch(e){}
@@ -4039,7 +4454,7 @@ function resetToHome() {
 })();
 function _updateChooseBtn(name){
   const btn=document.getElementById('tool-choose-btn'),span=document.getElementById('tool-choose-name');
-  if(btn) btn.textContent='\u2713 PDF loaded'; if(span) span.textContent=name;
+  if(btn) btn.textContent=_T.pdf_loaded||'\u2713 PDF loaded'; if(span) span.textContent=name;
 }
 
 
@@ -4176,6 +4591,8 @@ window.cpEyeDropper         = cpEyeDropper;
 window.openTool             = openTool;
 window.onMergeFilesSelected = onMergeFilesSelected;
 window.onImgFilesSelected   = onImgFilesSelected;
+window.switchCropMode       = switchCropMode;
+window.ccUpdateAspectAndRedraw = ccUpdateAspectAndRedraw;
 
 })(); // end IIFE
 </script>
