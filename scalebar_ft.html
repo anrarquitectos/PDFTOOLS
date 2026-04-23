@@ -1256,7 +1256,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           </div>
         </div>
         <div style="margin-top:18px;">
-          <button class="btn btn-primary" id="sbf-btn" data-i18n="sbf_btn">Add scale bar (ft)</button>
+          <button class="btn btn-primary" id="sbf-btn" data-i18n="sbf_btn">Add scale bar</button>
           <button class="btn btn-dl" id="sbf-dl" disabled>⬇ <span data-i18n="btn_dl_pdf">Download PDF</span></button>
           <button class="btn btn-apply" id="sbf-apply" disabled>↩ <span data-i18n="btn_keep">Keep working with this version</span></button>
         </div>
@@ -1892,7 +1892,7 @@ const _TL = {
     'sbf_label_style': 'Style:',
     'sbf_label_pos_click': 'Position — click on the preview to place the bar:',
     'sbf_rc_hint': 'Load a PDF to see a page preview. Click anywhere on it to position the scale bar. The preview updates instantly as you change style, colour, or scale.',
-    'sbf_btn': 'Add scale bar (ft)',
+    'sbf_btn': 'Add scale bar',
     'other_tools_heading': 'Other tools',
         'tool_desc_text_note': 'Add a plain-text annotation box to any page — font, size, color and position.',
   },
@@ -1925,7 +1925,7 @@ const _TL = {
     'sbf_label_style': 'Estilo:',
     'sbf_label_pos_click': 'Posición — haz clic en la vista previa para ubicar la barra:',
     'sbf_rc_hint': 'Carga un PDF para ver la vista previa de la página. Haz clic en cualquier punto para posicionar la escala gráfica. La vista se actualiza al instante al cambiar el estilo, el color o la escala.',
-    'sbf_btn': 'Añadir escala gráfica (pies)',
+    'sbf_btn': 'Añadir escala gráfica',
     'other_tools_heading': 'Otras herramientas',
         'tool_desc_text_note': 'Añade una caja de texto a cualquier página — fuente, tamaño, color y posición.',
   }
@@ -2836,7 +2836,7 @@ document.getElementById('sbf-btn').addEventListener('click', async () => {
   );
 });
 document.getElementById('sbf-dl').addEventListener('click',
-  () => { if (sbfBytes) download(sbfBytes, nameSuffix('_scalebar_ft')); });
+  () => { if (sbfBytes) { download(sbfBytes, nameSuffix('_scalebar_ft')); showDonationBanner(); } });
 document.getElementById('sbf-apply').addEventListener('click',
   () => { if (sbfBytes) applyAsActive(sbfBytes, 'Scale bar (ft)', 'sbf-status', 'sbf-apply'); });
 
@@ -4607,9 +4607,6 @@ function cpInit() {
   if (window.EyeDropper) {
     document.getElementById('cp-eyedropper').classList.add('supported');
   }
-  // Pre-apply first palette color if one was saved in this session
-  const _saved = cpLoad();
-  if (_saved.length > 0) cpActiveColor = _saved[0];
   cpSetActive(cpActiveColor, false);
   cpRenderSwatches();
 
@@ -4715,11 +4712,6 @@ openTool = function(id) {
   _cpOrigOpenTool(id);
   document.getElementById('color-palette-wrap').classList.add('visible');
   cpTargetInputId = null;
-  // Apply saved palette color to this tool's color inputs
-  const _pal = cpLoad();
-  if (_pal.length > 0) {
-    setTimeout(() => cpApplyColor(_pal[0]), 0);
-  }
 };
 
 document.addEventListener('DOMContentLoaded', cpInit);
