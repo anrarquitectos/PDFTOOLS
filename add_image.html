@@ -560,7 +560,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p style="font-size:0.78rem;color:#8a93a8;margin:0 0 12px;line-height:1.6;" data-i18n="donation_desc">If Scalebar PDF Tools saved you some work today, a small tip goes a long way.</p>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <a id="donation-kofi-btn" href="https://ko-fi.com/scalebarpdftools" target="_blank" rel="noopener noreferrer">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="rgba(255,255,255,0.08)"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682-.028-1.682-.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.015-2.059 2.015z"/></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 7.324-.022 11.822c.164 2.424 2.586 2.672 2.586 2.672s8.267-.023 11.966-.049c2.438-.426 2.683-2.566 2.658-3.734 4.352.24 7.422-2.831 6.649-6.916zm-11.062 3.511c-1.246 1.453-4.011 3.976-4.011 3.976s-.121.119-.31.023c-.076-.057-.108-.09-.108-.09-.443-.441-3.368-3.049-4.034-3.954-.709-.965-1.041-2.7-.091-3.71.951-1.01 3.005-1.086 4.363.407 0 0 1.565-1.782 3.468-.963 1.904.82 1.832 3.011.723 4.311zm6.173.478c-.928.116-1.682-.028-1.682-.028V7.284h1.77s1.971.551 1.971 2.638c0 1.913-.985 2.015-2.059 2.015z"/></svg>
                 <span data-i18n="donation_btn">Support on Ko-fi</span>
               </a>
               <button id="donation-dismiss" data-i18n="donation_dismiss">no thanks</button>
@@ -569,12 +569,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
     </div>
-      <div class="tp-faq">
-      <div class="tp-faq-item">
-        <button class="tp-faq-q" onclick="toggleTpFaq(this)"><span data-i18n="faq_free_q"></span><span class="faq-arrow">▼</span></button>
-        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
-      </div>
-      </div>
     <!-- ── 2. CONVERT TO IMAGE ── -->
     <div class="tool-panel" id="panel-convert">
       <div class="panel-box">
@@ -1665,8 +1659,6 @@ const _TL = {
     'donation_dismiss': 'no thanks',
     'faq_compress_q': 'How does the Compress tool work?',
     'faq_compress_a': "It uses Ghostscript compiled to WebAssembly, running entirely in your browser. You can choose from four presets — <em>Screen</em> (72 dpi, smallest), <em>eBook</em> (150 dpi), <em>Printer</em> (300 dpi), and <em>Prepress</em> (high quality) — or switch to <strong>Custom</strong> mode to set your own DPI and JPEG quality. The presets map directly to Ghostscript's <code>-dPDFSETTINGS</code> options. If the WASM engine fails to initialise, the tool falls back to a metadata-strip compression using pdf-lib.",
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
     'btn_home': '← Home',
     'btn_choose_pdf': 'Choose PDF',
     'banner_working': 'Working on modified file',
@@ -1718,8 +1710,6 @@ const _TL = {
     'donation_dismiss': 'no, gracias',
     'faq_compress_q': '¿Cómo funciona la herramienta de compresión?',
     'faq_compress_a': 'Usa Ghostscript compilado a WebAssembly, ejecutándose completamente en tu navegador. Puedes elegir entre cuatro presets — <em>Screen</em> (72 ppp, más pequeño), <em>eBook</em> (150 ppp), <em>Printer</em> (300 ppp) y <em>Prepress</em> (alta calidad) — o cambiar al modo <strong>Custom</strong> para configurar tu propio DPI y calidad JPEG. Los presets corresponden directamente a las opciones <code>-dPDFSETTINGS</code> de Ghostscript. Si el motor WASM no se inicializa, la herramienta recurre a una compresión de extracción de metadatos con pdf-lib.',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
     'btn_home': '← Inicio',
     'btn_choose_pdf': 'Elegir PDF',
     'banner_working': 'Trabajando con versión modificada',
@@ -2081,26 +2071,29 @@ function showDonationBanner(){
   document.getElementById('donation-dismiss').onclick=()=>{b.style.display='none';};
 }
 
+async function aiInitFromBuffer(name) {
+  document.getElementById('ai-pdf-name').textContent = name;
+  document.getElementById('ai-img-btn').disabled = false;
+  try {
+    const pdfJs = await ensurePdfjs();
+    const doc = await pdfJs.getDocument({data: currentBuffer.slice(0)}).promise;
+    aiPdfPageCount = doc.numPages;
+    document.getElementById('ai-preview-page').max = aiPdfPageCount;
+    document.getElementById('ai-to').value = aiPdfPageCount;
+    status('ai-status', name + ' loaded (' + aiPdfPageCount + ' pages).', 'ok');
+    document.getElementById('ai-preview-wrap').style.display = '';
+    renderPageOnly();
+    if (aiImgData) drawOverlay();
+  } catch(err) { status('ai-status', 'Error: ' + err.message, 'err'); }
+}
+
 document.getElementById('ai-pdf-input').addEventListener('change', async e=>{
   const file=e.target.files[0]; if(!file) return;
   currentBuffer=new Uint8Array(await readFile(file)); currentFileName=file.name;
-  document.getElementById('ai-pdf-name').textContent=file.name;
   document.getElementById('file-indicator').innerHTML='File: <span>'+file.name+'</span>';
   document.getElementById('btn-change-file').style.display='inline-block';
   aiBytes=null; document.getElementById('ai-dl').disabled=true; document.getElementById('ai-apply').disabled=true;
-  document.getElementById('ai-img-btn').disabled=false;
-  try {
-    const pdfJs=await ensurePdfjs();
-    const doc=await pdfJs.getDocument({data:currentBuffer.slice(0)}).promise;
-    aiPdfPageCount=doc.numPages;
-    document.getElementById('ai-preview-page').max=aiPdfPageCount;
-    document.getElementById('ai-to').value=aiPdfPageCount;
-    document.getElementById('ai-pdf-name').textContent = file.name;
-    status('ai-status',file.name+' loaded ('+aiPdfPageCount+' pages).','ok');
-    document.getElementById('ai-preview-wrap').style.display='';
-    renderPageOnly();
-    if(aiImgData) drawOverlay();
-  } catch(err){ status('ai-status','Error: '+err.message,'err'); }
+  await aiInitFromBuffer(file.name);
 });
 
 document.getElementById('ai-img-input').addEventListener('change', e=>{
@@ -4222,6 +4215,7 @@ function resetToHome() {
       currentBuffer=arr.buffer; currentFileName=name; _updateChooseBtn(name);
       document.getElementById('file-indicator').innerHTML='File: <span style="color:#fff">'+name+'</span>';
       document.getElementById('btn-change-file').style.display='inline-block';
+      aiInitFromBuffer(name);
     }
   }catch(e){}
   const inp=document.getElementById('tool-choose-file');
