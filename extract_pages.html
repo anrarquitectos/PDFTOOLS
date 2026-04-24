@@ -123,6 +123,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .btn-apply { border-color:rgba(167,139,250,0.35); color:#a78bfa; font-size:0.76rem; padding:6px 14px; }
   .btn-apply:hover { background:rgba(167,139,250,0.1); }
   .status { margin-top:10px; font-size:0.78rem; min-height:18px; padding:4px 0; font-family:'Space Mono',monospace; }
+  .status:empty { min-height:0; padding:0; margin-top:0; }
   .ok { color:var(--cyan); } .err { color:var(--err); } .run { color:var(--yellow); }
 
   .preset-grid { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
@@ -251,7 +252,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   #cp-hidden-input { position:absolute; opacity:0; width:0; height:0; pointer-events:none; }
   .cp-sep { width:1px; height:14px; background:rgba(255,255,255,0.12); flex-shrink:0; }
 
-  #convert-preview { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  #convert-preview { display:flex; flex-wrap:wrap; gap:10px; margin-top:0px; }
   #convert-preview canvas { border:1px solid var(--light); border-radius:4px; }
 
   footer { position:relative; z-index:1; text-align:center; padding:28px 20px; font-size:0.72rem; color:var(--muted); border-top:1px solid var(--light); margin-top:40px; font-family:'Space Mono',monospace; }
@@ -775,10 +776,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </div>
           </div>
         </div>
-        <div class="tp-faq"><div class="tp-faq-item">
-          <button class="tp-faq-q" onclick="toggleTpFaq(this)"><span data-i18n="faq_free_q"></span><span class="faq-arrow">▼</span></button>
-          <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
-        </div></div>
       </div>
     </div>
 
@@ -1217,7 +1214,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="file-name" id="i2p-file-name"></span>
           </div>
         </div>
-        <div id="i2p-preview" style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;"></div>
+        <div id="i2p-preview" style="display:flex;flex-wrap:wrap;gap:0px;margin:0px 0;"></div>
         <div class="row">
           <div>
             <label>Page size:</label>
@@ -1746,8 +1743,6 @@ const _TL = {
     'donation_desc':  'If Scalebar PDF Tools saved you some work today, a small tip goes a long way.',
     'donation_btn':   'Support on Ko-fi',
     'donation_dismiss': 'no thanks',
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
     'btn_home': '← Home',
     'btn_choose_pdf': 'Choose PDF',
     'banner_working': 'Working on modified file',
@@ -1773,8 +1768,6 @@ const _TL = {
     'donation_desc':  'Si Scalebar PDF Tools te ahorró trabajo hoy, un pequeño aporte ayuda mucho.',
     'donation_btn':   'Apoyar en Ko-fi',
     'donation_dismiss': 'no, gracias',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
     'btn_home': '← Inicio',
     'btn_choose_pdf': 'Elegir PDF',
     'banner_working': 'Trabajando con versión modificada',
