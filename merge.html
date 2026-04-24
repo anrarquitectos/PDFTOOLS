@@ -126,6 +126,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .btn-apply { border-color:rgba(167,139,250,0.35); color:#a78bfa; font-size:0.76rem; padding:6px 14px; }
   .btn-apply:hover { background:rgba(167,139,250,0.1); }
   .status { margin-top:10px; font-size:0.78rem; min-height:18px; padding:4px 0; font-family:'Space Mono',monospace; }
+  .status:empty { min-height:0; padding:0; margin-top:0; }
   .ok { color:var(--cyan); } .err { color:var(--err); } .run { color:var(--yellow); }
 
   .preset-grid { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
@@ -255,6 +256,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   .cp-sep { width:1px; height:14px; background:rgba(255,255,255,0.12); flex-shrink:0; }
 
   #convert-preview { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  #convert-preview:empty { margin-top:0; }
   #convert-preview canvas { border:1px solid var(--light); border-radius:4px; }
 
   footer { position:relative; z-index:1; text-align:center; padding:28px 20px; font-size:0.72rem; color:var(--muted); border-top:1px solid var(--light); margin-top:40px; font-family:'Space Mono',monospace; }
@@ -1181,12 +1183,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
       </div>
     </div>
-      <div class="tp-faq">
-      <div class="tp-faq-item">
-        <button class="tp-faq-q" onclick="toggleTpFaq(this)"><span data-i18n="faq_free_q"></span><span class="faq-arrow">▼</span></button>
-        <div class="tp-faq-a" data-i18n-html="faq_free_a"></div>
-      </div>
-      </div>
+
 
 
     <!-- ── 10. IMAGE TO PDF ── -->
@@ -1738,8 +1735,6 @@ const _TL = {
     'banner_working': 'Working on modified file',
     'btn_dl_pdf': 'Download PDF',
     'btn_keep': 'Keep working with this version',
-    'faq_free_q': 'Is this tool free? How is it funded?',
-    'faq_free_a': 'All tools are free with no account required and no file limits. Scalebar PDF Tools is sustained by a small, non-intrusive <strong>Carbon Ads</strong> unit — a single ad served to technical and design audiences. If you find the tools useful, you can also leave a one-time tip via the support button.',
     'mg_h2': 'Merge multiple PDF files into one',
     'mg_desc': 'Upload multiple PDF files, drag the preview cards to set the order, then merge everything into one document. Supports any number of files and any page count. No server upload — processing is entirely local.',
     'mg_file_label': '📁 Choose PDF files (multiple allowed)…',
@@ -1777,8 +1772,6 @@ const _TL = {
     'banner_working': 'Trabajando con versión modificada',
     'btn_dl_pdf': 'Descargar PDF',
     'btn_keep': 'Seguir trabajando con esta versión',
-    'faq_free_q': '¿Esta herramienta es gratuita? ¿Cómo se financia?',
-    'faq_free_a': 'Todas las herramientas son gratuitas, sin necesidad de cuenta ni límites de archivo. Scalebar PDF Tools se sostiene con una pequeña unidad <strong>Carbon Ads</strong> no intrusiva, dirigida a audiencias técnicas y de diseño. Si las herramientas te resultan útiles, también puedes dejar un donativo con el botón de apoyo.',
     'mg_h2': 'Fusiona varios archivos PDF en uno',
     'mg_desc': 'Sube varios archivos PDF, arrastra las tarjetas de vista previa para ordenarlos y combínalos en un solo documento. Compatible con cualquier número de archivos y páginas. Sin servidores — el procesamiento es completamente local.',
     'mg_file_label': '📁 Elegir archivos PDF (se permiten varios)…',
@@ -1848,7 +1841,7 @@ let modificationHistory = [];
 
 // ─── HOME GRID ───────────────────────────────────────────────────────────
 const homeGrid = document.getElementById('home-tools-grid');
-TOOLS.forEach(t => {
+if (typeof TOOLS !== 'undefined') TOOLS.forEach(t => {
   const card = document.createElement('div');
   card.className = 'tool-card';
   const _tk=t.id.replace(/-/g,'_');
